@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Правовая защита директора учреждения культуры</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1e2a3a;
+            --accent: #2c7da0;
+            --success: #2e7d32;
+            --danger: #c62828;
+            --warning: #ef6c00;
+            --bg-grid: #f4f7fb;
+            --text: #0f172a;
+            --shadow-sm: 0 8px 20px -4px rgba(0, 0, 0, 0.05);
+            --border-radius: 20px;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-grid);
+            background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 28px 28px;
+            margin: 0;
+            padding: 28px 16px 48px;
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .journey-container {
+            max-width: 640px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+            letter-spacing: -0.2px;
+        }
+
+        /* Короткая формулировка */
+        .legal-note {
+            background: #eef2ff;
+            border-left: 4px solid var(--accent);
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #1e2a3a;
+            margin-bottom: 24px;
+            text-align: center;
+            line-height: 1.4;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        /* карточки */
+        .node-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.2rem;
+            margin-bottom: 0;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid #e2edf2;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(10px);
+            display: none;
+        }
+
+        .node-card.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            animation: fadeSlideUp 0.3s ease forwards;
+        }
+
+        @keyframes fadeSlideUp {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .node-card.danger {
+            border-left: 6px solid var(--danger);
+            background: #fff5f5;
+        }
+        .node-card.success {
+            border-left: 6px solid var(--success);
+            background: #f1f9f0;
+        }
+        .node-card.warning {
+            border-left: 6px solid var(--warning);
+            background: #fff8e7;
+        }
+
+        .badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            padding: 3px 8px;
+            border-radius: 30px;
+            display: inline-block;
+            margin-bottom: 8px;
+            background: #eef2ff;
+            color: #1e40af;
+        }
+        .danger .badge { background: #ffebee; color: #b71c1c; }
+        .success .badge { background: #e0f2e9; color: #1e6f3f; }
+
+        .node-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+        }
+
+        .node-text {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        .options-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 4px;
+        }
+        .choice-btn {
+            flex: 1 1 auto;
+            background: white;
+            border: 1.5px solid #cbd5e1;
+            padding: 8px 14px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            font-family: inherit;
+            color: #0f172a;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .choice-btn:hover {
+            border-color: var(--accent);
+            background: #eef8ff;
+        }
+        .choice-btn.selected {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        .choice-btn:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        /* стрелки */
+        .arrow-stage {
+            display: flex;
+            justify-content: center;
+            margin: 0 0 2px;
+            height: 26px;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+        .arrow-stage.visible {
+            opacity: 1;
+        }
+        .arrow-svg {
+            width: 44px;
+            height: 24px;
+            fill: none;
+            stroke: #2c7da0;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+            stroke-dasharray: 120;
+            stroke-dashoffset: 120;
+            transition: stroke-dashoffset 0.55s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+        .arrow-stage.visible .arrow-svg {
+            stroke-dashoffset: 0;
+        }
+
+        .reset-area {
+            display: flex;
+            justify-content: center;
+            margin-top: 28px;
+        }
+        .reset-button {
+            background: #2c3e50;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .reset-button:hover {
+            background: #1e2a3a;
+        }
+
+        @media (max-width: 500px) {
+            .node-card { padding: 1rem; }
+            .node-title { font-size: 1.1rem; }
+            .choice-btn { padding: 6px 10px; font-size: 0.75rem; }
+            .arrow-stage { height: 22px; }
+            .legal-note { font-size: 0.75rem; padding: 8px 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="journey-container">
+    <div class="header">
+        <h1>Правовая защита директора учреждения культуры</h1>
+    </div>
+
+    <!-- Короткая формулировка -->
+    <div class="legal-note">
+        ⚖️ При увольнении по ст. 278 ТК РФ
+    </div>
+
+    <div id="schemaFlow">
+        <!-- СТАРТ: Шаг 1, заголовок "Серьезный разговор" -->
+        <div class="node-card active" id="node-start">
+            <div class="badge">ШАГ 1</div>
+            <div class="node-title">Серьезный разговор</div>
+            <div class="node-text">Учредитель просит покинуть пост «по собственному желанию», но вы знаете — при увольнении по ст. 278 ТК РФ полагается компенсация.</div>
+            <div class="options-group">
+                <button class="choice-btn" data-next="node-own-will" data-arrow="arrow-1" data-current="node-start">✔️ Напишу «по собственному»</button>
+                <button class="choice-btn" data-next="node-refuse" data-arrow="arrow-1" data-current="node-start">❌ Откажусь, требую по ст.278</button>
+            </div>
+        </div>
+
+        <div class="arrow-stage" id="arrow-1"><svg class="arrow-svg" viewBox="0 0 60 40"><path d="M30 5 L30 30 M30 30 L22 22 M30 30 L38 22"/></svg></div>
+
+        <!-- ЛОВУШКА: собственное желание -->
+        <div class="node-card danger" id="node-own-will">
+            <div class="badge">ОШИБКА</div>
+            <div class="node-title">Вы теряете компенсацию</div>
+            <div class="node-text">Заявление «по собственному» лишает вас выплаты (ст.279 ТК РФ — минимум 3 оклада).</div>
+            <div class="options-group">
+                <button class="choice-btn" data-next="node-refuse" data-arrow="arrow-2" data-current="node-own-will">🔄 Отозвать заявление и требовать увольнения по решению учредителя</button>
+            </div>
+        </div>
+
+        <div class="arrow-stage" id="arrow-2"><svg class="arrow-svg" viewBox="0 0 60 40"><path d="M30 5 L30 30 M30 30 L22 22 M30 30 L38 22"/></svg></div>
+
+        <!-- ОТКАЗ -->
+        <div class="node-card" id="node-refuse">
+            <div class="badge">ШАГ 2</div>
+            <div class="node-title">Увольнение по п.2 ст.278 ТК РФ</div>
+            <div class="node-text">Компенсация — не менее 3 средних месячных заработков. Какую сумму предлагают?</div>
+            <div class="options-group">
+                <button class="choice-btn" data-next="node-comp-low" data-arrow="arrow-3" data-current="node-refuse">📉 Меньше 3 окладов</button>
+                <button class="choice-btn" data-next="node-comp-ok" data-arrow="arrow-3" data-current="node-refuse">✅ 3 оклада или больше</button>
+            </div>
+        </div>
+
+        <div class="arrow-stage" id="arrow-3"><svg class="arrow-svg" viewBox="0 0 60 40"><path d="M30 5 L30 30 M30 30 L22 22 M30 30 L38 22"/></svg></div>
+
+        <!-- ЗАНИЖЕНА -->
+        <div class="node-card danger" id="node-comp-low">
+            <div class="badge">НАРУШЕНИЕ</div>
+            <div class="node-title">Заниженная компенсация</div>
+            <div class="node-text">Меньше 3 окладов — незаконно. Вы имеете право на доплату.</div>
+            <div class="options-group">
+                <button class="choice-btn" data-next="node-comp-ok" data-arrow="arrow-4" data-current="node-comp-low">📢 Требую законные 3 оклада</button>
+            </div>
+        </div>
+
+        <div class="arrow-stage" id="arrow-4"><svg class="arrow-svg" viewBox="0 0 60 40"><path d="M30 5 L30 30 M30 30 L22 22 M30 30 L38 22"/></svg></div>
+
+        <!-- КОМПЕНСАЦИЯ ОК + универсальные формулировки для здоровья -->
+        <div class="node-card" id="node-comp-ok">
+            <div class="badge">ШАГ 3</div>
+            <div class="node-title">Ваше здоровье</div>
+            <div class="node-text">Увольнять по инициативе работодателя во время больничного запрещено (ст.81 ТК РФ).</div>
+            <div class="options-group">
+                <button class="choice-btn" data-next="node-sick" data-arrow="arrow-5" data-current="node-comp-ok">🩺 На больничном</button>
+                <button class="choice-btn" data-next="node-healthy" data-arrow="arrow-5" data-current="node-comp-ok">💪 Здоров(а), работаю</button>
+            </div>
+        </div>
+
+        <div class="arrow-stage" id="arrow-5"><svg class="arrow-svg" viewBox="0 0 60 40"><path d="M30 5 L30 30 M30 30 L22 22 M30 30 L38 22"/></svg></div>
+
+        <!-- БОЛЬНИЧНЫЙ (универсальные формулировки) -->
+        <div class="node-card" id="node-sick">
+            <div class="badge">ШАГ 4</div>
+            <div class="node-title">Когда открыт больничный?</div>
+            <div class="node-text">Запрет на увольнение действует, если больничный открыт до приказа.</div>
+            <div class="options-group">
+                <button class="choice-btn" data-next="node-sick-before" data-arrow="arrow-6" data-current="node-sick">📅 До подписания приказа</button>
+                <button class="choice-btn" data-next="node-sick-after" data-arrow="arrow-6" data-current="node-sick">⏰ После приказа</button>
+            </div>
+        </div>
+
+        <div class="arrow-stage" id="arrow-6"><svg class="arrow-svg" viewBox="0 0 60 40"><path d="M30 5 L30 30 M30 30 L22 22 M30 30 L38 22"/></svg></div>
+
+        <!-- больничный ДО -->
+        <div class="node-card success" id="node-sick-before">
+            <div class="badge">СИЛЬНАЯ ПОЗИЦИЯ</div>
+            <div class="node-title">Больничный до приказа</div>
+            <div class="node-text">Уволить вас сейчас нельзя. Это ваш козырь для переговоров.</div>
+            <div class="options-group">
+                <button class="choice-btn" data-next="node-final" data-arrow="arrow-7" data-current="node-sick-before">📌 Итог</button>
+            </div>
+        </div>
+
+        <!-- больничный ПОСЛЕ -->
+        <div class="node-card warning" id="node-sick-after">
+            <div class="badge">РИСК</div>
+            <div class="node-title">Больничный после приказа</div>
+            <div class="node-text">Суд может посчитать это злоупотреблением, но шанс есть.</div>
+            <div class="options-group">
+                <button class="choice-btn" data-next="node-final" data-arrow="arrow-7" data-current="node-sick-after">📌 Итог</button>
+            </div>
+        </div>
+
+        <!-- ЗДОРОВЫЙ сценарий (универсально) -->
+        <div class="node-card" id="node-healthy">
+            <div class="badge">ШАГ 4</div>
+            <div class="node-title">Расчёт и документы</div>
+            <div class="node-text">Работодатель обязан выдать трудовую книжку и выплатить всё в день увольнения.</div>
+            <div class="options-group">
+                <button class="choice-btn" data-next="node-final" data-arrow="arrow-7" data-current="node-healthy">📌 Итог</button>
+            </div>
+        </div>
+
+        <div class="arrow-stage" id="arrow-7"><svg class="arrow-svg" viewBox="0 0 60 40"><path d="M30 5 L30 30 M30 30 L22 22 M30 30 L38 22"/></svg></div>
+
+        <!-- ФИНАЛ: вывод результата -->
+        <div class="node-card" id="node-final">
+            <div class="badge">РЕЗУЛЬТАТ</div>
+            <div class="node-text" id="final-simple-output"></div>
+        </div>
+    </div>
+
+    <div class="reset-area" id="resetZone" style="display: none;">
+        <button class="reset-button" id="resetButton">⟳ Пройти заново</button>
+    </div>
+</div>
+
+<script>
+    let activeTransition = false;
+
+    function handleChoice(btnElement) {
+        if (activeTransition) return;
+        const currentId = btnElement.getAttribute('data-current');
+        const nextId = btnElement.getAttribute('data-next');
+        const arrowId = btnElement.getAttribute('data-arrow');
+
+        if (!currentId || !nextId) return;
+        const currentBlock = document.getElementById(currentId);
+        if (!currentBlock) return;
+
+        // блокируем кнопки в текущем блоке
+        const btns = currentBlock.querySelectorAll('.choice-btn');
+        btns.forEach(btn => {
+            btn.disabled = true;
+            if (btn === btnElement) btn.classList.add('selected');
+        });
+
+        const arrowContainer = document.getElementById(arrowId);
+        if (arrowContainer) arrowContainer.classList.add('visible');
+
+        activeTransition = true;
+        setTimeout(() => {
+            const nextBlock = document.getElementById(nextId);
+            if (nextBlock) {
+                nextBlock.classList.add('active');
+                nextBlock.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                if (nextId === 'node-final') {
+                    generateFinalText();
+                    const resetZone = document.getElementById('resetZone');
+                    if (resetZone) resetZone.style.display = 'flex';
+                }
+            }
+            activeTransition = false;
+        }, 500);
+    }
+
+    function generateFinalText() {
+        // определяем пройденный путь
+        const sickBefore = document.getElementById('node-sick-before')?.classList.contains('active');
+        const sickAfter = document.getElementById('node-sick-after')?.classList.contains('active');
+        const healthy = document.getElementById('node-healthy')?.classList.contains('active');
+        const lowComp = document.getElementById('node-comp-low')?.classList.contains('active');
+        const ownWillTrap = document.getElementById('node-own-will')?.classList.contains('active');
+        const refusePath = document.getElementById('node-refuse')?.classList.contains('active');
+
+        let resultText = "";
+
+        // ловушка с собственным без исправления
+        if (ownWillTrap && !refusePath) {
+            resultText = "Вы написали заявление «по собственному желанию». Вы теряете право на компенсацию (ст.279 ТК РФ). Совет: отозвать заявление и требовать увольнения по решению учредителя (п.2 ст.278).";
+        } 
+        else if (sickBefore) {
+            // ИСПРАВЛЕННЫЙ ТЕКСТ ПО ЗАПРОСУ:
+            resultText = "Если больничный открыт до подписания приказа, увольнять вас незаконно. Используйте это: предложите учредителю расстаться по соглашению сторон с повышенной выплатой.";
+        }
+        else if (sickAfter) {
+            resultText = "Больничный открыт после подписания приказа → высокий судебный риск. Тем не менее требуйте полную компенсацию 3 оклада, фиксируйте все даты.";
+        }
+        else if (healthy && lowComp) {
+            resultText = "Вы здоров(а), но вам предлагали меньше 3 окладов. Требуйте доплату до трёх средних заработков. Если откажут — обращайтесь в трудовую инспекцию или суд.";
+        }
+        else if (healthy) {
+            resultText = "Вы здоров(а), компенсация соответствует закону. Следите, чтобы трудовую книжку выдали в день увольнения, а расчёт был полным. Всё в порядке.";
+        }
+        else if (lowComp) {
+            resultText = "Компенсация занижена (менее 3 окладов). Это незаконно. Требуйте доплату или обжалуйте действия учредителя.";
+        }
+        else {
+            resultText = "Увольнение по решению учредителя (п.2 ст.278 ТК РФ) с компенсацией не менее 3 окладов. Проверьте день увольнения: документы и выплаты должны быть в последний рабочий день. Ваши права соблюдены.";
+        }
+
+        const outputDiv = document.getElementById('final-simple-output');
+        if (outputDiv) outputDiv.innerText = resultText;
+    }
+
+    function bindButtons() {
+        const btns = document.querySelectorAll('.choice-btn');
+        btns.forEach(btn => {
+            btn.removeEventListener('click', clickHandler);
+            btn.addEventListener('click', clickHandler);
+        });
+    }
+
+    function clickHandler(e) {
+        e.stopPropagation();
+        handleChoice(this);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        bindButtons();
+        // сброс визуального состояния
+        document.querySelectorAll('.arrow-stage').forEach(a => a.classList.remove('visible'));
+        document.querySelectorAll('.node-card').forEach(n => n.classList.remove('active'));
+        const start = document.getElementById('node-start');
+        if (start) start.classList.add('active');
+        const resetZone = document.getElementById('resetZone');
+        if (resetZone) resetZone.style.display = 'none';
+        document.querySelectorAll('.choice-btn').forEach(btn => {
+            btn.disabled = false;
+            btn.classList.remove('selected');
+        });
+        activeTransition = false;
+    });
+
+    const resetBtn = document.getElementById('resetButton');
+    if (resetBtn) resetBtn.addEventListener('click', () => window.location.reload());
+</script>
+</body>
+</html>
