@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Контрольный вопрос: отсрочить увольнение</title>
+</head>
+<body style="font-family: sans-serif; max-width: 650px; margin: 2rem auto; padding: 0 1rem;">
+    <h3>📄 Контрольный вопрос</h3>
+    <p><strong>Ситуация:</strong> Вы узнали, что начальство уже подготовило, но ещё <strong>не подписало</strong> приказ о вашем увольнении по инициативе работодателя. Вы хотите законно отсрочить расторжение договора.</p>
+    <p><strong>Как лучше всего поступить?</strong></p>
+
+    <div id="quiz">
+        <div style="margin: 1rem 0;">
+            <label><input type="radio" name="answer" value="a"> а) Открыть больничный после подписания приказа и сразу сообщить начальнику.</label>
+        </div>
+        <div style="margin: 1rem 0;">
+            <label><input type="radio" name="answer" value="b"> б) Открыть больничный до подписания приказа и обязательно уведомить работодателя о своей нетрудоспособности.</label>
+        </div>
+        <div style="margin: 1rem 0;">
+            <label><input type="radio" name="answer" value="c"> в) Взять больничный до подписания, но ничего не говорить начальству, надеясь на суд.</label>
+        </div>
+        <div style="margin: 1rem 0;">
+            <label><input type="radio" name="answer" value="d"> г) Написать заявление об увольнении по собственному желанию, чтобы избежать конфликта.</label>
+        </div>
+        <button onclick="checkAnswer()" style="margin-top: 0.5rem; padding: 8px 20px;">Проверить</button>
+        <p id="feedback" style="margin-top: 1.5rem; background: #f0f0f0; padding: 12px; border-radius: 12px;"></p>
+    </div>
+
+    <script>
+        function checkAnswer() {
+            const selected = document.querySelector('input[name="answer"]:checked');
+            const feedback = document.getElementById('feedback');
+            if (!selected) {
+                feedback.innerHTML = "⚠️ Выберите один из вариантов (а, б, в или г).";
+                return;
+            }
+            if (selected.value === "b") {
+                feedback.innerHTML = "✅ Правильно. Это единственный законный способ (ст. 81 ТК РФ): больничный ДО подписания приказа + уведомление работодателя. Увольнение приостанавливается до выздоровления.";
+            } else if (selected.value === "a") {
+                feedback.innerHTML = "❌ Неверно. Если больничный открыт после подписания приказа, увольнение считается законным, отсрочки не будет.";
+            } else if (selected.value === "c") {
+                feedback.innerHTML = "❌ Неверно. Сокрытие факта больничного — злоупотребление правом. Суд может отказать в восстановлении.";
+            } else {
+                feedback.innerHTML = "❌ Неверно. Увольнение по собственному желанию — это не отсрочка, а добровольный уход. Задача — отсрочить увольнение по инициативе работодателя.";
+            }
+        }
+    </script>
+</body>
+</html>
