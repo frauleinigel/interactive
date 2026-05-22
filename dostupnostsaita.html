@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Тренажёр доступности | Аудит сайта</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0a2b5e 0%, #0b3b6e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', system-ui, sans-serif;
+            padding: 2rem;
+        }
+
+        .trainer {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 3rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border: 1px solid rgba(220, 53, 69, 0.5);
+        }
+
+        .progress-area {
+            background: #f8f9ff;
+            padding: 1rem 2rem;
+            border-bottom: 3px solid #dc143c;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .step {
+            font-weight: 700;
+            font-size: 1rem;
+            background: #0a2b5e;
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+        }
+        .score-preview {
+            font-size: 1rem;
+            color: #1e3a8a;
+            font-weight: 600;
+            background: #e9ecef;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+        }
+
+        .task-content {
+            padding: 2rem 2rem 1.5rem;
+        }
+
+        .task-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #0a2b5e;
+            border-left: 8px solid #dc143c;
+            padding-left: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .task-description {
+            font-size: 1.3rem;
+            line-height: 1.45;
+            font-weight: 500;
+            color: #001f3f;
+            background: #f0f4ff;
+            padding: 1.2rem;
+            border-radius: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: inset 0 0 0 1px #ffffff80, 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .timer-logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 1rem 0 2rem;
+        }
+        .timer-icon {
+            background: linear-gradient(135deg, #0d47a1, #1e88e5);
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3), inset 0 2px 5px rgba(255,255,255,0.4);
+            animation: pulse 1.6s infinite ease-in-out;
+            border: 3px solid white;
+        }
+        .timer-icon span {
+            font-size: 4.5rem;
+            display: block;
+            line-height: 1;
+            animation: tick 1s infinite steps(1);
+        }
+        .timer-icon p {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: white;
+            background: #dc143c;
+            padding: 0.2rem 0.8rem;
+            border-radius: 50px;
+            margin-top: 8px;
+            letter-spacing: 1px;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.05); background: #0a58ca; box-shadow: 0 20px 30px rgba(0,0,0,0.4);}
+            100% { transform: scale(1); opacity: 0.9; }
+        }
+        @keyframes tick {
+            0% { opacity: 0.7; text-shadow: 0 0 2px white; }
+            50% { opacity: 1; text-shadow: 0 0 8px #ffd966; }
+            100% { opacity: 0.7; }
+        }
+
+        /* Стиль вопроса: чёрный текст, красивый синий значок */
+        .question {
+            font-size: 1.7rem;
+            font-weight: 700;
+            text-align: center;
+            background: #fff5e6;
+            padding: 1rem;
+            border-radius: 2rem;
+            margin: 1.5rem 0;
+            color: #000000;  /* чёрный текст вопроса */
+            border: 2px dashed #0a2b5e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .question-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(145deg, #0d6efd, #0a58ca);
+            color: white;
+            border-radius: 50%;
+            font-size: 2rem;
+            font-weight: bold;
+            font-family: 'Segoe UI', system-ui;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.1s ease;
+        }
+        .question-icon:hover {
+            transform: scale(1.02);
+        }
+
+        .actions {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin: 1rem 0 0.5rem;
+        }
+        .btn-answer {
+            flex: 1;
+            padding: 1rem 0.8rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.1);
+        }
+        .btn-yes {
+            background: #0d6efd;
+            color: white;
+            border-bottom: 4px solid #0a58ca;
+        }
+        .btn-yes:hover:not(:disabled) {
+            background: #0b5ed7;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 12px rgba(13,110,253,0.3);
+        }
+        .btn-no {
+            background: #dc143c;
+            color: white;
+            border-bottom: 4px solid #8b0000;
+        }
+        .btn-no:hover:not(:disabled) {
+            background: #c00b2e;
+            transform: translateY(-2px);
+        }
+        .btn-answer:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Блок обратной связи с анимированной иконкой */
+        .feedback-block {
+            margin-top: 1.5rem;
+            background: #f1f3f7;
+            border-radius: 1.8rem;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 600;
+            font-size: 1rem;
+            border-left: 10px solid;
+            transition: all 0.2s;
+        }
+        .feedback-block.success {
+            background: #d9f0ff;
+            border-left-color: #ffc107;
+            color: #004080;
+        }
+        .feedback-block.warning {
+            background: #ffe6e6;
+            border-left-color: #dc143c;
+            color: #8b0000;
+        }
+        .feedback-icon {
+            font-size: 2.2rem;
+            display: inline-block;
+            transition: transform 0.2s ease;
+        }
+        /* Анимация для иконок звёзды и предупреждения */
+        .feedback-icon.animate-icon {
+            animation: bouncePop 0.5s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+        }
+        @keyframes bouncePop {
+            0% {
+                transform: scale(0.2) rotate(-30deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.3) rotate(5deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+        .feedback-text {
+            flex: 1;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        .next-btn {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-radius: 60px;
+            margin-top: 1.2rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .next-btn:hover {
+            background: #0f2b66;
+            transform: scale(0.98);
+        }
+
+        .final-result {
+            background: linear-gradient(145deg, #ffffff, #f0f4ff);
+            padding: 1.8rem;
+            border-radius: 2rem;
+            margin: 1.5rem;
+            text-align: center;
+        }
+        .stars-final {
+            font-size: 2.5rem;
+            letter-spacing: 8px;
+            color: #ffb800;
+            margin: 0.8rem 0;
+        }
+        .verdict {
+            background: #eef2ff;
+            padding: 1rem;
+            border-radius: 1.5rem;
+            font-weight: 500;
+            margin: 1rem 0;
+            font-size: 1rem;
+        }
+        .reset-final {
+            background: #0a2b5e;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+            .task-description {
+                font-size: 1.1rem;
+            }
+            .question {
+                font-size: 1.3rem;
+            }
+            .btn-answer {
+                font-size: 1.2rem;
+            }
+            .timer-icon {
+                width: 100px;
+                height: 100px;
+            }
+            .timer-icon span {
+                font-size: 3rem;
+            }
+            .question-icon {
+                width: 42px;
+                height: 42px;
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="trainer" id="trainerApp">
+    <div class="progress-area">
+        <div class="step" id="stepCounter">Задание 1 из 7</div>
+        <div class="score-preview" id="previewStars">⭐ Прогресс: 0 ☆</div>
+    </div>
+    <div id="dynamicContent"></div>
+</div>
+
+<script>
+    const tasks = [
+        {
+            num: 1,
+            instruction: "Откройте в соседней вкладке браузера сайт своего учреждения и оставьте в стороне компьютерную мышь. Используйте клавишу Tab для перехода по разделам. Попробуйте дойти до самого конца — кнопки обратной связи.",
+            question: "Вы смогли добраться до всех элементов без мышки?",
+            successText: "Отлично! Структура сайта понятна для клавиатурной навигации.",
+            failText: "Нарушение. Программист должен настроить последовательный переход по всем элементам кнопкой Tab."
+        },
+        {
+            num: 2,
+            instruction: "На сайте своего учреждения зажмите Ctrl и прокрутите колесо мыши вверх до масштаба 200%. Посмотрите на верстку.",
+            question: "Текст остается читаемым и внизу нет горизонтальной полосы прокрутки?",
+            successText: "Великолепно! У вас гибкая верстка, которая подстраивается под посетителя.",
+            failText: "Нарушение. Сайт «ломается» при увеличении. Замените фиксированные пиксели (px) на относительные единицы (rem или em)."
+        },
+        {
+            num: 3,
+            instruction: "Включите экранный диктор — в Windows по комбинации клавиш: Win + Ctrl + Enter. Наведите курсор на главную афишу или логотип.",
+            question: "Диктор произнес понятное описание картинки?",
+            successText: "Молодцы! Важные изображения имеют правильные alt-тексты.",
+            failText: "Нарушение. Сейчас для незрячего человека сайт — «белое пятно». Нужно прописать краткие описания ко всем смысловым фото."
+        },
+        {
+            num: 4,
+            instruction: "Откройте любой PDF-файл на сайте. Попробуйте выделить мышкой абзац текста.",
+            question: "Текст выделяется и его можно скопировать?",
+            successText: "Хорошо. У документа есть текстовый слой, который считают программы озвучки.",
+            failText: "Нарушение. Документ загружен как картинка. Нужно пересохранить его в текстовом формате или выложить на сайт HTML-копию."
+        },
+        {
+            num: 5,
+            instruction: "Найдите на главной странице сайта любой движущийся элемент. Например, слайдер или бегущую строку.",
+            question: "У этого блока есть видимые кнопки «Пауза» или «Стоп»?",
+            successText: "Верно. Вы даете пользователю возможность остановить мелькание и спокойно прочитать текст.",
+            failText: "Нарушение. Автоматическое движение без возможности остановки запрещено. Необходимо добавить элементы управления анимацией."
+        },
+        {
+            num: 6,
+            instruction: "Посмотрите на основной текст новостей. Проверьте его начертание.",
+            question: "Шрифт простой, без декоративных засечек и лишних завитков?",
+            successText: "Правильно. Такие шрифты легче воспринимать людям с остаточным зрением.",
+            failText: "Нарушение. Сложные декоративные шрифты затрудняют чтение. Замените их на стандартные системные без засечек."
+        },
+        {
+            num: 7,
+            instruction: "Посмотрите на название любой страницы сайта, которое расположено наверху. Затем перейдите в другой раздел — например, в «Контакты».",
+            question: "Заголовок вкладки изменился и понятно описывает текущую страницу?",
+            successText: "Превосходно! Это позволяет пользователю мгновенно сориентироваться при переходе.",
+            failText: "Нарушение. Нужно прописать уникальные теги заголовков для каждой страницы сайта."
+        }
+    ];
+
+    let currentIndex = 0;
+    let answers = new Array(7).fill(null);
+    let isAnswered = false;
+
+    const dynamicContainer = document.getElementById('dynamicContent');
+    const stepSpan = document.getElementById('stepCounter');
+    const previewSpan = document.getElementById('previewStars');
+
+    function updateProgressHeader() {
+        const answeredCount = answers.filter(a => a !== null).length;
+        const starsCount = answers.filter(a => a === true).length;
+        previewSpan.innerHTML = `⭐ Прогресс: ${starsCount} ★ / ${answeredCount} отвечено`;
+        stepSpan.innerText = `Задание ${currentIndex+1} из ${tasks.length}`;
+    }
+
+    // Функция для добавления анимации к иконке ответа
+    function animateIcon(iconElement) {
+        if (!iconElement) return;
+        iconElement.classList.remove('animate-icon');
+        // форсируем перерисовку, чтобы анимация запустилась заново
+        void iconElement.offsetWidth;
+        iconElement.classList.add('animate-icon');
+        // убираем класс после завершения анимации, чтобы можно было анимировать снова
+        setTimeout(() => {
+            iconElement.classList.remove('animate-icon');
+        }, 500);
+    }
+
+    function renderCurrentTask() {
+        if (currentIndex >= tasks.length) {
+            showFinalScreen();
+            return;
+        }
+
+        const task = tasks[currentIndex];
+        const hasAnswered = answers[currentIndex] !== null;
+        isAnswered = hasAnswered;
+        
+        let feedbackHtml = '';
+        if (hasAnswered) {
+            const isYes = answers[currentIndex] === true;
+            const icon = isYes ? '⭐' : '⚠️';
+            const msg = isYes ? task.successText : task.failText;
+            const cls = isYes ? 'success' : 'warning';
+            feedbackHtml = `
+                <div class="feedback-block ${cls}">
+                    <div class="feedback-icon" id="resultIcon">${icon}</div>
+                    <div class="feedback-text">${msg}</div>
+                </div>
+            `;
+        }
+
+        const questionWithIcon = `
+            <div class="question">
+                <div class="question-icon">?</div>
+                <span>${task.question}</span>
+            </div>
+        `;
+
+        const html = `
+            <div class="task-content">
+                <div class="task-title">Задание ${task.num}</div>
+                <div class="task-description">${task.instruction}</div>
+                
+                <div class="timer-logo">
+                    <div class="timer-icon">
+                        <span>⏲️</span>
+                        <p>ВРЕМЯ ПОШЛО</p>
+                    </div>
+                </div>
+                
+                ${questionWithIcon}
+                
+                <div class="actions">
+                    <button class="btn-answer btn-yes" id="yesBtn" ${hasAnswered ? 'disabled' : ''}>ДА</button>
+                    <button class="btn-answer btn-no" id="noBtn" ${hasAnswered ? 'disabled' : ''}>НЕТ</button>
+                </div>
+                
+                ${feedbackHtml}
+                
+                ${hasAnswered ? `<button class="next-btn" id="nextTaskBtn">➡️ Следующее задание</button>` : ''}
+            </div>
+        `;
+        
+        dynamicContainer.innerHTML = html;
+        updateProgressHeader();
+        
+        // Если есть блок с иконкой ответа, запускаем анимацию
+        if (hasAnswered) {
+            const iconDiv = document.getElementById('resultIcon');
+            if (iconDiv) {
+                animateIcon(iconDiv);
+            }
+        }
+        
+        if (!hasAnswered) {
+            const yesBtn = document.getElementById('yesBtn');
+            const noBtn = document.getElementById('noBtn');
+            yesBtn.addEventListener('click', () => handleAnswer(true));
+            noBtn.addEventListener('click', () => handleAnswer(false));
+        } else {
+            const nextBtn = document.getElementById('nextTaskBtn');
+            if (nextBtn) nextBtn.addEventListener('click', goToNext);
+        }
+    }
+
+    function handleAnswer(value) {
+        if (isAnswered) return;
+        answers[currentIndex] = value;
+        isAnswered = true;
+        renderCurrentTask();  // перерисовываем с фидбеком и анимация сработает в момент появления иконки
+    }
+
+    function goToNext() {
+        if (currentIndex + 1 <= tasks.length) {
+            currentIndex++;
+            isAnswered = false;
+            renderCurrentTask();
+        }
+    }
+
+    function showFinalScreen() {
+        const totalStars = answers.filter(a => a === true).length;
+        let verdictMsg = '';
+        
+        if (totalStars === 7) {
+            verdictMsg = '🏆 Поздравляем! Ваш сайт — образец доступности. Сохраните этот результат и поддерживайте планку.';
+        } 
+        else if (totalStars >= 4 && totalStars <= 6) {
+            verdictMsg = `✅ Хороший результат, но есть риски. Сайт удобен, но за отдельные технические ошибки учреждение может получить штраф. Сообщите о выявленных недоработках техническому специалисту.`;
+        } 
+        else {
+            verdictMsg = `⚠️ Критическая ситуация. Сайт недоступен для большой категории пользователей. Высокий риск взыскания по статье 5.62 КоАП. Рекомендуем скорее начать техническую модернизацию ресурса. Сообщите о выявленных недоработках техническому специалисту.`;
+        }
+
+        let starVisual = '';
+        for (let i = 0; i < 7; i++) {
+            starVisual += answers[i] === true ? '★' : '☆';
+        }
+        
+        const finalHtml = `
+            <div class="final-result">
+                <h2 style="color:#0a2b5e;">📊 Итоги аудита</h2>
+                <div class="stars-final">${starVisual}</div>
+                <div style="font-size:2rem; font-weight:800;">${totalStars} / 7 звезд</div>
+                <div class="verdict">${verdictMsg}</div>
+                <button class="reset-final" id="restartBtn">⟳ Пройти заново</button>
+            </div>
+        `;
+        dynamicContainer.innerHTML = finalHtml;
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            currentIndex = 0;
+            answers.fill(null);
+            isAnswered = false;
+            renderCurrentTask();
+        });
+        updateProgressHeader(); 
+        stepSpan.innerText = `Завершено`;
+        previewSpan.innerHTML = `⭐ Итог: ${totalStars} звезд`;
+    }
+
+    renderCurrentTask();
+</script>
+</body>
+</html>
