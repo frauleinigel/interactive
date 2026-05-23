@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Творческие планы – помоги коллегам</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #f5f0e6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        .exercise-container {
+            max-width: 1000px;
+            width: 100%;
+            background: #fffef9;
+            border-radius: 2.5rem;
+            padding: 2.2rem 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+            border: 1px solid #e3d7bb;
+            position: relative;
+        }
+        .game-title {
+            font-size: 1.8rem;
+            font-weight: 500;
+            color: #5a4a32;
+            margin-bottom: 0.8rem;
+            text-align: center;
+        }
+        .instruction {
+            text-align: center;
+            color: #6b5a3e;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+            font-style: italic;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(4, 1fr);
+            gap: 1.2rem;
+            align-items: stretch;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 1.2rem;
+            border: 2px solid #dad1b8;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.03);
+            transition: border-color 0.2s, background 0.2s, transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 140px;
+        }
+
+        .character-card {
+            background: #fefcf5;
+            flex-direction: row;
+            align-items: center;
+            gap: 1rem;
+        }
+        .character-card.matched {
+            border-color: #9bbf7a;
+            background: #f4f9ed;
+        }
+        .character-card.wrong-flash {
+            animation: shakeCard 0.4s ease;
+            border-color: #d14b4b;
+        }
+        @keyframes shakeCard {
+            0%,100%{ transform: translateX(0); }
+            25%{ transform: translateX(-5px); }
+            50%{ transform: translateX(5px); }
+            75%{ transform: translateX(-3px); }
+        }
+        .character-card.drag-over {
+            background: #f9f4e5;
+            border-color: #b39650;
+            transform: scale(1.02);
+        }
+
+        .avatar {
+            font-size: 2.5rem;
+            min-width: 3rem;
+            text-align: center;
+            line-height: 1;
+        }
+        .speech-bubble {
+            flex: 1;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #3e3629;
+        }
+        .character-name {
+            font-weight: 600;
+            color: #6b5a3e;
+            margin-bottom: 0.2rem;
+        }
+        .thanks-message {
+            color: #2b5e2b;
+            font-weight: 500;
+            margin-top: 0.3rem;
+            display: none;
+        }
+        .character-card.matched .thanks-message {
+            display: block;
+        }
+        .character-card.matched .request-text {
+            display: none;
+        }
+
+        .plan-card {
+            background: #fffbf0;
+            border: 2px solid #c9af7c;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #4f3f28;
+            cursor: grab;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s, background 0.3s;
+        }
+        .plan-card:active {
+            cursor: grabbing;
+        }
+        .plan-card.dragging {
+            opacity: 0.4;
+            transform: scale(0.95);
+        }
+
+        .plan-card.matched {
+            opacity: 0.5;
+            background: #eef5e2;
+            border-color: #9bbf7a;
+            cursor: default;
+            pointer-events: none;
+            user-select: none;
+        }
+        .plan-card.matched::after {
+            content: ' ✓';
+            color: #2d6a4f;
+            font-weight: bold;
+            margin-left: 0.4rem;
+        }
+
+        .error-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ffe4e4;
+            color: #b22222;
+            font-weight: 600;
+            padding: 1rem 2rem;
+            border-radius: 40px;
+            font-size: 1rem;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .error-message.visible {
+            opacity: 1;
+        }
+
+        .control-panel {
+            margin-top: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .reset-btn {
+            background: none;
+            border: 1px solid #cfb991;
+            padding: 0.5rem 1.8rem;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            color: #5b4a32;
+            transition: 0.2s;
+        }
+        .reset-btn:hover {
+            background: #f2ead9;
+            border-color: #b3924c;
+        }
+        .complete-message {
+            margin-top: 1rem;
+            font-weight: 600;
+            color: #2d6a4f;
+            font-size: 1.2rem;
+            text-align: center;
+            display: none;
+        }
+        .complete-message.visible {
+            display: block;
+        }
+
+        @media (max-width: 650px) {
+            .game-grid {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto;
+            }
+            .character-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="exercise-container">
+    <div class="game-title">Упражнение: помощь коллегам</div>
+    <div class="instruction">Перетащите карточки с названиями планов к персонажам</div>
+
+    <div class="game-grid" id="gameGrid"></div>
+
+    <div class="error-message" id="errorMessage">Вы ошиблись!</div>
+
+    <div class="control-panel">
+        <button class="reset-btn" id="resetButton">🔄 Заново</button>
+    </div>
+    <div class="complete-message" id="completeMessage">🎉 Прекрасно! Все планы на своих местах.</div>
+</div>
+
+<script>
+    (function() {
+        const characters = [
+            {
+                id: 'c1',
+                name: 'Зам. директора по творческой работе',
+                emoji: '👩‍💼',
+                request: 'Надо сдать показатели по госзаданию и успеть включить все события «Пушкинской карты». Какой план мне подготовить?',
+                correctPlanId: 'plan_events',
+                thanks: 'Отлично! Передам в бухгалтерию.'
+            },
+            {
+                id: 'c2',
+                name: 'Библиотекарь',
+                emoji: '👩‍💻',
+                request: 'Подскажите, в каком плане расписать закупку новых книг и акты на списание старых?',
+                correctPlanId: 'plan_acquisition',
+                thanks: 'Спасибо! Обновим фонды.'
+            },
+            {
+                id: 'c3',
+                name: 'Методист',
+                emoji: '👩‍🏫',
+                request: 'Нужно утвердить график педсоветов и открытых уроков. Какой документ я должна составить?',
+                correctPlanId: 'plan_method',
+                thanks: 'Верно! Внесём в госзадание.'
+            },
+            {
+                id: 'c4',
+                name: 'Куратор выставок',
+                emoji: '👩‍🎨',
+                request: 'Помогите найти план, где указывают даты выставок и кто за них отвечает.',
+                correctPlanId: 'plan_exhibition',
+                thanks: 'Чудесно! Уже анонсируем.'
+            }
+        ];
+
+        const plans = [
+            { id: 'plan_events', title: 'План мероприятий' },
+            { id: 'plan_acquisition', title: 'План комплектования' },
+            { id: 'plan_method', title: 'Методический план' },
+            { id: 'plan_exhibition', title: 'Выставочный план' }
+        ];
+
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        const grid = document.getElementById('gameGrid');
+        const resetBtn = document.getElementById('resetButton');
+        const completeMessage = document.getElementById('completeMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        let errorTimer = null;
+
+        function playSound(freq, type = 'sine', dur = 0.15) {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = type;
+            osc.frequency.value = freq;
+            gain.gain.value = 0.15;
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+            osc.stop(ctx.currentTime + dur);
+        }
+        function successSound() {
+            playSound(600, 'triangle', 0.12);
+            setTimeout(() => playSound(900, 'triangle', 0.12), 120);
+        }
+        function errorSound() {
+            playSound(200, 'sawtooth', 0.2);
+        }
+
+        function showError() {
+            if (errorTimer) clearTimeout(errorTimer);
+            errorMessage.classList.add('visible');
+            errorTimer = setTimeout(() => {
+                errorMessage.classList.remove('visible');
+            }, 2000);
+        }
+
+        function checkAllMatched() {
+            const planCards = document.querySelectorAll('.plan-card');
+            if ([...planCards].every(card => card.classList.contains('matched'))) {
+                completeMessage.classList.add('visible');
+                errorMessage.classList.remove('visible');
+            } else {
+                completeMessage.classList.remove('visible');
+            }
+        }
+
+        function buildGame() {
+            grid.innerHTML = '';
+            const shuffledPlans = shuffleArray([...plans]);
+
+            characters.forEach((ch, index) => {
+                const plan = shuffledPlans[index];
+                const planCard = document.createElement('div');
+                planCard.className = 'card plan-card';
+                planCard.setAttribute('draggable', 'true');
+                planCard.setAttribute('data-plan-id', plan.id);
+                planCard.textContent = plan.title;
+                planCard.addEventListener('dragstart', handleDragStart);
+                planCard.addEventListener('dragend', handleDragEnd);
+                grid.appendChild(planCard);
+
+                const charCard = document.createElement('div');
+                charCard.className = 'card character-card';
+                charCard.setAttribute('data-char-id', ch.id);
+                charCard.setAttribute('data-correct-plan', ch.correctPlanId);
+                charCard.innerHTML = `
+                    <div class="avatar">${ch.emoji}</div>
+                    <div class="speech-bubble">
+                        <div class="character-name">${ch.name}</div>
+                        <div class="request-text">${ch.request}</div>
+                        <div class="thanks-message">${ch.thanks}</div>
+                    </div>
+                `;
+                charCard.addEventListener('dragover', handleDragOver);
+                charCard.addEventListener('dragleave', handleDragLeave);
+                charCard.addEventListener('drop', handleDrop);
+                grid.appendChild(charCard);
+            });
+
+            document.querySelectorAll('.character-card').forEach(c => c.classList.remove('matched'));
+            document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('matched'));
+            completeMessage.classList.remove('visible');
+            errorMessage.classList.remove('visible');
+        }
+
+        let draggedPlan = null;
+
+        function handleDragStart(e) {
+            draggedPlan = this;
+            this.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', this.getAttribute('data-plan-id'));
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            draggedPlan = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            this.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const charCard = this;
+            charCard.classList.remove('drag-over');
+
+            if (charCard.classList.contains('matched')) return;
+
+            const planId = e.dataTransfer.getData('text/plain');
+            if (!planId) return;
+
+            const correctPlanId = charCard.getAttribute('data-correct-plan');
+
+            if (planId === correctPlanId) {
+                charCard.classList.add('matched');
+                if (draggedPlan) {
+                    draggedPlan.classList.add('matched');
+                    draggedPlan.setAttribute('draggable', 'false');
+                }
+                successSound();
+                errorMessage.classList.remove('visible');
+                checkAllMatched();
+            } else {
+                charCard.classList.add('wrong-flash');
+                setTimeout(() => charCard.classList.remove('wrong-flash'), 400);
+                errorSound();
+                showError();
+            }
+        }
+
+        resetBtn.addEventListener('click', buildGame);
+        buildGame();
+
+        window.addEventListener('touchmove', function(e) {
+            if (e.target.classList.contains('plan-card')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+    })();
+</script>
+</body>
+</html>
