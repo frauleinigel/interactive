@@ -207,7 +207,7 @@
     </div>
 
     <div class="value-display">
-        <span id="sheetsValue">0</span> листов
+        <span id="sheetsValue">0</span> л
     </div>
     <div class="feedback-area" id="feedbackMsg">
         👆 Потяните за ползунок
@@ -226,8 +226,7 @@
     let startX = 0, startLeft = 0;
     const minSheets = 0;
     const maxSheets = 500;
-    const correctSheets = 250;
-    const tolerance = 5;
+    const correctSheets = 250;   // только ровно 250
 
     let scaleWidth = scaleElement.offsetWidth;
     let thumbWidth = thumb.offsetWidth;
@@ -275,8 +274,7 @@
         isDragging = false;
         thumb.style.cursor = 'grab';
 
-        const diff = Math.abs(currentSheets - correctSheets);
-        if (diff <= tolerance) {
+        if (currentSheets === correctSheets) {
             feedbackDiv.innerHTML = '✅ Верно! Это максимальный объем единицы хранения.';
             feedbackDiv.className = 'feedback-area success';
         } else {
