@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Интеллектуальная разминка | Золотой стиль</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #fbf7f0;  /* светло-бежевый фон */
+            font-family: 'Inter', 'Segoe UI', Roboto, system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+
+        /* основная карточка */
+        .quiz-card {
+            max-width: 720px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s;
+            border: 1px solid #ecd9b4;
+        }
+
+        /* шапка — золотисто-синяя */
+        .quiz-header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f2c46 100%);
+            padding: 1.8rem 2rem;
+            text-align: center;
+            border-bottom: 3px solid #d4af37;
+        }
+
+        .quiz-header h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+            color: #f9e2b7;
+            margin-bottom: 0.4rem;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .quiz-header p {
+            font-size: 0.95rem;
+            color: #ffefcf;
+            font-weight: 500;
+            opacity: 0.95;
+        }
+
+        /* прогресс-бар область */
+        .progress-area {
+            background: #fef6e8;
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1px solid #f0e1ce;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #b8860b;
+            font-family: monospace;
+            letter-spacing: 0.3px;
+        }
+
+        .question-container {
+            padding: 2rem 2rem 1.8rem;
+        }
+
+        .question-text {
+            font-size: 1.32rem;
+            font-weight: 500;
+            color: #1e2f3a;
+            line-height: 1.4;
+            margin-bottom: 1.8rem;
+            background: #fefaf4;
+            padding: 0.7rem 1rem;
+            border-radius: 28px;
+            border-left: 5px solid #d4af37;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .option-btn {
+            background: #ffffff;
+            border: 1.5px solid #e2d5c0;
+            border-radius: 60px;
+            padding: 0.85rem 1.4rem;
+            font-size: 1rem;
+            text-align: left;
+            font-family: inherit;
+            font-weight: 500;
+            color: #1e3a5f;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.02);
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: #fff9ef;
+            border-color: #d4af37;
+            transform: translateX(5px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .option-prefix {
+            background: #f0e4d2;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #c98f2b;
+            border: 1px solid #e8c48a;
+        }
+
+        .feedback-message {
+            border-radius: 1.5rem;
+            padding: 0.9rem 1.2rem;
+            margin: 0.8rem 0 1rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feedback-correct {
+            background: #e6f4ea;
+            border-left: 5px solid #2c6e9e;
+            color: #1a5a3c;
+            display: flex;
+        }
+
+        .feedback-wrong {
+            background: #ffe6e5;
+            border-left: 5px solid #c42c2c;
+            color: #b13b3b;
+            display: flex;
+        }
+
+        .next-btn {
+            background: #2c6e9e;
+            border: none;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.85rem 1.2rem;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+            text-align: center;
+            font-family: inherit;
+            letter-spacing: 0.3px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .next-btn:hover:not(:disabled) {
+            background: #1f5580;
+            transform: scale(0.99);
+        }
+
+        .next-btn:disabled {
+            background: #adc6da;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .reset-btn {
+            background: #fdf2e2;
+            border: 1px solid #d4af37;
+            color: #b2701a;
+            font-weight: 600;
+            padding: 0.8rem;
+            border-radius: 60px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+            font-family: inherit;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .reset-btn:hover {
+            background: #faeccc;
+            border-color: #c49f2e;
+            color: #8b5a0e;
+        }
+
+        .result-area {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .result-stats {
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 0.5rem 0;
+            color: #1e3a5f;
+            font-family: inherit;
+        }
+
+        hr {
+            margin: 1rem 0;
+            border: none;
+            height: 1px;
+            background: #ecd9b4;
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 1rem 2rem 1.5rem;
+            color: #ad9a78;
+            border-top: 1px solid #f0e1ce;
+            background: #fefaf4;
+        }
+
+        @media (max-width: 550px) {
+            .quiz-card {
+                border-radius: 1.5rem;
+            }
+            .question-container {
+                padding: 1.5rem;
+            }
+            .question-text {
+                font-size: 1.15rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-card" id="quizApp">
+    <div class="quiz-header">
+        <h1>✨ Интеллектуальная разминка</h1>
+        <p>Подумайте над ситуацией и выберите правильный ответ</p>
+    </div>
+    <div id="mainContent"></div>
+</div>
+
+<script>
+    // Три ситуации (точное соответствие условию)
+    const questions = [
+        {
+            text: "При подготовке к проверке выяснилось, что оригиналы приказов за прошлый год потеряны в отделе маркетинга. Кто понесет дисциплинарную ответственность, если в учреждении внедрена система оперативного хранения?",
+            options: [
+                "а) архивист",
+                "б) руководитель отдела маркетинга",
+                "в) секретарь"
+            ],
+            correctIndex: 1   // руководитель отдела маркетинга
+        },
+        {
+            text: "Секретарь закончила работу с договором и оставила его на столе — торопилась домой к детям. Через месяц перед сдачей в архив выяснилось, что он потерялся. Какое правило нарушено?",
+            options: [
+                "а) Никакое, это обычная практика учреждений культуры.",
+                "б) Правило «Закончил — положи в дело».",
+                "в) Правило электронного документооборота."
+            ],
+            correctIndex: 1   // правило «Закончил — положи в дело»
+        },
+        {
+            text: "Поступил запрос от Прокуратуры: нужна копия приказа о создании комиссии за прошлый год. В организации внедрена система оперативного хранения. Как найти документ быстрее всего?",
+            options: [
+                "а) Перерыть все шкафы и столы сотрудников.",
+                "б) Написать служебную записку в архив на поиск в течение двух недель.",
+                "в) Обратиться к номенклатуре дел, определить дело с нужным сроком хранения и запросить у ответственного."
+            ],
+            correctIndex: 2   // номенклатура дел
+        }
+    ];
+
+    let currentIndex = 0;
+    let userAnswers = new Array(questions.length).fill(null);   // индексы выбранных ответов
+    let quizFinished = false;
+
+    const mainContainer = document.getElementById('mainContent');
+
+    function render() {
+        if (quizFinished) {
+            renderFinalResult();
+            return;
+        }
+        if (currentIndex < questions.length) {
+            renderQuestion(currentIndex);
+        } else {
+            quizFinished = true;
+            renderFinalResult();
+        }
+    }
+
+    function renderQuestion(index) {
+        const q = questions[index];
+        const alreadyAnswered = (userAnswers[index] !== null);
+        const selectedIdx = userAnswers[index];
+
+        let optionsHtml = '';
+        q.options.forEach((opt, idx) => {
+            const letter = opt[0]; // а, б, в
+            const textOnly = opt.substring(2).trim();
+            const isSelected = (selectedIdx === idx);
+            const selectedStyle = isSelected ? 'background:#fff5e6; border-color:#d4af37;' : '';
+            optionsHtml += `
+                <button class="option-btn" data-opt-index="${idx}" ${alreadyAnswered ? 'disabled' : ''} style="${selectedStyle}">
+                    <span class="option-prefix">${letter}</span>
+                    <span>${textOnly}</span>
+                </button>
+            `;
+        });
+
+        let feedbackHtml = '';
+        if (alreadyAnswered) {
+            const isCorrect = (selectedIdx === q.correctIndex);
+            const feedbackText = isCorrect ? '✅ Верно! Вы молодец!' : '❌ Ошибка! Повторите материал.';
+            const feedbackClass = isCorrect ? 'feedback-correct' : 'feedback-wrong';
+            feedbackHtml = `<div class="feedback-message ${feedbackClass}">${feedbackText}</div>`;
+        } else {
+            feedbackHtml = `<div class="feedback-message" style="display: none;"></div>`;
+        }
+
+        const nextDisabled = !alreadyAnswered ? 'disabled' : '';
+        const progressText = `${index+1} из ${questions.length}`;
+
+        const html = `
+            <div class="progress-area">
+                <span>📋 Вопрос ${progressText}</span>
+                <span>⚡ выберите вариант</span>
+            </div>
+            <div class="question-container">
+                <div class="question-text">${q.text}</div>
+                <div class="options-list" id="optionsList">
+                    ${optionsHtml}
+                </div>
+                ${feedbackHtml}
+                <button class="next-btn" id="nextButton" ${nextDisabled}>➡ Следующий вопрос</button>
+            </div>
+        `;
+        mainContainer.innerHTML = html;
+
+        // обработчики на варианты ответов
+        const optButtons = document.querySelectorAll('.option-btn');
+        optButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (userAnswers[index] !== null) return;
+                const optIndex = parseInt(btn.dataset.optIndex);
+                userAnswers[index] = optIndex;
+                renderQuestion(index);
+            });
+        });
+
+        const nextBtn = document.getElementById('nextButton');
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (userAnswers[index] === null) return;
+                if (currentIndex + 1 < questions.length) {
+                    currentIndex++;
+                    render();
+                } else {
+                    quizFinished = true;
+                    render();
+                }
+            });
+        }
+    }
+
+    function renderFinalResult() {
+        const total = questions.length;
+        let correctCount = 0;
+        for (let i = 0; i < total; i++) {
+            if (userAnswers[i] !== null && userAnswers[i] === questions[i].correctIndex) {
+                correctCount++;
+            }
+        }
+        // Только сухая статистика, никаких "советов" или лишних фраз
+        const detailsHtml = questions.map((q, idx) => {
+            const userChoice = userAnswers[idx];
+            const isCorrect = (userChoice === q.correctIndex);
+            const statusIcon = isCorrect ? '✓' : '✗';
+            const correctAnswerText = q.options[q.correctIndex];
+            let shortText = q.text.length > 100 ? q.text.substring(0, 97) + '…' : q.text;
+            return `
+                <div style="margin-bottom: 0.9rem; text-align: left; font-size: 0.85rem; border-bottom: 1px solid #f0e1ce; padding-bottom: 0.7rem; color: #2f4f5c;">
+                    <div><strong style="color:${isCorrect ? '#2c6e9e' : '#c42c2c'}">${statusIcon} Вопрос ${idx+1}:</strong> ${shortText}</div>
+                    <div style="color:#b8860b; margin-top: 6px; font-size:0.8rem;">✓ Верный ответ: ${correctAnswerText}</div>
+                </div>
+            `;
+        }).join('');
+
+        const html = `
+            <div class="progress-area">
+                <span>🏁 Разминка завершена</span>
+                <span>${correctCount}/${total} верных</span>
+            </div>
+            <div class="result-area">
+                <div class="result-stats">${correctCount} из ${total}</div>
+                <hr />
+                <div style="max-height: 260px; overflow-y: auto; margin-top: 0.5rem; text-align: left;">
+                    ${detailsHtml}
+                </div>
+                <button class="reset-btn" id="restartButton">⟳ Начать заново</button>
+            </div>
+            <footer>⚜️ Оперативное хранение · Номенклатура дел · Ответственность</footer>
+        `;
+        mainContainer.innerHTML = html;
+
+        const restartBtn = document.getElementById('restartButton');
+        if (restartBtn) {
+            restartBtn.addEventListener('click', () => {
+                currentIndex = 0;
+                userAnswers = new Array(questions.length).fill(null);
+                quizFinished = false;
+                render();
+            });
+        }
+    }
+
+    render();
+</script>
+</body>
+</html>
