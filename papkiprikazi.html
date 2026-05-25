@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Тренажёр: папки с приказами</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: #fbf7f0;  /* светло-бежевый фон */
+            font-family: 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        /* только тренажёр, без лишних блоков */
+        .trainer {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 1.8rem;
+            padding: 1.5rem;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.05);
+            border: 1px solid #ecd9b4;
+        }
+
+        /* заголовок над папками */
+        .drag-instruction {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1e3a5f;
+            background: #fef7ed;
+            padding: 0.7rem;
+            border-radius: 60px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #d4af37;
+        }
+
+        /* три папки в один ряд (горизонтально) */
+        .folders-row {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.8rem;
+        }
+
+        /* папки стали меньше */
+        .folder {
+            background: #fefaf4;
+            border-radius: 1.2rem;
+            width: 180px;
+            min-height: 220px;
+            border: 2px solid #e0cfb5;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.03);
+        }
+
+        .folder-header {
+            background: #1e3a5f;
+            padding: 0.5rem;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #f9e2b7;
+            border-bottom: 2px solid #d4af37;
+            border-radius: 1.2rem 1.2rem 0 0;
+        }
+
+        .folder-years {
+            font-size: 0.7rem;
+            background: #0f2c46;
+            display: block;
+            margin-top: 0.2rem;
+            padding: 0.2rem;
+            border-radius: 20px;
+            font-weight: normal;
+        }
+
+        .folder-content {
+            padding: 0.6rem;
+            min-height: 170px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .folder-card {
+            background: #eef4fa;
+            border-radius: 40px;
+            padding: 0.35rem 0.6rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            text-align: center;
+            color: #1e3a5f;
+            border: 1px solid #d4af37;
+        }
+
+        /* область с неперемещёнными карточками */
+        .drag-area {
+            background: #fef7ed;
+            border-radius: 1.2rem;
+            padding: 1rem;
+            margin: 0.5rem 0 1rem;
+            border: 2px dashed #d4af37;
+        }
+
+        .cards-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+            justify-content: center;
+            align-items: center;
+            min-height: 90px;
+        }
+
+        .drag-card {
+            background: white;
+            border-radius: 60px;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #1e3a5f;
+            border: 2px solid #1e3a5f;
+            cursor: grab;
+            transition: 0.1s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: inline-block;
+        }
+        .drag-card:active {
+            cursor: grabbing;
+        }
+        .drag-card.dragging {
+            opacity: 0.4;
+        }
+
+        .feedback-area {
+            margin-top: 0.8rem;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            text-align: center;
+            font-weight: 500;
+            background: #f0e4d2;
+            color: #1e3a5f;
+            font-size: 0.8rem;
+        }
+
+        .success-msg {
+            background: #e6f4ea;
+            color: #1a5a3c;
+            border-left: 4px solid #2c6e9e;
+        }
+
+        .error-msg {
+            background: #ffe6e5;
+            color: #b13b3b;
+            border-left: 4px solid #c42c2c;
+        }
+
+        .reset-btn {
+            background: #1e3a5f;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.45rem 1.2rem;
+            border-radius: 60px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+            display: block;
+            margin: 0.8rem auto 0;
+        }
+        .reset-btn:hover {
+            background: #0f2c46;
+            transform: scale(0.98);
+        }
+        .flex-center {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* адаптив: если не влезают три палки, уменьшаем отступы, но сохраняем ряд */
+        @media (max-width: 680px) {
+            .folders-row {
+                gap: 0.7rem;
+            }
+            .folder {
+                width: 150px;
+                min-height: 200px;
+            }
+            .folder-header {
+                font-size: 0.85rem;
+                padding: 0.4rem;
+            }
+            .drag-card {
+                font-size: 0.7rem;
+                padding: 0.4rem 0.8rem;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .folders-row {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .folder {
+                width: 160px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="trainer">
+    <!-- заголовок-инструкция -->
+    <div class="drag-instruction">
+        🖱️ Перетащите карточки с приказами в нужные папки
+    </div>
+
+    <!-- три папки в ряд -->
+    <div class="folders-row" id="foldersRow">
+        <div class="folder" data-folder="50">
+            <div class="folder-header">📁 50 лет<br><span class="folder-years">приём, перевод, увольнение, премии</span></div>
+            <div class="folder-content" id="folder50"></div>
+        </div>
+        <div class="folder" data-folder="5">
+            <div class="folder-header">📁 5 лет<br><span class="folder-years">отпуска, командировки, дежурства</span></div>
+            <div class="folder-content" id="folder5"></div>
+        </div>
+        <div class="folder" data-folder="3">
+            <div class="folder-header">📁 3 года<br><span class="folder-years">взыскания, выговоры, замечания</span></div>
+            <div class="folder-content" id="folder3"></div>
+        </div>
+    </div>
+
+    <!-- область перетаскивания -->
+    <div class="drag-area">
+        <div class="cards-pool" id="cardsPool"></div>
+        <div id="globalFeedback" class="feedback-area"></div>
+    </div>
+    <div class="flex-center">
+        <button class="reset-btn" id="resetBtn">⟳ Начать заново</button>
+    </div>
+</div>
+
+<script>
+    // карточки: название и правильная папка (50, 5, 3)
+    const itemsData = [
+        { id: "p1", name: "Приказ о приёме на работу", correct: "50" },
+        { id: "p2", name: "Приказ о переводе", correct: "50" },
+        { id: "p3", name: "Приказ о премировании", correct: "50" },
+        { id: "p4", name: "Приказ об увольнении", correct: "50" },
+        { id: "p5", name: "Приказ об отпуске", correct: "5" },
+        { id: "p6", name: "Приказ о командировке", correct: "5" },
+        { id: "p7", name: "Приказ о дежурстве", correct: "5" },
+        { id: "p8", name: "Приказ о выговоре", correct: "3" },
+        { id: "p9", name: "Приказ о замечании", correct: "3" }
+    ];
+
+    let itemLocation = {};   // id -> 'pool' / '50' / '5' / '3'
+    let total = itemsData.length;
+
+    function init() {
+        itemsData.forEach(item => { itemLocation[item.id] = 'pool'; });
+        render();
+    }
+
+    function render() {
+        // чистим контейнеры папок
+        document.getElementById('folder50').innerHTML = '';
+        document.getElementById('folder5').innerHTML = '';
+        document.getElementById('folder3').innerHTML = '';
+        const poolDiv = document.getElementById('cardsPool');
+        poolDiv.innerHTML = '';
+
+        let correctPlaced = 0;
+        itemsData.forEach(item => {
+            const loc = itemLocation[item.id];
+            const card = document.createElement('div');
+            card.className = 'drag-card';
+            card.setAttribute('data-id', item.id);
+            card.setAttribute('draggable', 'true');
+            card.textContent = item.name;
+            card.setAttribute('data-correct', item.correct);
+            card.addEventListener('dragstart', handleDragStart);
+            card.addEventListener('dragend', handleDragEnd);
+
+            if (loc === 'pool') {
+                poolDiv.appendChild(card);
+            } else {
+                // внутри папки — не перетаскиваемые
+                card.setAttribute('draggable', 'false');
+                card.style.cursor = 'default';
+                card.style.background = '#eef4fa';
+                card.style.borderColor = '#d4af37';
+                if (loc === '50') document.getElementById('folder50').appendChild(card);
+                else if (loc === '5') document.getElementById('folder5').appendChild(card);
+                else if (loc === '3') document.getElementById('folder3').appendChild(card);
+            }
+            if (loc !== 'pool' && loc === item.correct) correctPlaced++;
+        });
+
+        const feedback = document.getElementById('globalFeedback');
+        if (correctPlaced === total) {
+            feedback.innerHTML = '🎉 Отлично! Все приказы распределены верно!';
+            feedback.className = 'feedback-area success-msg';
+        } else {
+            feedback.innerHTML = `✅ Правильно: ${correctPlaced} из ${total}. Перетащите остальные карточки в нужные папки.`;
+            feedback.className = 'feedback-area';
+        }
+    }
+
+    let dragId = null;
+    function handleDragStart(e) {
+        const target = e.target.closest('.drag-card');
+        if (!target) return;
+        const id = target.getAttribute('data-id');
+        if (!id) return;
+        dragId = id;
+        e.dataTransfer.setData('text/plain', id);
+        e.dataTransfer.effectAllowed = 'move';
+        target.classList.add('dragging');
+    }
+    function handleDragEnd(e) {
+        const target = e.target.closest('.drag-card');
+        if (target) target.classList.remove('dragging');
+        dragId = null;
+    }
+
+    function setupDropZones() {
+        const folders = document.querySelectorAll('.folder');
+        folders.forEach(folder => {
+            folder.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            });
+            folder.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const targetFolder = folder.getAttribute('data-folder'); // "50","5","3"
+                const itemId = e.dataTransfer.getData('text/plain');
+                if (!itemId) return;
+                if (itemLocation[itemId] !== 'pool') {
+                    showMsg('Эта карточка уже размещена! Сбросьте упражнение.', 'error');
+                    return;
+                }
+                const item = itemsData.find(i => i.id === itemId);
+                if (!item) return;
+                if (targetFolder === item.correct) {
+                    itemLocation[itemId] = targetFolder;
+                    render();
+                    let term = targetFolder === '50' ? '50 лет' : (targetFolder === '5' ? '5 лет' : '3 года');
+                    showMsg(`✅ Верно! «${item.name}» — срок хранения ${term}.`, 'success');
+                } else {
+                    let correctTerm = item.correct === '50' ? '50 лет' : (item.correct === '5' ? '5 лет' : '3 года');
+                    showMsg(`❌ Ошибка! «${item.name}» нельзя в папку на ${targetFolder === '50' ? '50 лет' : (targetFolder === '5' ? '5 лет' : '3 года')}. Правильный срок: ${correctTerm}.`, 'error');
+                }
+            });
+        });
+    }
+
+    let timeoutId = null;
+    function showMsg(text, type) {
+        const fb = document.getElementById('globalFeedback');
+        fb.innerHTML = text;
+        fb.className = `feedback-area ${type === 'success' ? 'success-msg' : 'error-msg'}`;
+        if (timeoutId) clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            const correctNow = itemsData.filter(i => i.correct === itemLocation[i.id] && itemLocation[i.id] !== 'pool').length;
+            if (correctNow === total) {
+                fb.innerHTML = '🎉 Отлично! Все приказы распределены верно!';
+                fb.className = 'feedback-area success-msg';
+            } else {
+                fb.innerHTML = `✅ Правильно: ${correctNow} из ${total}. Перетащите остальные карточки в нужные папки.`;
+                fb.className = 'feedback-area';
+            }
+        }, 1500);
+    }
+
+    function resetGame() {
+        itemsData.forEach(item => { itemLocation[item.id] = 'pool'; });
+        render();
+        const fb = document.getElementById('globalFeedback');
+        fb.innerHTML = `✅ Правильно: 0 из ${total}. Перетащите карточки в нужные папки.`;
+        fb.className = 'feedback-area';
+        if (timeoutId) clearTimeout(timeoutId);
+    }
+
+    init();
+    setupDropZones();
+    document.body.addEventListener('dragover', (e) => e.preventDefault());
+    document.body.addEventListener('drop', (e) => e.preventDefault());
+    document.getElementById('resetBtn').addEventListener('click', resetGame);
+</script>
+</body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Максимальный объём единицы хранения</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: #fbf7f0;
+            font-family: 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .interactive {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 2rem;
+            padding: 2rem;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.05);
+            border: 1px solid #ecd9b4;
+            text-align: center;
+        }
+
+        .question {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1e3a5f;
+            margin-bottom: 0.8rem;
+        }
+        .sub {
+            font-size: 0.95rem;
+            color: #b8860b;
+            margin-bottom: 1.8rem;
+        }
+
+        .slider-container {
+            margin: 2rem 0 1rem;
+            position: relative;
+            padding: 0 15px;
+        }
+        .scale {
+            position: relative;
+            height: 60px;
+            background: #e8dccc;
+            border-radius: 40px;
+            border: 2px solid #d4af37;
+            overflow: visible;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .track {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #e0cfb5, #f9efdf);
+            border-radius: 40px;
+        }
+        .markers {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 12px;
+            pointer-events: none;
+        }
+        .marker {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #5e4a2b;
+            background: rgba(255,251,240,0.9);
+            padding: 2px 5px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .thumb {
+            position: absolute;
+            top: -12px;
+            width: 44px;
+            height: 84px;
+            background: linear-gradient(145deg, #2c5a7a, #1e3a5f);
+            border-radius: 40px;
+            cursor: grab;
+            z-index: 10;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+            border: 2px solid #d4af37;
+            transition: left 0.05s linear;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            color: #f9e2b7;
+        }
+        .thumb:active {
+            cursor: grabbing;
+            transform: scale(0.97);
+        }
+        .thumb span {
+            font-size: 1.4rem;
+            font-weight: bold;
+            text-shadow: 0 1px 0 #0f2c46;
+        }
+
+        .value-display {
+            margin: 1.8rem 0 0.8rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e3a5f;
+        }
+        .value-display span {
+            background: #fef3e0;
+            padding: 0.2rem 1rem;
+            border-radius: 60px;
+            display: inline-block;
+            border: 1px solid #ecd9b4;
+        }
+
+        .feedback-area {
+            margin: 1rem 0;
+            padding: 0.7rem;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            background: #f0e4d2;
+            color: #1e3a5f;
+        }
+        .success {
+            background: #e6f4ea;
+            color: #1a5a3c;
+            border-left: 4px solid #2c6e9e;
+        }
+        .error {
+            background: #ffe6e5;
+            color: #b13b3b;
+            border-left: 4px solid #c42c2c;
+        }
+
+        .reset-btn {
+            background: #b8860b;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.6rem 1.8rem;
+            border-radius: 60px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 0.8rem;
+            transition: 0.2s;
+        }
+        .reset-btn:hover {
+            background: #9b6e0b;
+            transform: scale(0.98);
+        }
+        .instruction {
+            background: #fef7ed;
+            padding: 0.6rem;
+            border-radius: 40px;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            border: 1px solid #ecd9b4;
+            color: #5e4a2b;
+        }
+    </style>
+</head>
+<body>
+<div class="interactive">
+    <div class="question">Какой максимальный объем единицы хранения?</div>
+    <div class="sub">Перетащите ползунок к нужной отметке</div>
+
+    <div class="instruction">
+        💡 Вспомните норматив: толщина дела не должна превышать определённого количества листов.
+    </div>
+
+    <div class="slider-container">
+        <div class="scale" id="scale">
+            <div class="track"></div>
+            <div class="markers">
+                <span class="marker">0</span>
+                <span class="marker">50</span>
+                <span class="marker">150</span>
+                <span class="marker">250</span>
+                <span class="marker">350</span>
+                <span class="marker">450</span>
+                <span class="marker">500</span>
+            </div>
+            <div class="thumb" id="thumb">
+                <span>⤍</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="value-display">
+        <span id="sheetsValue">0</span> листов
+    </div>
+    <div class="feedback-area" id="feedbackMsg">
+        👆 Потяните за ползунок
+    </div>
+    <button class="reset-btn" id="resetBtn">⟳ Начать заново</button>
+</div>
+
+<script>
+    const scaleElement = document.getElementById('scale');
+    const thumb = document.getElementById('thumb');
+    const sheetsSpan = document.getElementById('sheetsValue');
+    const feedbackDiv = document.getElementById('feedbackMsg');
+
+    let currentSheets = 0;
+    let isDragging = false;
+    let startX = 0, startLeft = 0;
+    const minSheets = 0;
+    const maxSheets = 500;
+    const correctSheets = 250;
+    const tolerance = 5;
+
+    let scaleWidth = scaleElement.offsetWidth;
+    let thumbWidth = thumb.offsetWidth;
+    let leftMin = 0;
+    let leftMax = scaleWidth - thumbWidth;
+
+    function updatePositionFromSheets(sheets) {
+        sheets = Math.min(maxSheets, Math.max(minSheets, sheets));
+        const percent = sheets / maxSheets;
+        let left = percent * (scaleWidth - thumbWidth);
+        left = Math.min(leftMax, Math.max(leftMin, left));
+        thumb.style.left = left + 'px';
+        sheetsSpan.innerText = sheets;
+        currentSheets = sheets;
+    }
+
+    function getSheetsFromLeft(left) {
+        const percent = left / (scaleWidth - thumbWidth);
+        let sheets = Math.round(percent * maxSheets);
+        sheets = Math.min(maxSheets, Math.max(minSheets, sheets));
+        return sheets;
+    }
+
+    function onDragStart(e) {
+        isDragging = true;
+        startX = e.clientX;
+        startLeft = parseFloat(thumb.style.left) || 0;
+        thumb.style.cursor = 'grabbing';
+        e.preventDefault();
+    }
+
+    function onDragMove(e) {
+        if (!isDragging) return;
+        let dx = e.clientX - startX;
+        let newLeft = startLeft + dx;
+        newLeft = Math.min(leftMax, Math.max(leftMin, newLeft));
+        thumb.style.left = newLeft + 'px';
+        const sheets = getSheetsFromLeft(newLeft);
+        sheetsSpan.innerText = sheets;
+        currentSheets = sheets;
+    }
+
+    function onDragEnd() {
+        if (!isDragging) return;
+        isDragging = false;
+        thumb.style.cursor = 'grab';
+
+        const diff = Math.abs(currentSheets - correctSheets);
+        if (diff <= tolerance) {
+            feedbackDiv.innerHTML = '✅ Верно! Это максимальный объем единицы хранения.';
+            feedbackDiv.className = 'feedback-area success';
+        } else {
+            let message = '';
+            if (currentSheets > correctSheets) {
+                message = '❌ Ошибка. Вы указали слишком большой объём. Попробуйте ещё раз.';
+            } else {
+                message = '❌ Ошибка. Вы указали слишком маленький объём. Попробуйте ещё раз.';
+            }
+            feedbackDiv.innerHTML = message;
+            feedbackDiv.className = 'feedback-area error';
+        }
+    }
+
+    function resetGame() {
+        updatePositionFromSheets(0);
+        feedbackDiv.innerHTML = '👆 Потяните за ползунок и выберите правильную отметку.';
+        feedbackDiv.className = 'feedback-area';
+        isDragging = false;
+        thumb.style.cursor = 'grab';
+    }
+
+    function handleResize() {
+        scaleWidth = scaleElement.offsetWidth;
+        thumbWidth = thumb.offsetWidth;
+        leftMin = 0;
+        leftMax = scaleWidth - thumbWidth;
+        updatePositionFromSheets(currentSheets);
+    }
+
+    thumb.addEventListener('mousedown', onDragStart);
+    window.addEventListener('mousemove', onDragMove);
+    window.addEventListener('mouseup', onDragEnd);
+    window.addEventListener('resize', handleResize);
+    document.getElementById('resetBtn').addEventListener('click', resetGame);
+
+    setTimeout(() => {
+        scaleWidth = scaleElement.offsetWidth;
+        thumbWidth = thumb.offsetWidth;
+        leftMax = scaleWidth - thumbWidth;
+        updatePositionFromSheets(0);
+    }, 100);
+</script>
+</body>
+</html>

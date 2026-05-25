@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Упражнение «Лишний элемент»</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #fbf7f0;
+            font-family: 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .exercise {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 2rem;
+            padding: 1.8rem;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.05);
+            border: 1px solid #ecd9b4;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e3a5f;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        .sub {
+            text-align: center;
+            color: #b8860b;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            border-bottom: 1px dashed #ecd9b4;
+            padding-bottom: 0.6rem;
+        }
+
+        .folder-case {
+            background: #fef3e0;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            border: 2px solid #d4af37;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .folder-case::before {
+            content: "📂 Личное дело";
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: white;
+            padding: 0 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #b2701a;
+            border-radius: 30px;
+            border: 1px solid #ecd9b4;
+        }
+
+        .docs-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin: 1rem 0 1.5rem;
+        }
+
+        .doc-card {
+            background: white;
+            width: 160px;
+            padding: 1rem 0.8rem;
+            border-radius: 1rem;
+            text-align: center;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: 0.15s;
+            border: 1px solid #e0cfb5;
+            font-weight: 500;
+            color: #1e3a5f;
+        }
+        .doc-card:hover {
+            transform: translateY(-3px);
+            border-color: #d4af37;
+        }
+        .doc-card.removed {
+            background: #ffe0e0;
+            border: 2px solid #c42c2c;
+            color: #a00;
+            text-decoration: line-through;
+            opacity: 0.7;
+            cursor: default;
+            position: relative;
+        }
+        .doc-card.removed::after {
+            content: "✕";
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #c42c2c;
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #c42c2c;
+        }
+
+        .feedback-area {
+            margin: 1rem 0;
+            padding: 0.7rem;
+            border-radius: 60px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: #f0e4d2;
+            color: #1e3a5f;
+        }
+        .error-feedback {
+            background: #ffe6e5;
+            color: #b13b3b;
+            border-left: 4px solid #c42c2c;
+        }
+        .success-feedback {
+            background: #e6f4ea;
+            color: #1a5a3c;
+            border-left: 4px solid #2c6e9e;
+        }
+        .neutral-feedback {
+            background: #f0e4d2;
+        }
+
+        .action-btn {
+            background: #1e3a5f;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.6rem 1.5rem;
+            border-radius: 60px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            display: inline-block;
+            margin: 0.3rem 0.3rem;
+        }
+        .action-btn:hover {
+            background: #0f2c46;
+            transform: scale(0.98);
+        }
+        .reset-btn {
+            background: #b8860b;
+        }
+        .reset-btn:hover {
+            background: #9b6e0b;
+        }
+        .flex-center {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 600px) {
+            .doc-card { width: 140px; font-size: 0.8rem; padding: 0.8rem 0.5rem; }
+            .exercise { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="exercise">
+    <div class="title">📋 Упражнение «Лишний элемент»</div>
+    <div class="sub">Кликните на документы, которые кадровик должен удалить перед сдачей дела в архив</div>
+
+    <div class="folder-case">
+        <div class="docs-grid" id="docsContainer">
+            <div class="doc-card" data-doc="contract" data-keep="true">📄 Трудовой договор</div>
+            <div class="doc-card" data-doc="passport" data-keep="false">🆔 Копия паспорта</div>
+            <div class="doc-card" data-doc="order" data-keep="true">📜 Приказ о приёме</div>
+            <div class="doc-card" data-doc="snils" data-keep="false">💳 Копия СНИЛС</div>
+            <div class="doc-card" data-doc="statement" data-keep="true">✍️ Заявление о приёме</div>
+            <div class="doc-card" data-doc="workcopy" data-keep="true">📑 Копия трудовой книжки</div>
+        </div>
+        <div class="feedback-area" id="globalFeedback">
+            👆 Нажмите на лишние документы.
+        </div>
+        <div class="flex-center">
+            <button class="action-btn" id="checkBtn">✅ Проверить результат</button>
+            <button class="action-btn reset-btn" id="resetBtn">⟳ Начать заново</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const docs = document.querySelectorAll('.doc-card');
+    let removedStatus = {
+        contract: false,
+        passport: false,
+        order: false,
+        snils: false,
+        statement: false,
+        workcopy: false
+    };
+    const shouldBeRemoved = ['passport', 'snils'];
+
+    function updateUI() {
+        docs.forEach(doc => {
+            const docType = doc.getAttribute('data-doc');
+            if (removedStatus[docType]) {
+                doc.classList.add('removed');
+            } else {
+                doc.classList.remove('removed');
+            }
+        });
+    }
+
+    let messageTimeout = null;
+
+    function showTemporaryMessage(msg, type) {
+        const feedbackDiv = document.getElementById('globalFeedback');
+        feedbackDiv.innerHTML = msg;
+        feedbackDiv.className = `feedback-area ${type === 'success' ? 'success-feedback' : (type === 'error' ? 'error-feedback' : 'neutral-feedback')}`;
+        if (messageTimeout) clearTimeout(messageTimeout);
+        messageTimeout = setTimeout(() => {
+            const correctCount = getCorrectRemovedCount();
+            const totalNeeded = shouldBeRemoved.length;
+            if (correctCount === totalNeeded && allRequiredRemoved()) {
+                feedbackDiv.innerHTML = `🎉 Отлично! Все лишние документы удалены.`;
+                feedbackDiv.className = 'feedback-area success-feedback';
+            } else {
+                feedbackDiv.innerHTML = `📌 Отмечено на удаление: ${correctCount} из ${totalNeeded}.`;
+                feedbackDiv.className = 'feedback-area neutral-feedback';
+            }
+        }, 1800);
+    }
+
+    function handleDocClick(e) {
+        const doc = e.currentTarget;
+        const docType = doc.getAttribute('data-doc');
+        const isKeep = doc.getAttribute('data-keep') === 'true';
+
+        if (removedStatus[docType]) {
+            showTemporaryMessage(`⚠️ Документ уже помечен. Сбросьте, чтобы изменить.`, 'error');
+            return;
+        }
+
+        if (!isKeep) {
+            removedStatus[docType] = true;
+            updateUI();
+            showTemporaryMessage(`✅ Верно! Этот документ не должен храниться в архиве.`, 'success');
+        } else {
+            showTemporaryMessage(`❌ Ошибка! Этот документ нужно оставить в деле.`, 'error');
+        }
+    }
+
+    function getCorrectRemovedCount() {
+        let count = 0;
+        for (let doc of shouldBeRemoved) {
+            if (removedStatus[doc]) count++;
+        }
+        return count;
+    }
+
+    function allRequiredRemoved() {
+        for (let doc of shouldBeRemoved) {
+            if (!removedStatus[doc]) return false;
+        }
+        return true;
+    }
+
+    function checkResult() {
+        const correct = getCorrectRemovedCount();
+        const total = shouldBeRemoved.length;
+        const feedbackDiv = document.getElementById('globalFeedback');
+        if (correct === total && allRequiredRemoved()) {
+            feedbackDiv.innerHTML = '🎉 Совершенно верно! Все лишние документы удалены. Дело готово к архиву.';
+            feedbackDiv.className = 'feedback-area success-feedback';
+        } else if (correct > 0 && correct < total) {
+            feedbackDiv.innerHTML = `⚠️ Вы удалили ${correct} из ${total} лишних документов.`;
+            feedbackDiv.className = 'feedback-area error-feedback';
+        } else {
+            feedbackDiv.innerHTML = '❌ Ни один лишний документ не отмечен.';
+            feedbackDiv.className = 'feedback-area error-feedback';
+        }
+        if (messageTimeout) clearTimeout(messageTimeout);
+        messageTimeout = setTimeout(() => {
+            const newCorrect = getCorrectRemovedCount();
+            if (newCorrect === total && allRequiredRemoved()) {
+                feedbackDiv.innerHTML = '🎉 Отлично! Все лишние документы удалены.';
+                feedbackDiv.className = 'feedback-area success-feedback';
+            } else {
+                feedbackDiv.innerHTML = `📌 Отмечено на удаление: ${newCorrect} из ${total}.`;
+                feedbackDiv.className = 'feedback-area neutral-feedback';
+            }
+        }, 3000);
+    }
+
+    function resetGame() {
+        removedStatus = {
+            contract: false,
+            passport: false,
+            order: false,
+            snils: false,
+            statement: false,
+            workcopy: false
+        };
+        updateUI();
+        const feedbackDiv = document.getElementById('globalFeedback');
+        feedbackDiv.innerHTML = '✨ Начните заново. Кликните на документы, которые нужно удалить.';
+        feedbackDiv.className = 'feedback-area neutral-feedback';
+        if (messageTimeout) clearTimeout(messageTimeout);
+    }
+
+    docs.forEach(doc => {
+        doc.addEventListener('click', handleDocClick);
+    });
+    document.getElementById('checkBtn').addEventListener('click', checkResult);
+    document.getElementById('resetBtn').addEventListener('click', resetGame);
+</script>
+</body>
+</html>
