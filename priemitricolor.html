@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Упражнение: приёмы вовлечения аудитории</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            font-family: 'Georgia', 'Times New Roman', Times, serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1.5rem;
+        }
+
+        .interactive {
+            max-width: 750px;
+            width: 100%;
+            background: #ffffff;
+            border: 2px solid #0039A6;
+            border-radius: 28px;
+            padding: 2rem 1.8rem;
+            box-shadow: 0 12px 28px rgba(0, 53, 128, 0.1);
+        }
+
+        /* ===== АНИМИРОВАННЫЙ ЗАГОЛОВОК ===== */
+        .header {
+            text-align: center;
+            margin-bottom: 1.8rem;
+            border-bottom: 2px dashed #D52B1E;
+            padding-bottom: 1rem;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .header-top {
+            font-size: 1rem;
+            letter-spacing: 2px;
+            color: #0039A6;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            animation: slideUpFade 0.5s ease-out 0.2s forwards;
+        }
+
+        .title-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin: 0.5rem 0;
+        }
+
+        .deco-line {
+            width: 60px;
+            height: 2px;
+            background: #D52B1E;
+            border-radius: 2px;
+            opacity: 0;
+            animation: growLine 0.5s ease-out 0.4s forwards;
+        }
+
+        h1 {
+            font-size: 1.9rem;
+            color: #D52B1E;
+            line-height: 1.2;
+            font-weight: 700;
+            display: inline-block;
+            transform: scale(0.95);
+            opacity: 0;
+            animation: titlePop 0.6s ease-out 0.3s forwards;
+            transition: text-shadow 0.3s ease;
+        }
+
+        h1:hover {
+            text-shadow: 0 0 8px rgba(213, 43, 30, 0.3);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes titlePop {
+            0% {
+                opacity: 0;
+                transform: scale(0.92);
+            }
+            80% {
+                transform: scale(1.02);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes growLine {
+            from {
+                width: 0;
+                opacity: 0;
+            }
+            to {
+                width: 60px;
+                opacity: 1;
+            }
+        }
+
+        .progress {
+            background: #F4F8FD;
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            font-weight: bold;
+            color: #0039A6;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-top: 0.75rem;
+            animation: fadeInUp 0.5s ease-out 0.5s backwards;
+        }
+
+        /* Конец анимаций заголовка */
+
+        .situation-card {
+            background: #F9FAFC;
+            border-left: 6px solid #D52B1E;
+            border-radius: 20px;
+            padding: 1.6rem;
+            margin-bottom: 1rem;
+            transition: box-shadow 0.2s;
+        }
+
+        .situation-text {
+            font-size: 1.25rem;
+            line-height: 1.45;
+            color: #1e2a3a;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .situation-desc {
+            color: #2c3e50;
+            margin-bottom: 1.8rem;
+            font-style: italic;
+            padding-left: 0.5rem;
+            border-left: 3px solid #0039A6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #0039A6;
+            border-radius: 60px;
+            padding: 0.8rem 1.4rem;
+            font-family: 'Georgia', serif;
+            font-size: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #0039A6;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .option-btn::before {
+            content: "●";
+            font-size: 1.2rem;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .option-btn:nth-child(1)::before {
+            color: #D52B1E;
+        }
+        .option-btn:nth-child(2)::before {
+            color: #0039A6;
+        }
+        .option-btn:nth-child(3)::before {
+            color: #1e6f3f;
+        }
+
+        .option-btn:hover:not(:disabled)::before {
+            color: white;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: #0039A6;
+            color: white;
+            transform: translateX(6px);
+        }
+
+        .explanation-screen {
+            background: #F9FAFC;
+            border-radius: 24px;
+            padding: 1.8rem;
+            margin-bottom: 1rem;
+            border: 2px solid #1e6f3f;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .explanation-correct-text {
+            background: #e0f2e9;
+            padding: 1rem;
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #1e6f3f;
+            border-left: 5px solid #1e6f3f;
+        }
+
+        .explanation-detail {
+            color: #1a2a3a;
+            line-height: 1.5;
+            margin-bottom: 1.8rem;
+            font-size: 1rem;
+        }
+
+        .next-btn {
+            background: #0039A6;
+            color: white;
+            border: none;
+            padding: 0.7rem 2rem;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: inherit;
+            transition: 0.2s;
+            width: 100%;
+            text-align: center;
+        }
+
+        .next-btn:hover {
+            background: #D52B1E;
+            transform: scale(1.01);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0.9rem 1.8rem;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1rem;
+            z-index: 1000;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            animation: fadeInUp 0.2s ease;
+            pointer-events: none;
+            max-width: 90%;
+            text-align: center;
+            background: #D52B1E;
+            color: white;
+        }
+
+        .final-screen {
+            text-align: center;
+            background: #e0f2e9;
+            border-radius: 24px;
+            padding: 2rem;
+            margin-top: 0.5rem;
+        }
+
+        .final-screen h2 {
+            color: #1e6f3f;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        .restart-btn {
+            background: #0039A6;
+            color: white;
+            border: none;
+            padding: 0.7rem 2rem;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: inherit;
+            transition: 0.2s;
+        }
+
+        .restart-btn:hover {
+            background: #D52B1E;
+            transform: scale(1.02);
+        }
+
+        .footer-note {
+            margin-top: 2rem;
+            font-size: 0.75rem;
+            color: #4a4a4a;
+            text-align: center;
+        }
+
+        @media (max-width: 550px) {
+            .interactive {
+                padding: 1.5rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .deco-line {
+                width: 30px;
+            }
+            @keyframes growLine {
+                to { width: 30px; }
+            }
+            .option-btn {
+                padding: 0.6rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="interactive" id="app">
+    <div class="header">
+        <div class="header-top">Упражнение</div>
+        <div class="title-wrapper">
+            <span class="deco-line"></span>
+            <h1>Примените приемы вовлечения аудитории</h1>
+            <span class="deco-line"></span>
+        </div>
+        <div class="progress" id="progressIndicator">Ситуация 1 из 3</div>
+    </div>
+
+    <div id="quizContainer"></div>
+    <div class="footer-note">Сделано в Школе менеджера культуры · Актион</div>
+</div>
+
+<script>
+    const questions = [
+        {
+            situation: "Аудитория зевает 🥱",
+            desc: "Ваша задача — вернуть тонус и физически «включить» слушателей в процесс.",
+            options: [
+                "Громко постучу по столу или захлопну книгу, чтобы взбодрить присутствующих.",
+                "Попрошу поднять руки тех, кто согласен с обсуждаемым тезисом.",
+                "Извинюсь за скучный материал и постараюсь максимально быстро дочитать текст до конца."
+            ],
+            correct: 1,
+            explanation: "Физическое движение разгоняет кровь и заставляет мозг переключиться. Поднятие руки не вызывает стресса, но возвращает человека в состояние «здесь и сейчас»."
+        },
+        {
+            situation: "Участник уткнулся в телефон 📱",
+            desc: "Ваша задача — переключить его внимание со смартфона на контент мероприятия.",
+            options: [
+                "Обращусь к этому участнику с простой просьбой: «Помогите мне, пожалуйста, раздать эти ленты».",
+                "Сделаю замечание: «Уважаемый, мы здесь вообще-то о патриотизме говорим, отложите свои гаджеты».",
+                "Проигнорирую ситуацию, чтобы не вступать в конфликт с посетителем."
+            ],
+            correct: 0,
+            explanation: "Человеку трудно отказать в вежливой просьбе, а для её выполнения ему физически придётся отложить телефон и включиться в работу группы."
+        },
+        {
+            situation: "Участники говорят между собой вслух на отвлеченную тему 🗣️",
+            desc: "Ваша задача — остановить шум в зале, не прибегая к тактике разъяренного школьного учителя.",
+            options: [
+                "Повышу голос, стараясь перекричать гул и донести информацию до остальных.",
+                "Резко замолчу и посмотрю на нарушителей в упор, пока все остальные тоже не обратят на них внимание.",
+                "Перейду на полушепот и попрошу всех одновременно закрыть глаза и представить сцену из прошлого."
+            ],
+            correct: 2,
+            explanation: "Когда вы начинаете говорить тише, аудитория инстинктивно притихает, чтобы расслышать вас. «Шумные» участники внезапно осознают, как громко звучит их разговор. Представляя образ с закрытыми глазами, человек переключает внимание на работу воображения и не может продолжать частную беседу."
+        }
+    ];
+
+    let currentIndex = 0;
+    let toastTimeout = null;
+    let showingExplanation = false;
+
+    const quizContainer = document.getElementById("quizContainer");
+    const progressSpan = document.getElementById("progressIndicator");
+
+    function clearToast() {
+        if (toastTimeout) {
+            clearTimeout(toastTimeout);
+            toastTimeout = null;
+        }
+        const existingToast = document.querySelector(".toast");
+        if (existingToast) existingToast.remove();
+    }
+
+    function showErrorToast() {
+        clearToast();
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.textContent = "❌ Ошибка! Попробуйте другой вариант.";
+        document.body.appendChild(toast);
+        toastTimeout = setTimeout(() => {
+            if (toast && toast.remove) toast.remove();
+            toastTimeout = null;
+        }, 1500);
+    }
+
+    function showExplanationScreen(question, selectedText) {
+        showingExplanation = true;
+        const explanationHtml = `
+            <div class="explanation-screen">
+                <div class="explanation-correct-text">
+                    ✅ <strong>Правильный ответ:</strong> ${selectedText}
+                </div>
+                <div class="explanation-detail">
+                    <strong>📖 Разбор:</strong><br>
+                    ${question.explanation}
+                </div>
+                <button class="next-btn" id="nextFromExplanation">Далее →</button>
+            </div>
+        `;
+        quizContainer.innerHTML = explanationHtml;
+        const nextBtn = document.getElementById("nextFromExplanation");
+        nextBtn.addEventListener("click", () => {
+            showingExplanation = false;
+            if (currentIndex + 1 < questions.length) {
+                currentIndex++;
+                renderQuestion();
+            } else {
+                showFinal();
+            }
+        });
+    }
+
+    function handleAnswer(selectedIdx, question) {
+        if (showingExplanation) return;
+        const selectedText = question.options[selectedIdx];
+        if (selectedIdx === question.correct) {
+            showExplanationScreen(question, selectedText);
+        } else {
+            showErrorToast();
+        }
+    }
+
+    function renderQuestion() {
+        showingExplanation = false;
+        if (currentIndex >= questions.length) {
+            showFinal();
+            return;
+        }
+        const q = questions[currentIndex];
+        progressSpan.textContent = `Ситуация ${currentIndex + 1} из ${questions.length}`;
+
+        let optionsHtml = "";
+        q.options.forEach((optText, idx) => {
+            optionsHtml += `
+                <button class="option-btn" data-idx="${idx}">
+                    ${optText}
+                </button>
+            `;
+        });
+
+        const fullHtml = `
+            <div class="situation-card">
+                <div class="situation-text">${q.situation}</div>
+                <div class="situation-desc">${q.desc}</div>
+                <div class="options">
+                    ${optionsHtml}
+                </div>
+            </div>
+        `;
+
+        quizContainer.innerHTML = fullHtml;
+
+        const btns = document.querySelectorAll(".option-btn");
+        btns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                const idx = parseInt(btn.getAttribute("data-idx"), 10);
+                handleAnswer(idx, q);
+            });
+        });
+    }
+
+    function showFinal() {
+        showingExplanation = false;
+        progressSpan.textContent = "Завершено ✅";
+        quizContainer.innerHTML = `
+            <div class="final-screen">
+                <h2>🎉 Отлично! 🎉</h2>
+                <button class="restart-btn" id="restartQuiz">⟳ Пройти заново</button>
+            </div>
+        `;
+        const restartBtn = document.getElementById("restartQuiz");
+        if (restartBtn) {
+            restartBtn.addEventListener("click", () => {
+                currentIndex = 0;
+                renderQuestion();
+            });
+        }
+    }
+
+    renderQuestion();
+</script>
+</body>
+</html>
