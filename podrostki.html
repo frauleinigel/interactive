@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Трудовые ситуации: несовершеннолетние</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f4fa 0%, #e9eef3 100%);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 2rem 1.5rem;
+            color: #1f1f1f;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: 1px solid #dce5ec;
+        }
+
+        .progress-bar {
+            background: #ffffff;
+            padding: 1rem 2rem;
+            border-bottom: 3px solid #0039a6;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .steps {
+            font-weight: 600;
+            background: #f0f2f5;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            color: #0039a6;
+        }
+
+        .reset-btn {
+            background: none;
+            border: 1px solid #cbcfd4;
+            padding: 0.3rem 1rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            color: #2c3e50;
+            transition: 0.2s;
+        }
+
+        .reset-btn:hover {
+            background: #eceff3;
+            border-color: #0039a6;
+            color: #0039a6;
+        }
+
+        .situation-card {
+            padding: 2rem 2rem 1.8rem;
+            position: relative;
+        }
+
+        .situation-title {
+            font-size: 1.7rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #c1272d;
+            border-left: 6px solid #c1272d;
+            padding-left: 1rem;
+            letter-spacing: -0.3px;
+        }
+
+        .situation-text {
+            background: #f8fafd;
+            padding: 1.2rem 1.5rem;
+            border-radius: 1.2rem;
+            margin-bottom: 1.8rem;
+            border: 1px solid #e2e8f0;
+            font-size: 1rem;
+            line-height: 1.45;
+            color: #1e2a36;
+        }
+
+        .question {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin: 1rem 0 1.2rem 0;
+            padding-bottom: 0.2rem;
+            border-bottom: 2px dashed #b0c4de;
+            color: #1f2e3a;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .option-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .option-btn {
+            background: #fefefe;
+            border: 2px solid #3a7ca5;
+            padding: 0.9rem 1.3rem;
+            border-radius: 60px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #003057;
+            text-align: left;
+            font-family: inherit;
+            width: 100%;
+            box-shadow: 0 1px 3px rgba(0,57,166,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: #e6f0ff;
+            border-color: #c1272d;
+            transform: translateX(5px);
+            box-shadow: 0 4px 10px rgba(193,39,45,0.2);
+        }
+
+        .option-btn.selected-correct {
+            background: #c8f0e4;
+            border-color: #1f7b5c;
+            color: #0a3b2f;
+            box-shadow: 0 2px 8px rgba(31,123,92,0.3);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+            background: #f5f7fa;
+            border-color: #b9cad9;
+            transform: none;
+        }
+
+        /* всплывающая подсказка-ошибка над кнопкой */
+        .error-tooltip {
+            position: absolute;
+            bottom: 110%;
+            left: 20px;
+            background: #c1272d;
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 100;
+            pointer-events: none;
+            animation: fadeUp 0.2s ease;
+            font-family: inherit;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feedback {
+            background: #fefbf5;
+            border-radius: 1.2rem;
+            padding: 1.3rem 1.5rem;
+            margin: 0.5rem 0 1rem 0;
+            border-left: 5px solid #0039a6;
+            display: none;
+            animation: fadeSlide 0.25s ease;
+        }
+
+        .feedback.visible {
+            display: block;
+        }
+
+        .verdict {
+            font-weight: 800;
+            font-size: 1rem;
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.2px;
+            color: #1f7b5c;
+        }
+
+        .explanation-text {
+            color: #2c3e4e;
+            line-height: 1.45;
+            font-size: 0.95rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+
+        .nav-btn {
+            background: #0039a6;
+            border: none;
+            padding: 0.7rem 1.8rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            width: auto;
+            min-width: 180px;
+        }
+
+        .nav-btn:disabled {
+            background: #b0c2d4;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .nav-btn:not(:disabled):hover {
+            background: #c1272d;
+            transform: scale(0.97);
+        }
+
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+            .situation-card {
+                padding: 1.5rem;
+            }
+            .situation-title {
+                font-size: 1.4rem;
+            }
+            .nav-btn {
+                padding: 0.5rem 1.2rem;
+                min-width: 140px;
+            }
+            .option-btn {
+                font-size: 0.9rem;
+                padding: 0.7rem 1rem;
+            }
+            .error-tooltip {
+                font-size: 0.75rem;
+                white-space: normal;
+                width: max-content;
+                max-width: 220px;
+                left: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="progress-bar">
+        <div class="steps" id="stepIndicator">Ситуация 1 из 3</div>
+        <button class="reset-btn" id="fullResetBtn">⟳ Пройти заново</button>
+    </div>
+
+    <div class="situation-card">
+        <div class="situation-title" id="situationTitle">🎭 Ситуация 1. Прогульщик в театре</div>
+        <div class="situation-text" id="situationText"></div>
+        <div class="question" id="questionText"></div>
+        <div class="options" id="optionsContainer"></div>
+        <div class="feedback" id="feedbackBlock">
+            <div class="verdict" id="verdictBlock"></div>
+            <div class="explanation-text" id="explanationBlock"></div>
+        </div>
+        <div class="nav-buttons">
+            <button class="nav-btn" id="nextBtn">Далее →</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Ситуации (тексты по запросу)
+    const situations = [
+        {
+            id: 1,
+            title: "🎭 Ситуация 1. Прогульщик в театре",
+            text: "17-летний монтировщик декораций Денис три дня подряд не выходил на работу в театр без уважительной причины. Директор составил акты, затребовал объяснительные и уволил парня по статье за прогул. Запросы в ГИТ и Комиссию по делам несовершеннолетних театр отправлять не стал, так как оснований и так достаточно.",
+            question: "Законно ли увольнение Дениса?",
+            options: [
+                { value: "A", text: "🔹 А: Да, за грубое нарушение трудовой дисциплины (прогул) работодатель имеет право уволить подростка без согласований." },
+                { value: "B", text: "🔸 Б: Нет, увольнение по статье — инициатива работодателя. Нужно было получить письменное согласие ГИТ и Комиссии по делам несовершеннолетних." }
+            ],
+            correct: "B",
+            verdictCorrect: "✅ Вердикт ГИТ: Нарушение! Театр будет оштрафован, а Дениса восстановят на работе.",
+            explanation: "Даже если подросток совершил серьезный проступок (прогулял работу, пришел нетрезвым или испортил имущество), его увольнение по статье все равно считается «инициативой работодателя». А значит, статья 269 ТК РФ обязывает получить письменное согласие ГИТ и Комиссии по делам несовершеннолетних. Без этих документов увольнение незаконно."
+        },
+        {
+            id: 2,
+            title: "📚 Ситуация 2. «Я устала, я ухожу» в библиотеке",
+            text: "15-летняя Марина проработала в библиотеке месяц, но решила уволиться: устала совмещать работу со школой и захотела просто отдохнуть на каникулах. Она написала заявление по собственному желанию. Кадровик библиотеки сразу оформил увольнение, выдал Марине расчет и трудовую книжку.",
+            question: "Требовалось ли библиотеке запрашивать согласие у ГИТ, Комиссии или родителей Марины?",
+            options: [
+                { value: "A", text: "📌 А: Да, Марине всего 15 лет, увольнение нужно было согласовать хотя бы с родителями." },
+                { value: "B", text: "✅ Б: Нет, при увольнении по собственному желанию никаких согласований с ведомствами или родителями не требуется." }
+            ],
+            correct: "B",
+            verdictCorrect: "✅ Вердикт ГИТ: Всё законно! Библиотека сработала безупречно.",
+            explanation: "Если несовершеннолетний сам инициирует увольнение (пишет заявление по собственному желанию), закон защищает его право на свободу труда. Работодатель оформляет увольнение в стандартном порядке. Никакие согласия от ГИТ, Комиссии по делам несовершеннолетних или родителей в этом случае не нужны."
+        },
+        {
+            id: 3,
+            title: "🏛️ Ситуация 3. Молчаливая инспекция в музее",
+            text: "В музее сокращают штат, поэтому решили уволить 16-летнего гардеробщика Игоря. Администрация направила запросы в ГИТ и Комиссию по делам несовершеннолетних. Комиссия прислала согласие, а ГИТ просто проигнорировала. Решив, что молчание — знак согласия, музей оформил увольнение Игоря.",
+            question: "Законно ли увольнение Игоря по сокращению штата?",
+            options: [
+                { value: "A", text: "⏳ А: Законно. Музей выполнил свои обязанности и отправил запрос. Молчание ГИТ в течение месяца приравнивается к согласию." },
+                { value: "B", text: "⚠️ Б: Незаконно. Молчание ведомства не является согласием. Нужно было обязательно дождаться письменного ответа от ГИТ." }
+            ],
+            correct: "B",
+            verdictCorrect: "✅ Вердикт ГИТ: Нарушение! Увольнение признают незаконным.",
+            explanation: "Для увольнения подростка по инициативе работодателя необходимо получить положительный письменный ответ от обеих инстанций. Принцип «молчание — знак согласия» здесь не работает. Если ГИТ не ответила на запрос, работодатель должен связаться с инспекцией и дождаться официального документа, прежде чем издавать приказ об увольнении."
+        }
+    ];
+
+    let currentIndex = 0;
+    // Для каждой ситуации: null — не отвечено, иначе строка с правильным вариантом (только верный)
+    let answers = [null, null, null];
+    let feedbacksShown = [false, false, false];
+
+    const titleEl = document.getElementById('situationTitle');
+    const textEl = document.getElementById('situationText');
+    const questionEl = document.getElementById('questionText');
+    const optionsContainer = document.getElementById('optionsContainer');
+    const feedbackBlock = document.getElementById('feedbackBlock');
+    const verdictBlock = document.getElementById('verdictBlock');
+    const explanationBlock = document.getElementById('explanationBlock');
+    const nextBtn = document.getElementById('nextBtn');
+    const stepIndicator = document.getElementById('stepIndicator');
+    const fullResetBtn = document.getElementById('fullResetBtn');
+
+    // Показать сообщение об ошибке над конкретным элементом кнопки
+    function showErrorOverButton(buttonElement) {
+        // Удаляем уже существующий тултип у этой кнопки, если есть
+        const parent = buttonElement.parentElement;
+        const existingTooltip = parent.querySelector('.error-tooltip');
+        if (existingTooltip) existingTooltip.remove();
+
+        const tooltip = document.createElement('div');
+        tooltip.className = 'error-tooltip';
+        tooltip.textContent = '⚠️ Ошибка! Выберите другой вариант';
+        parent.style.position = 'relative';
+        parent.appendChild(tooltip);
+
+        // Удалить через 3 секунды
+        setTimeout(() => {
+            if (tooltip && tooltip.parentNode) tooltip.remove();
+        }, 3000);
+    }
+
+    // Обработка клика по варианту
+    function onAnswerClick(selectedValue, btnElement) {
+        // Если уже дан правильный ответ на текущую ситуацию, ничего не делаем (кнопки заблокированы)
+        if (answers[currentIndex] !== null) return;
+
+        const sit = situations[currentIndex];
+        const isCorrect = (selectedValue === sit.correct);
+
+        if (!isCorrect) {
+            showErrorOverButton(btnElement);
+            return; // неправильный ответ не сохраняем, фидбек не показываем
+        }
+
+        // Правильный ответ: сохраняем, показываем фидбек, блокируем кнопки
+        answers[currentIndex] = selectedValue;
+        feedbacksShown[currentIndex] = true;
+        renderCurrentSituation();
+    }
+
+    // Рендер текущей ситуации
+    function renderCurrentSituation() {
+        const sit = situations[currentIndex];
+        titleEl.textContent = sit.title;
+        textEl.textContent = sit.text;
+        questionEl.textContent = sit.question;
+        
+        optionsContainer.innerHTML = '';
+        const isAnsweredCorrect = (answers[currentIndex] !== null);
+        
+        sit.options.forEach(opt => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'option-wrapper';
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerHTML = opt.text;
+            btn.setAttribute('data-value', opt.value);
+            if (isAnsweredCorrect) {
+                btn.disabled = true;
+                if (opt.value === answers[currentIndex]) {
+                    btn.classList.add('selected-correct');
+                }
+            } else {
+                btn.disabled = false;
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    onAnswerClick(opt.value, btn);
+                });
+            }
+            wrapper.appendChild(btn);
+            optionsContainer.appendChild(wrapper);
+        });
+        
+        // Отображение фидбека (только для правильного ответа)
+        if (isAnsweredCorrect && feedbacksShown[currentIndex]) {
+            verdictBlock.innerHTML = `<span class="correct">✔️ ${sit.verdictCorrect}</span>`;
+            explanationBlock.textContent = sit.explanation;
+            feedbackBlock.classList.add('visible');
+        } else {
+            feedbackBlock.classList.remove('visible');
+        }
+        
+        stepIndicator.textContent = `Ситуация ${currentIndex+1} из ${situations.length}`;
+        
+        if (currentIndex === situations.length - 1) {
+            nextBtn.textContent = "🔄 Пройти тест заново";
+        } else {
+            nextBtn.textContent = "Далее →";
+        }
+        nextBtn.disabled = false;
+    }
+    
+    // Обработчик навигации
+    function handleNext() {
+        if (answers[currentIndex] === null) {
+            alert('Пожалуйста, выберите правильный вариант ответа, чтобы продолжить.');
+            return;
+        }
+        if (currentIndex === situations.length - 1) {
+            fullReset();
+            return;
+        }
+        currentIndex++;
+        renderCurrentSituation();
+    }
+    
+    function fullReset() {
+        answers = [null, null, null];
+        feedbacksShown = [false, false, false];
+        currentIndex = 0;
+        renderCurrentSituation();
+    }
+    
+    function init() {
+        renderCurrentSituation();
+        nextBtn.addEventListener('click', handleNext);
+        fullResetBtn.addEventListener('click', fullReset);
+    }
+    
+    init();
+</script>
+</body>
+</html>
