@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Упрямый кандидат — Вася</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(145deg, #eef2fa 0%, #e0e8f2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 1.5rem;
+        }
+
+        .interactive-card {
+            max-width: 1300px;
+            width: 100%;
+            background: white;
+            border-radius: 3rem;
+            box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.25);
+            padding: 2rem 1rem;
+        }
+
+        /* Горизонтальный контейнер — всегда в строку */
+        .decision-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: nowrap;
+        }
+
+        /* Левая и правая секции */
+        .left-section, .right-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .left-section {
+            align-items: flex-end;
+        }
+        .right-section {
+            align-items: flex-start;
+        }
+
+        /* Текст-пояснение (не кликабельный) */
+        .desc-text {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1e3a4d;
+            background: #f8fafc;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            max-width: 250px;
+            text-align: center;
+        }
+
+        /* Красная стрелка — кликабельная кнопка */
+        .arrow-btn {
+            background: #c1272d;
+            width: 70px;
+            height: 70px;
+            border-radius: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 5px 15px rgba(193,39,45,0.4);
+            border: none;
+            font-size: 2.6rem;
+            font-weight: bold;
+            color: white;
+            line-height: 1;
+        }
+
+        .arrow-btn:hover {
+            transform: scale(1.1);
+            background: #a51f24;
+            box-shadow: 0 8px 20px rgba(193,39,45,0.6);
+        }
+
+        .arrow-btn:active {
+            transform: scale(0.94);
+        }
+
+        /* Центральный персонаж */
+        .character {
+            flex: 0 0 340px;
+            background: linear-gradient(135deg, #fef9e6, #fff3df);
+            border-radius: 2rem;
+            padding: 1.2rem 1rem;
+            text-align: center;
+            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15);
+            border: 2px solid #ffcd94;
+            margin: 0 0.5rem;
+        }
+
+        .avatar {
+            font-size: 4.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .name-age {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #b3520c;
+            margin-bottom: 0.5rem;
+        }
+
+        .bubble {
+            background: white;
+            border-radius: 1.8rem;
+            padding: 1rem 1.2rem;
+            font-weight: 500;
+            font-size: 1rem;
+            color: #2c3e2f;
+            border-left: 5px solid #ffb347;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            margin-top: 0.5rem;
+        }
+
+        .bubble p {
+            font-style: italic;
+            line-height: 1.4;
+        }
+
+        /* Подсказка */
+        .hint {
+            text-align: center;
+            margin-top: 1.2rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #2c5a74;
+            background: #eef3fc;
+            display: inline-block;
+            width: auto;
+            padding: 0.4rem 1.2rem;
+            border-radius: 40px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Зона для сообщения */
+        .message-area {
+            margin-top: 2rem;
+            text-align: center;
+            min-height: 80px;
+        }
+
+        .feedback-message {
+            display: inline-block;
+            padding: 0.8rem 1.8rem;
+            border-radius: 60px;
+            font-weight: 800;
+            font-size: 1.2rem;
+            background: #f0f5fa;
+            animation: fadeSlide 0.2s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .feedback-message.correct {
+            background: #d7f0e6;
+            color: #1c6b4f;
+            border-left: 6px solid #1f7b5c;
+        }
+
+        .feedback-message.wrong {
+            background: #ffe0db;
+            color: #bc2f1e;
+            border-left: 6px solid #c1272d;
+        }
+
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Адаптив: на планшетах уменьшаем отступы, но сохраняем горизонталь */
+        @media (max-width: 950px) {
+            .decision-row {
+                gap: 0.5rem;
+            }
+            .character {
+                flex: 0 0 280px;
+            }
+            .arrow-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 2.2rem;
+            }
+            .desc-text {
+                max-width: 200px;
+                font-size: 0.85rem;
+            }
+            .avatar {
+                font-size: 4rem;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .decision-row {
+                gap: 0.3rem;
+            }
+            .character {
+                flex: 0 0 250px;
+            }
+            .arrow-btn {
+                width: 55px;
+                height: 55px;
+                font-size: 2rem;
+            }
+            .desc-text {
+                font-size: 0.75rem;
+                padding: 0.3rem 0.8rem;
+            }
+            .bubble p {
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 700px) {
+            /* всё равно не перестраиваем в колонку, просто уменьшаем */
+            .desc-text {
+                display: none; /* можно скрыть текст на совсем узких, останутся стрелки и персонаж */
+            }
+            .arrow-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.8rem;
+            }
+            .character {
+                flex: 0 0 220px;
+            }
+            .avatar {
+                font-size: 3.2rem;
+            }
+            .name-age {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="interactive-card">
+    <div class="decision-row">
+        <!-- ЛЕВАЯ СТРЕЛКА (верное действие) -->
+        <div class="left-section">
+            <div class="desc-text">Направить на обязательный медосмотр</div>
+            <button class="arrow-btn" id="correctArrow" aria-label="Верное решение">←</button>
+        </div>
+
+        <!-- ЦЕНТР: ПЕРСОНАЖ (17-летний Вася) -->
+        <div class="character">
+            <div class="avatar">🧑‍🎤</div>
+            <div class="name-age">17-летний Вася</div>
+            <div class="bubble">
+                <p>«Я и так здоров! И генетика у меня супер.<br>На медосмотр не пойду — неохота время терять!»</p>
+            </div>
+        </div>
+
+        <!-- ПРАВАЯ СТРЕЛКА (неверное действие) -->
+        <div class="right-section">
+            <div class="desc-text">Не спорить с подростком и обойтись без справки</div>
+            <button class="arrow-btn" id="wrongArrow" aria-label="Ошибочное решение">→</button>
+        </div>
+    </div>
+
+    <div class="hint">
+        🧭 Выберите верное действие, нажав на стрелку
+    </div>
+
+    <div class="message-area" id="messageArea"></div>
+</div>
+
+<script>
+    const messageContainer = document.getElementById('messageArea');
+    let activeTimeout = null;
+
+    function showFeedback(isCorrect) {
+        if (activeTimeout) clearTimeout(activeTimeout);
+        
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'feedback-message';
+        if (isCorrect) {
+            msgDiv.classList.add('correct');
+            msgDiv.innerHTML = '🎉 Абсолютно верно!';
+        } else {
+            msgDiv.classList.add('wrong');
+            msgDiv.innerHTML = '❌ Опасная ошибка!';
+        }
+        
+        messageContainer.innerHTML = '';
+        messageContainer.appendChild(msgDiv);
+        
+        activeTimeout = setTimeout(() => {
+            if (messageContainer.firstChild) {
+                messageContainer.innerHTML = '';
+            }
+            activeTimeout = null;
+        }, 3000);
+    }
+    
+    const correctArrow = document.getElementById('correctArrow');
+    const wrongArrow = document.getElementById('wrongArrow');
+    
+    correctArrow.addEventListener('click', () => {
+        showFeedback(true);
+    });
+    
+    wrongArrow.addEventListener('click', () => {
+        showFeedback(false);
+    });
+</script>
+</body>
+</html>
