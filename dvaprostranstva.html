@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Тест: мемориальная атмосфера</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #faf5e9;   /* светло-бежевый */
+            font-family: 'Inter', 'Segoe UI', 'Roboto', 'Georgia', serif;
+            color: #002b42;        /* тёмно-синий */
+            line-height: 1.45;
+            padding: 2rem 1.5rem;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .test-container {
+            max-width: 1400px;
+            width: 100%;
+            background: #fffcf5;
+            border-radius: 2rem;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+            padding: 2rem 1.8rem 2.5rem;
+            border: 1px solid #eaddc7;
+        }
+
+        .question-wrapper {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .main-question {
+            text-align: center;
+            font-size: 1.9rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            color: #002b42;
+            line-height: 1.3;
+            padding-bottom: 0.6rem;
+            border-bottom: 2px solid #e5d5ba;
+            display: inline-block;
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .gallery-row {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .image-card {
+            flex: 1 1 0;
+            min-width: 280px;
+            background: #ffffff;
+            border-radius: 1.8rem;
+            overflow: hidden;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s;
+            border: 1px solid #e2d2bb;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        @media (min-width: 900px) {
+            .image-card {
+                flex: 1 1 0;
+                min-width: 380px;
+            }
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.1);
+            border-color: #c6b28b;
+        }
+
+        .img-wrapper {
+            background: #fefaf3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.2rem;
+            min-height: 320px;
+        }
+
+        .img-wrapper img {
+            width: 100%;
+            height: auto;
+            border-radius: 1.2rem;
+            display: block;
+            object-fit: contain;
+            max-height: 460px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .choice-buttons {
+            display: flex;
+            gap: 1rem;
+            padding: 1.2rem 1rem 1.5rem;
+            justify-content: center;
+            border-top: 1px solid #f0e5d6;
+            background: #fffcf5;
+        }
+
+        .choice-btn {
+            background: #e8dfd0;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 0.7rem 1.6rem;
+            border-radius: 60px;
+            color: #002b42;
+            cursor: pointer;
+            font-family: inherit;
+            letter-spacing: 0.3px;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            width: auto;
+            min-width: 180px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .choice-btn:hover {
+            background: #d9cdb5;
+            transform: scale(0.97);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .choice-btn.selected {
+            background: #c4a86a;
+            color: #001e2f;
+            box-shadow: 0 0 0 2px #f3ecd9;
+            font-weight: 700;
+        }
+
+        .insight-panel {
+            background: #fff9ef;
+            border-radius: 1.6rem;
+            margin-top: 1.5rem;
+            padding: 0;
+            border-left: 6px solid #c7a86b;
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            visibility: hidden;
+            transform: translateY(8px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        .insight-panel.show {
+            max-height: 380px;
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            padding: 1.8rem 2rem 1.8rem;
+            margin-top: 2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0e5d4;
+        }
+
+        .insight-text {
+            font-size: 1.08rem;
+            line-height: 1.55;
+            color: #1e2f3a;
+        }
+
+        .insight-text strong {
+            color: #a47f44;
+            font-weight: 700;
+        }
+
+        .result-feedback {
+            margin-bottom: 1rem;
+            font-weight: 600;
+            font-size: 1.15rem;
+            background: #f3efE5;
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+        }
+
+        .reset-btn {
+            background: #e8dfd0;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            color: #002b42;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 1.2rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        .reset-btn:hover {
+            background: #d9cdb5;
+            transform: scale(0.97);
+        }
+        .reset-wrapper {
+            text-align: center;
+            display: none;
+        }
+        .reset-wrapper.visible {
+            display: block;
+        }
+
+        @media (max-width: 800px) {
+            .gallery-row {
+                gap: 1.5rem;
+            }
+            .image-card {
+                min-width: 280px;
+                flex: 1 1 280px;
+            }
+            .main-question {
+                font-size: 1.5rem;
+            }
+            .choice-btn {
+                font-size: 1rem;
+                padding: 0.5rem 1.2rem;
+                min-width: 150px;
+            }
+            .insight-panel.show {
+                padding: 1.2rem;
+            }
+            .insight-text {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .image-card {
+                min-width: 100%;
+                flex: 1 1 100%;
+            }
+            .img-wrapper {
+                min-height: 240px;
+            }
+            .img-wrapper img {
+                max-height: 320px;
+            }
+            body {
+                padding: 1rem;
+            }
+            .test-container {
+                padding: 1.2rem;
+            }
+        }
+
+        .caption-note {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="test-container">
+    <div class="question-wrapper">
+        <h1 class="main-question">Сравните два пространства. В каком проще настроиться на тему мемориального события?</h1>
+    </div>
+
+    <div class="gallery-row">
+        <!-- ПРОСТРАНСТВО №1 (слева) -->
+        <div class="image-card" data-space="1">
+            <div class="img-wrapper">
+                <img src="https://i127.fastpic.org/big/2026/0531/8d/ab087fb44f09eebdb0c633b14fc8858d.jpeg?md5=cGPvqkhn75lJwLasLYkZ7w&expires=1780261200"
+                     alt="Пространство №1"
+                     loading="lazy"
+                     onerror="this.onerror=null; this.src='https://via.placeholder.com/800x500?text=Пространство+1'">
+            </div>
+            <div class="choice-buttons">
+                <button class="choice-btn" data-choice="1">☀️ ВАРИАНТ №1</button>
+            </div>
+        </div>
+
+        <!-- ПРОСТРАНСТВО №2 (справа) -->
+        <div class="image-card" data-space="2">
+            <div class="img-wrapper">
+                <img src="https://i127.fastpic.org/big/2026/0531/fc/9f123d1c94ef7fccaa6049673b0808fc.jpeg?md5=ddFR5HSdErcUriTsqHoyIA&expires=1780261200"
+                     alt="Пространство №2"
+                     loading="lazy"
+                     onerror="this.onerror=null; this.src='https://via.placeholder.com/800x500?text=Пространство+2'">
+            </div>
+            <div class="choice-buttons">
+                <button class="choice-btn" data-choice="2">🌙 ВАРИАНТ №2</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- панель расшифровки (без надписи "РЕЗУЛЬТАТ") -->
+    <div id="insightBlock" class="insight-panel">
+        <div class="insight-text">
+            <div id="feedbackMessage" class="result-feedback"></div>
+            <p><strong>На картинке №2 более подходящая атмосфера.</strong> Приглушённый свет скрывает технику, мебель и документы, которые напоминают о повседневных делах. Полумрак стирает границы привычного, стимулирует гостя забыть о будничных заботах и сосредоточиться на теме встречи.</p>
+        </div>
+    </div>
+
+    <div id="resetWrapper" class="reset-wrapper">
+        <button id="resetBtn" class="reset-btn">⟳ ПОВТОРИТЬ</button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const insightPanel = document.getElementById('insightBlock');
+        const allBtns = document.querySelectorAll('.choice-btn');
+        const resetWrapper = document.getElementById('resetWrapper');
+        const resetBtn = document.getElementById('resetBtn');
+        const feedbackDiv = document.getElementById('feedbackMessage');
+
+        function makeChoice(selectedValue) {
+            if (!insightPanel.classList.contains('show')) {
+                insightPanel.classList.add('show');
+            }
+            allBtns.forEach(btn => btn.classList.remove('selected'));
+            const selectedBtns = document.querySelectorAll(`.choice-btn[data-choice="${selectedValue}"]`);
+            selectedBtns.forEach(btn => btn.classList.add('selected'));
+
+            // Правильный ответ — вариант №2
+            if (selectedValue === '2') {
+                feedbackDiv.innerHTML = '✅ Вы правы';
+                feedbackDiv.style.color = '#2a6b2a';
+            } else {
+                feedbackDiv.innerHTML = '❌ Вы ошиблись';
+                feedbackDiv.style.color = '#9b2c1d';
+            }
+
+            resetWrapper.classList.add('visible');
+            
+            if (window.innerWidth < 640 && insightPanel) {
+                setTimeout(() => {
+                    insightPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            }
+        }
+
+        function resetTest() {
+            insightPanel.classList.remove('show');
+            allBtns.forEach(btn => btn.classList.remove('selected'));
+            resetWrapper.classList.remove('visible');
+            feedbackDiv.innerHTML = '';
+        }
+
+        allBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const choice = btn.getAttribute('data-choice');
+                if (choice === '1' || choice === '2') {
+                    makeChoice(choice);
+                }
+            });
+        });
+
+        const cards = document.querySelectorAll('.image-card');
+        cards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (!e.target.closest('.choice-btn')) {
+                    const innerBtn = card.querySelector('.choice-btn');
+                    if (innerBtn) innerBtn.click();
+                }
+            });
+        });
+
+        resetBtn.addEventListener('click', () => {
+            resetTest();
+        });
+    })();
+</script>
+</body>
+</html>

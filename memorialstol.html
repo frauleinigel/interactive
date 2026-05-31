@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Мемориальная композиция</title>
+    <style>
+        * {
+            user-select: none;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #faf5e9;
+            font-family: 'Inter', 'Segoe UI', 'Roboto', 'Georgia', serif;
+            color: #002b42;
+            line-height: 1.3;
+            padding: 1.5rem;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1300px;
+            width: 100%;
+            background: #fffcf5;
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            border: 1px solid #eaddc7;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .sub {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #5b6e7e;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e5d5ba;
+            display: inline-block;
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+            padding-bottom: 0.3rem;
+        }
+
+        /* горизонтальная корзина */
+        .basket-strip {
+            background: #fef7ec;
+            border: 1.5px solid #ddceb2;
+            border-radius: 1.2rem;
+            padding: 0.7rem 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .basket-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .basket-header-row h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .show-basket-btn {
+            background: #e8dfd0;
+            border: none;
+            font-size: 0.75rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .nav-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 0.3rem;
+        }
+
+        .nav-btn {
+            background: #e8dfd0;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.1s;
+        }
+        .nav-btn:hover {
+            background: #d9cdb5;
+        }
+
+        .current-item-horizontal {
+            background: #fff9ef;
+            border-radius: 2rem;
+            padding: 0.3rem 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #e2cfb0;
+            cursor: grab;
+            min-width: 180px;
+            justify-content: center;
+        }
+        .current-item-horizontal:active {
+            cursor: grabbing;
+        }
+        .danger-current {
+            background: #fff0e6;
+            border-left: 4px solid #d9534f;
+        }
+        .item-icon-small {
+            font-size: 1.5rem;
+        }
+        .item-name-small {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .hint-text {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #8f7a58;
+            margin-top: 0.6rem;
+            letter-spacing: 0.3px;
+        }
+
+        /* СТОЛ — уменьшенной высоты */
+        .table-area {
+            background: #f7f1e4;
+            border-radius: 1.2rem;
+            border: 2px solid #dacbad;
+            padding: 0.7rem;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .table-header h2 {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .reset-btn {
+            background: #e8dfd0;
+            border: none;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .table-canvas {
+            position: relative;
+            background: rgba(210, 190, 150, 0.2);
+            min-height: 260px;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .table-object {
+            position: absolute;
+            cursor: grab;
+            background: #fff9ef;
+            border-radius: 0.8rem;
+            padding: 0.3rem 0.6rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            border: 1px solid #cfc29e;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            z-index: 10;
+        }
+        .table-object:active {
+            cursor: grabbing;
+        }
+        .table-object.dragging-table {
+            opacity: 0.8;
+            z-index: 1000;
+        }
+        .table-object .item-icon {
+            font-size: 1.4rem;
+        }
+        .table-object .item-label {
+            display: none;
+        }
+
+        .placeholder-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #9b8e6e;
+            font-size: 0.8rem;
+            text-align: center;
+            font-style: italic;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .ready-btn {
+            display: block;
+            margin: 1.5rem auto 0;
+            background: #c4a86a;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.6rem 1.8rem;
+            border-radius: 40px;
+            color: #fffcf5;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .ready-btn:hover {
+            background: #b08f54;
+            transform: scale(0.98);
+        }
+
+        /* Финальная плашка по центру с крестиком */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+        .result-card {
+            background: #fffcf5;
+            border-radius: 2rem;
+            padding: 1.8rem 2rem;
+            max-width: 500px;
+            width: 85%;
+            text-align: center;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.3);
+            border: 1px solid #e5cfb0;
+            position: relative;
+        }
+        .close-result {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #7e6e4e;
+            transition: 0.1s;
+            line-height: 1;
+        }
+        .close-result:hover {
+            color: #b08f54;
+            transform: scale(1.1);
+        }
+        .result-message {
+            font-size: 1.3rem;
+            font-weight: 600;
+            padding: 0.5rem 0;
+            word-break: break-word;
+        }
+        .result-message.warning {
+            color: #c0392b;
+        }
+        .result-message.success {
+            color: #2c6e2c;
+        }
+
+        /* Модалка списка корзины */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background: #fffcf5;
+            border-radius: 1.5rem;
+            padding: 1rem;
+            width: 80%;
+            max-width: 350px;
+        }
+        .modal-content h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        .basket-items-list {
+            list-style: none;
+            padding: 0;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .basket-items-list li {
+            padding: 0.3rem;
+            border-bottom: 1px solid #e6dac8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.8rem;
+        }
+        .close-modal {
+            margin-top: 0.8rem;
+            background: #e8dfd0;
+            border: none;
+            padding: 0.2rem 0.8rem;
+            border-radius: 1rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 700px) {
+            .basket-header-row { flex-direction: column; align-items: stretch; }
+            .nav-area { flex-wrap: wrap; }
+            .current-item-horizontal { min-width: 150px; }
+            .result-message { font-size: 1rem; }
+            .result-card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Составьте мемориальную композицию</h1>
+    <div style="text-align: center"><div class="sub">Перетащите из корзины нужные предметы и расставьте на выставочном столе</div></div>
+
+    <!-- ГОРИЗОНТАЛЬНАЯ КОРЗИНА -->
+    <div class="basket-strip">
+        <div class="basket-header-row">
+            <h2>📦 Корзина</h2>
+            <button class="show-basket-btn" id="showBasketBtn">📋 Список всех предметов</button>
+        </div>
+        <div class="nav-area">
+            <button id="prevItemBtn" class="nav-btn">◀</button>
+            <div id="currentItemCompact" class="current-item-horizontal"></div>
+            <button id="nextItemBtn" class="nav-btn">▶</button>
+        </div>
+        <div class="hint-text">📌 просматривайте содержимое, нажимая на стрелки</div>
+    </div>
+
+    <!-- ВЫСТАВОЧНЫЙ СТОЛ -->
+    <div class="table-area">
+        <div class="table-header">
+            <h2>🗄️ Выставочный стол</h2>
+            <button id="resetAllBtn" class="reset-btn">⟳ Сбросить всё</button>
+        </div>
+        <div id="tableCanvas" class="table-canvas">
+            <div class="placeholder-hint">Перетащите предмет из корзины</div>
+        </div>
+    </div>
+
+    <button id="readyBtn" class="ready-btn">Композиция готова</button>
+</div>
+
+<!-- Финальная плашка (по центру, с крестиком) -->
+<div id="resultModal" class="modal-overlay">
+    <div class="result-card">
+        <div id="closeResultBtn" class="close-result">&times;</div>
+        <div id="resultMessage" class="result-message"></div>
+    </div>
+</div>
+
+<!-- Модалка списка корзины -->
+<div id="basketModal" class="modal">
+    <div class="modal-content">
+        <h3>🧺 Все предметы в корзине</h3>
+        <ul id="modalBasketList" class="basket-items-list"></ul>
+        <button class="close-modal" id="closeModalBtn">Закрыть</button>
+    </div>
+</div>
+
+<script>
+    // ---------- ДАННЫЕ ПРЕДМЕТОВ (исправлены названия) ----------
+    const allItems = [
+        { id: "led_big", name: "Большая светодиодная свеча", icon: "🕯️✨", safe: true },
+        { id: "led_small", name: "Маленькая светодиодная свеча", icon: "🕯️🌟", safe: true },
+        { id: "book_closed", name: "Закрытая книга", icon: "📘", safe: true },
+        { id: "book_open", name: "Открытая книга", icon: "📖", safe: true },
+        { id: "flower1", name: "Гвоздика", icon: "🌹", safe: true },
+        { id: "flower2", name: "Гвоздика", icon: "🌹", safe: true },
+        { id: "wax", name: "Восковая свеча", icon: "🔥", safe: false },
+        { id: "paraffin", name: "Парафиновая свеча", icon: "🔥", safe: false }
+    ];
+
+    let basketItems = [];
+    let currentIndex = 0;
+    let tableObjects = [];
+
+    // DOM
+    const currentContainer = document.getElementById('currentItemCompact');
+    const prevBtn = document.getElementById('prevItemBtn');
+    const nextBtn = document.getElementById('nextItemBtn');
+    const tableCanvas = document.getElementById('tableCanvas');
+    const resetBtn = document.getElementById('resetAllBtn');
+    const showBasketBtn = document.getElementById('showBasketBtn');
+    const basketModal = document.getElementById('basketModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const modalList = document.getElementById('modalBasketList');
+    const readyBtn = document.getElementById('readyBtn');
+    const resultModal = document.getElementById('resultModal');
+    const resultMessageDiv = document.getElementById('resultMessage');
+    const closeResultBtn = document.getElementById('closeResultBtn');
+
+    function showResult(message, isWarning = false) {
+        resultMessageDiv.innerText = message;
+        resultMessageDiv.className = 'result-message ' + (isWarning ? 'warning' : 'success');
+        resultModal.style.display = 'flex';
+    }
+
+    function hideResult() {
+        resultModal.style.display = 'none';
+    }
+
+    function updateBasketUI() {
+        if (basketItems.length === 0) {
+            currentContainer.innerHTML = `<div style="padding: 0.2rem 0.5rem;">✨ Корзина пуста ✨</div>`;
+            currentContainer.style.cursor = 'default';
+            currentContainer.classList.remove('danger-current');
+            return;
+        }
+        if (currentIndex >= basketItems.length) currentIndex = basketItems.length - 1;
+        if (currentIndex < 0) currentIndex = 0;
+        const item = basketItems[currentIndex];
+        currentContainer.innerHTML = `
+            <span class="item-icon-small">${item.icon}</span>
+            <span class="item-name-small">${item.name}</span>
+        `;
+        currentContainer.style.cursor = 'grab';
+        currentContainer.classList.toggle('danger-current', !item.safe);
+    }
+
+    function updateModal() {
+        modalList.innerHTML = '';
+        if (basketItems.length === 0) {
+            const li = document.createElement('li');
+            li.innerText = 'Корзина пуста';
+            modalList.appendChild(li);
+        } else {
+            basketItems.forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span style="font-size:1.2rem">${item.icon}</span> <span>${item.name}</span>`;
+                modalList.appendChild(li);
+            });
+        }
+    }
+
+    // Перетаскивание из корзины
+    let isDragging = false;
+    let dragClone = null;
+    let dragStartItem = null;
+
+    function onMouseDown(e) {
+        if (basketItems.length === 0) return;
+        const item = basketItems[currentIndex];
+        e.preventDefault();
+        isDragging = true;
+        dragStartItem = item;
+        const rect = currentContainer.getBoundingClientRect();
+        dragClone = currentContainer.cloneNode(true);
+        dragClone.style.position = 'fixed';
+        dragClone.style.left = e.clientX + 'px';
+        dragClone.style.top = e.clientY + 'px';
+        dragClone.style.width = rect.width + 'px';
+        dragClone.style.opacity = '0.8';
+        dragClone.style.pointerEvents = 'none';
+        dragClone.style.zIndex = '9999';
+        dragClone.style.transition = 'none';
+        document.body.appendChild(dragClone);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+    }
+
+    function onMouseMove(e) {
+        if (!isDragging || !dragClone) return;
+        dragClone.style.left = (e.clientX - 20) + 'px';
+        dragClone.style.top = (e.clientY - 20) + 'px';
+    }
+
+    function onMouseUp(e) {
+        if (!isDragging || !dragClone) {
+            cleanupDrag();
+            return;
+        }
+        const rect = tableCanvas.getBoundingClientRect();
+        const isOverTable = (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom);
+        if (isOverTable && dragStartItem) {
+            let left = e.clientX - rect.left - 40;
+            let top = e.clientY - rect.top - 30;
+            left = Math.min(Math.max(left, 5), rect.width - 60);
+            top = Math.min(Math.max(top, 5), rect.height - 50);
+            tableObjects.push({
+                id: dragStartItem.id,
+                name: dragStartItem.name,
+                icon: dragStartItem.icon,
+                x: left,
+                y: top
+            });
+            basketItems.splice(currentIndex, 1);
+            if (basketItems.length > 0 && currentIndex >= basketItems.length) currentIndex = basketItems.length - 1;
+            if (basketItems.length === 0) currentIndex = 0;
+            updateBasketUI();
+            renderTable();
+            updateModal();
+            const fly = document.createElement('div');
+            fly.innerText = dragStartItem.icon;
+            fly.style.position = 'fixed';
+            fly.style.left = e.clientX + 'px';
+            fly.style.top = e.clientY + 'px';
+            fly.style.fontSize = '1.8rem';
+            fly.style.opacity = '0.8';
+            fly.style.transition = 'transform 0.2s ease-out, opacity 0.2s';
+            fly.style.pointerEvents = 'none';
+            fly.style.zIndex = '9998';
+            document.body.appendChild(fly);
+            requestAnimationFrame(() => {
+                fly.style.transform = 'translate(20px, -30px) scale(1.1)';
+                fly.style.opacity = '0';
+            });
+            setTimeout(() => fly.remove(), 200);
+        }
+        cleanupDrag();
+    }
+
+    function cleanupDrag() {
+        if (dragClone) dragClone.remove();
+        isDragging = false;
+        dragClone = null;
+        dragStartItem = null;
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+    }
+
+    function prevItem() {
+        if (basketItems.length === 0) return;
+        currentIndex = (currentIndex - 1 + basketItems.length) % basketItems.length;
+        updateBasketUI();
+    }
+    function nextItem() {
+        if (basketItems.length === 0) return;
+        currentIndex = (currentIndex + 1) % basketItems.length;
+        updateBasketUI();
+    }
+
+    function renderTable() {
+        while (tableCanvas.firstChild) tableCanvas.removeChild(tableCanvas.firstChild);
+        if (tableObjects.length === 0) {
+            const hint = document.createElement('div');
+            hint.className = 'placeholder-hint';
+            hint.innerText = 'Перетащите предмет из корзины';
+            tableCanvas.appendChild(hint);
+        } else {
+            tableObjects.forEach((obj, idx) => {
+                const el = document.createElement('div');
+                el.className = 'table-object';
+                el.setAttribute('data-idx', idx);
+                el.style.left = obj.x + 'px';
+                el.style.top = obj.y + 'px';
+                el.innerHTML = `<span class="item-icon">${obj.icon}</span>`;
+                el.addEventListener('mousedown', (e) => onTableItemMouseDown(e, idx));
+                el.ondragstart = (e) => e.preventDefault();
+                tableCanvas.appendChild(el);
+            });
+        }
+    }
+
+    let draggingTableIdx = null;
+    let dragTableEl = null;
+    let dragOffsetX = 0, dragOffsetY = 0;
+
+    function onTableItemMouseDown(e, idx) {
+        e.preventDefault();
+        draggingTableIdx = idx;
+        dragTableEl = e.target.closest('.table-object');
+        if (!dragTableEl) return;
+        const rect = dragTableEl.getBoundingClientRect();
+        const canvasRect = tableCanvas.getBoundingClientRect();
+        dragOffsetX = e.clientX - rect.left;
+        dragOffsetY = e.clientY - rect.top;
+        dragTableEl.classList.add('dragging-table');
+        window.addEventListener('mousemove', onTableMouseMove);
+        window.addEventListener('mouseup', onTableMouseUp);
+    }
+
+    function onTableMouseMove(e) {
+        if (draggingTableIdx === null || !dragTableEl) return;
+        const canvasRect = tableCanvas.getBoundingClientRect();
+        let newLeft = e.clientX - canvasRect.left - dragOffsetX;
+        let newTop = e.clientY - canvasRect.top - dragOffsetY;
+        const maxX = canvasRect.width - dragTableEl.offsetWidth;
+        const maxY = canvasRect.height - dragTableEl.offsetHeight;
+        newLeft = Math.min(Math.max(newLeft, 0), maxX);
+        newTop = Math.min(Math.max(newTop, 0), maxY);
+        dragTableEl.style.left = newLeft + 'px';
+        dragTableEl.style.top = newTop + 'px';
+        if (tableObjects[draggingTableIdx]) {
+            tableObjects[draggingTableIdx].x = newLeft;
+            tableObjects[draggingTableIdx].y = newTop;
+        }
+    }
+
+    function onTableMouseUp() {
+        if (dragTableEl) dragTableEl.classList.remove('dragging-table');
+        dragTableEl = null;
+        draggingTableIdx = null;
+        window.removeEventListener('mousemove', onTableMouseMove);
+        window.removeEventListener('mouseup', onTableMouseUp);
+    }
+
+    function resetAll() {
+        basketItems = allItems.map(item => ({ ...item }));
+        currentIndex = 0;
+        tableObjects = [];
+        updateBasketUI();
+        renderTable();
+        updateModal();
+        cleanupDrag();
+        hideResult();
+    }
+
+    function onReady() {
+        const hasDanger = tableObjects.some(obj => obj.id === 'wax' || obj.id === 'paraffin');
+        if (hasDanger) {
+            showResult("⚠️ Опасность! Вы добавили на выставочный стол свечи с открытым огнём. Это может вызвать возгорание.", true);
+        } else {
+            showResult("✨ Отлично! Вы создали гармоничную композицию и не стали брать из корзины свечи, которые могут вызвать возгорание.", false);
+        }
+    }
+
+    function init() {
+        resetAll();
+        currentContainer.addEventListener('mousedown', onMouseDown);
+        prevBtn.addEventListener('click', prevItem);
+        nextBtn.addEventListener('click', nextItem);
+        resetBtn.addEventListener('click', resetAll);
+        showBasketBtn.addEventListener('click', () => { updateModal(); basketModal.style.display = 'flex'; });
+        closeModalBtn.addEventListener('click', () => basketModal.style.display = 'none');
+        window.addEventListener('click', (e) => { if (e.target === basketModal) basketModal.style.display = 'none'; });
+        window.addEventListener('dragstart', (e) => e.preventDefault());
+        readyBtn.addEventListener('click', onReady);
+        closeResultBtn.addEventListener('click', hideResult);
+        resultModal.addEventListener('click', (e) => { if (e.target === resultModal) hideResult(); });
+    }
+    init();
+</script>
+</body>
+</html>

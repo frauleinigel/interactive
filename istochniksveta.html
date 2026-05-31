@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Тест: символичный источник света</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #faf5e9;
+            font-family: 'Inter', 'Segoe UI', 'Roboto', 'Georgia', serif;
+            color: #002b42;
+            line-height: 1.45;
+            padding: 2rem 1.5rem;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .test-container {
+            max-width: 800px;
+            width: 100%;
+            background: #fffcf5;
+            border-radius: 2rem;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+            padding: 2rem 1.8rem 2.5rem;
+            border: 1px solid #eaddc7;
+        }
+
+        .question-wrapper {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .main-question {
+            text-align: center;
+            font-size: 1.9rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            color: #002b42;
+            line-height: 1.3;
+            padding-bottom: 0.6rem;
+            border-bottom: 2px solid #e5d5ba;
+            display: inline-block;
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 550px;
+            margin: 2rem auto;
+        }
+
+        .option-btn {
+            background: #e8dfd0;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 0.9rem 1.5rem;
+            border-radius: 60px;
+            color: #002b42;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-align: left;
+            width: 100%;
+        }
+        .option-btn:hover:not(.disabled) {
+            background: #d9cdb5;
+            transform: scale(0.99);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+        .option-btn.selected {
+            background: #c4a86a;
+            color: #001e2f;
+            box-shadow: 0 0 0 2px #f3ecd9;
+            font-weight: 700;
+        }
+        .option-btn.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .option-emoji {
+            font-size: 1.7rem;
+            min-width: 48px;
+            text-align: center;
+        }
+
+        .insight-panel {
+            background: #fff9ef;
+            border-radius: 1.6rem;
+            margin-top: 1.5rem;
+            padding: 0;
+            border-left: 6px solid #c7a86b;
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            visibility: hidden;
+            transform: translateY(8px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+        .insight-panel.show {
+            max-height: 440px;
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            padding: 1.8rem 2rem 1.8rem;
+            margin-top: 2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0e5d4;
+        }
+        .insight-text {
+            font-size: 1.08rem;
+            line-height: 1.55;
+            color: #1e2f3a;
+        }
+        .insight-text strong {
+            color: #a47f44;
+            font-weight: 700;
+        }
+        .insight-text p {
+            margin-bottom: 0.75rem;
+        }
+        .insight-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-feedback {
+            margin-bottom: 1rem;
+            font-weight: 600;
+            font-size: 1.15rem;
+            background: #f3efe5;
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+        }
+
+        .reset-btn {
+            background: #e8dfd0;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            color: #002b42;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 1.2rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        .reset-btn:hover {
+            background: #d9cdb5;
+            transform: scale(0.97);
+        }
+        .reset-wrapper {
+            text-align: center;
+            display: none;
+        }
+        .reset-wrapper.visible {
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+            .test-container {
+                padding: 1.2rem;
+            }
+            .main-question {
+                font-size: 1.45rem;
+            }
+            .option-btn {
+                font-size: 0.95rem;
+                padding: 0.7rem 1rem;
+                gap: 10px;
+            }
+            .option-emoji {
+                font-size: 1.4rem;
+                min-width: 40px;
+            }
+            .insight-panel.show {
+                padding: 1.2rem;
+            }
+            .insight-text {
+                font-size: 0.92rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="test-container">
+    <div class="question-wrapper">
+        <h1 class="main-question">Какой источник света наиболее символичен для мемориальной встречи?</h1>
+    </div>
+
+    <div class="options-list">
+        <button class="option-btn" data-light="lamp">
+            <span class="option-emoji">💡</span> Настольная лампа под абажуром
+        </button>
+        <button class="option-btn" data-light="flashlight">
+            <span class="option-emoji">🔦</span> Карманный фонарик
+        </button>
+        <button class="option-btn" data-light="candle">
+            <span class="option-emoji">🕯️</span> Свеча
+        </button>
+        <button class="option-btn" data-light="spotlight">
+            <span class="option-emoji">🔌</span> Прожектор направленного света
+        </button>
+    </div>
+
+    <div id="insightBlock" class="insight-panel">
+        <div class="insight-text">
+            <div id="feedbackMessage" class="result-feedback"></div>
+            <p><strong>Верный ответ — свеча.</strong> Её пламя ассоциируется с метафорой человеческой жизни, моделью духовного пути.</p>
+            <p>Но как использовать этот символ в библиотеке безопасно? Разберемся на уроке.</p>
+        </div>
+    </div>
+
+    <div id="resetWrapper" class="reset-wrapper">
+        <button id="resetBtn" class="reset-btn">⟳ ПОВТОРИТЬ</button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const insightPanel = document.getElementById('insightBlock');
+        const optionBtns = document.querySelectorAll('.option-btn');
+        const resetWrapper = document.getElementById('resetWrapper');
+        const resetBtn = document.getElementById('resetBtn');
+        const feedbackDiv = document.getElementById('feedbackMessage');
+        const correctValue = 'candle';
+        let isAnswered = false;
+
+        function makeChoice(selectedValue) {
+            if (isAnswered) return;
+            isAnswered = true;
+            if (!insightPanel.classList.contains('show')) {
+                insightPanel.classList.add('show');
+            }
+            optionBtns.forEach(btn => btn.classList.remove('selected'));
+            const selectedBtn = document.querySelector(`.option-btn[data-light="${selectedValue}"]`);
+            if (selectedBtn) selectedBtn.classList.add('selected');
+            optionBtns.forEach(btn => btn.classList.add('disabled'));
+
+            if (selectedValue === correctValue) {
+                feedbackDiv.innerHTML = '✅ Вы правы';
+                feedbackDiv.style.color = '#2a6b2a';
+            } else {
+                feedbackDiv.innerHTML = '🙂 Интересная версия';
+                feedbackDiv.style.color = '#9b6d2c';
+            }
+            resetWrapper.classList.add('visible');
+            if (window.innerWidth < 640 && insightPanel) {
+                setTimeout(() => {
+                    insightPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            }
+        }
+
+        function resetTest() {
+            isAnswered = false;
+            insightPanel.classList.remove('show');
+            optionBtns.forEach(btn => {
+                btn.classList.remove('selected', 'disabled');
+            });
+            resetWrapper.classList.remove('visible');
+            feedbackDiv.innerHTML = '';
+        }
+
+        optionBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (isAnswered) return;
+                const lightType = btn.getAttribute('data-light');
+                if (lightType) makeChoice(lightType);
+            });
+        });
+        resetBtn.addEventListener('click', resetTest);
+    })();
+</script>
+</body>
+</html>
