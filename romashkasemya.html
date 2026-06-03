@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Соберите свою ромашку | Семейные ценности</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(145deg, #d4e4cf 0%, #c2d5bb 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 30px 20px;
+        }
+
+        .game-wrapper {
+            max-width: 950px;
+            width: 100%;
+            background: #fffdf5;
+            border-radius: 70px;
+            padding: 25px 20px 35px;
+            box-shadow: 0 25px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            margin: 0 0 15px;
+            color: #d9782c;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        /* Панель с карточками — НАД ромашкой */
+        .cards-panel {
+            background: #f8efdf;
+            border-radius: 60px;
+            padding: 18px 20px;
+            margin-bottom: 25px;
+            border: 2px dashed #e2cbaa;
+        }
+        .cards-title {
+            text-align: center;
+            font-weight: 600;
+            color: #7b5a38;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+        .drag-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+        .drag-card {
+            background: white;
+            border-radius: 60px;
+            padding: 10px 18px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-align: center;
+            color: #4d3a20;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            cursor: grab;
+            transition: 0.1s;
+            border-left: 7px solid #ffb347;
+            min-width: 130px;
+        }
+        .drag-card:active {
+            cursor: grabbing;
+        }
+        .drag-card.dragging {
+            opacity: 0.4;
+        }
+        .drag-card.hidden-card {
+            display: none;
+        }
+
+        /* Поле для ромашки */
+        .daisy-field {
+            position: relative;
+            width: 100%;
+            min-height: 480px;
+            background: #fef3e4;
+            border-radius: 90px;
+            box-shadow: inset 0 0 0 3px #ffe2bd, 0 8px 20px rgba(0, 0, 0, 0.08);
+            overflow: visible;
+            margin-top: 5px;
+        }
+
+        /* Центр ромашки */
+        .center-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140px;
+            height: 140px;
+            background: radial-gradient(circle at 35% 35%, #ffdd88, #f5b82e);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #6b3f00;
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+            border: 4px solid #ffbc5e;
+            z-index: 20;
+            backdrop-filter: blur(2px);
+            cursor: default;
+            line-height: 1.3;
+            padding: 12px;
+        }
+        .center-core span {
+            display: block;
+        }
+
+        /* Лепестковые зоны (пунктирные) — вплотную к центру */
+        .petal-slot {
+            position: absolute;
+            width: 115px;
+            height: 115px;
+            border-radius: 70% 30% 65% 35%;
+            background: rgba(255, 250, 200, 0.5);
+            border: 3px dashed #ffb347;
+            backdrop-filter: blur(3px);
+            transition: all 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #b98f54;
+            z-index: 10;
+            box-shadow: 0 0 0 0 rgba(255,180,70,0);
+        }
+        .petal-slot.drag-over {
+            background: rgba(255, 220, 120, 0.8);
+            border: 3px solid #ff9800;
+            transform: scale(1.02);
+        }
+        .petal-slot.filled {
+            background: white;
+            border: 3px solid #6fbf4c;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+            cursor: default;
+        }
+        .slot-card {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #4e3a24;
+            background: transparent;
+            width: 100%;
+            text-align: center;
+            padding: 8px;
+            word-break: break-word;
+            pointer-events: none;
+        }
+
+        /* Плашка победы по центру (как в первых упражнениях) */
+        .victory-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #2e7d32e6;
+            backdrop-filter: blur(12px);
+            color: #ffefb9;
+            font-size: 2rem;
+            font-weight: bold;
+            padding: 25px 45px;
+            border-radius: 80px;
+            text-align: center;
+            z-index: 1000;
+            white-space: nowrap;
+            box-shadow: 0 0 30px gold;
+            border: 3px solid #ffd966;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-family: monospace;
+        }
+        .victory-overlay.show {
+            opacity: 1;
+        }
+
+        .reset-btn {
+            background: #7d6843;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: white;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto 0;
+            transition: 0.15s;
+        }
+        .reset-btn:hover {
+            background: #5f4d2e;
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 700px) {
+            .center-core {
+                width: 105px;
+                height: 105px;
+                font-size: 0.9rem;
+            }
+            .petal-slot {
+                width: 85px;
+                height: 85px;
+            }
+            .drag-card {
+                font-size: 0.75rem;
+                padding: 6px 12px;
+                min-width: 100px;
+            }
+            .victory-overlay {
+                font-size: 1.3rem;
+                padding: 16px 28px;
+                white-space: normal;
+                width: 80%;
+                text-align: center;
+            }
+            .slot-card {
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-wrapper">
+    <h1>🌼 Соберите свою ромашку</h1>
+
+    <!-- Панель с карточками — над ромашкой -->
+    <div class="cards-panel">
+        <div class="cards-title">🌸 Перетащите каждый лепесток в пустую ячейку вокруг центра</div>
+        <div class="drag-cards" id="dragCardsContainer"></div>
+    </div>
+
+    <!-- Поле с ромашкой -->
+    <div class="daisy-field" id="daisyField">
+        <div class="center-core"><span>Семья — это...</span></div>
+        <!-- 6 слотов-лепестков будут созданы динамически -->
+    </div>
+
+    <button class="reset-btn" id="resetBtn">⟳ Собрать заново</button>
+</div>
+
+<!-- Плашка победы по центру -->
+<div id="victoryOverlay" class="victory-overlay">🎉 Поздравляем! Ромашка собрана! 🎉</div>
+
+<script>
+    // Ценности для лепестков
+    const VALUES = [
+        "Главное в жизни",
+        "Моя опора",
+        "Подарок судьбы",
+        "Любимые люди",
+        "Ответственность",
+        "Счастье"
+    ];
+
+    let slots = [];
+    let filledSlots = 0;
+    let draggedCard = null;
+    let cardsMap = new Map();
+
+    const daisyField = document.getElementById('daisyField');
+    const dragCardsContainer = document.getElementById('dragCardsContainer');
+    const resetBtn = document.getElementById('resetBtn');
+    const victoryOverlay = document.getElementById('victoryOverlay');
+
+    // Создаем слоты-лепестки вокруг центра (вплотную)
+    function createSlots() {
+        const centerX = 50;
+        const centerY = 50;
+        const radiusPercent = 26; // плотное прилегание к центру
+        const slotCount = VALUES.length;
+        const angleStep = 360 / slotCount;
+
+        for (let i = 0; i < slotCount; i++) {
+            const angle = i * angleStep;
+            const rad = angle * Math.PI / 180;
+            const left = centerX + radiusPercent * Math.cos(rad);
+            const top = centerY + radiusPercent * Math.sin(rad);
+            
+            const slot = document.createElement('div');
+            slot.className = 'petal-slot';
+            slot.setAttribute('data-slot-id', i);
+            slot.style.left = `${left}%`;
+            slot.style.top = `${top}%`;
+            slot.style.transform = 'translate(-50%, -50%)';
+            slot.style.transform += ` rotate(${angle + 20}deg)`;
+            
+            const inner = document.createElement('div');
+            inner.className = 'slot-card';
+            slot.appendChild(inner);
+            
+            slot.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                if (!slot.classList.contains('filled')) {
+                    slot.classList.add('drag-over');
+                }
+            });
+            slot.addEventListener('dragleave', () => {
+                slot.classList.remove('drag-over');
+            });
+            slot.addEventListener('drop', (e) => {
+                e.preventDefault();
+                slot.classList.remove('drag-over');
+                if (slot.classList.contains('filled')) return;
+                if (!draggedCard) return;
+                const cardValue = draggedCard.getAttribute('data-value');
+                if (!cardValue) return;
+                
+                const innerDiv = slot.querySelector('.slot-card');
+                innerDiv.textContent = cardValue;
+                slot.classList.add('filled');
+                draggedCard.classList.add('hidden-card');
+                filledSlots++;
+                draggedCard = null;
+                
+                if (filledSlots === VALUES.length) {
+                    showVictory();
+                }
+            });
+            
+            daisyField.appendChild(slot);
+            slots.push(slot);
+        }
+    }
+    
+    // Создание перетаскиваемых карточек
+    function createDragCards() {
+        dragCardsContainer.innerHTML = '';
+        cardsMap.clear();
+        VALUES.forEach((value, idx) => {
+            const card = document.createElement('div');
+            card.className = 'drag-card';
+            card.textContent = value;
+            card.setAttribute('data-card-id', `card_${idx}`);
+            card.setAttribute('data-value', value);
+            card.setAttribute('draggable', 'true');
+            
+            card.addEventListener('dragstart', (e) => {
+                if (card.classList.contains('hidden-card')) {
+                    e.preventDefault();
+                    return false;
+                }
+                draggedCard = card;
+                e.dataTransfer.setData('text/plain', value);
+                e.dataTransfer.effectAllowed = 'move';
+                card.classList.add('dragging');
+                const dragIcon = document.createElement('div');
+                dragIcon.textContent = value;
+                dragIcon.style.position = 'absolute';
+                dragIcon.style.top = '-1000px';
+                document.body.appendChild(dragIcon);
+                e.dataTransfer.setDragImage(dragIcon, 10, 10);
+                setTimeout(() => document.body.removeChild(dragIcon), 0);
+            });
+            card.addEventListener('dragend', () => {
+                card.classList.remove('dragging');
+                draggedCard = null;
+            });
+            dragCardsContainer.appendChild(card);
+            cardsMap.set(`card_${idx}`, card);
+        });
+    }
+    
+    function resetGame() {
+        slots.forEach(slot => {
+            slot.classList.remove('filled');
+            const inner = slot.querySelector('.slot-card');
+            inner.textContent = '';
+        });
+        filledSlots = 0;
+        for (let card of cardsMap.values()) {
+            card.classList.remove('hidden-card');
+        }
+        victoryOverlay.classList.remove('show');
+        draggedCard = null;
+    }
+    
+    function showVictory() {
+        victoryOverlay.classList.add('show');
+        setTimeout(() => {
+            victoryOverlay.classList.remove('show');
+        }, 5000);
+    }
+    
+    // Защита от перетаскивания посторонних элементов
+    window.addEventListener('dragstart', (e) => {
+        if (!e.target.closest('.drag-card')) {
+            e.preventDefault();
+        }
+    });
+    
+    createSlots();
+    createDragCards();
+    resetBtn.addEventListener('click', resetGame);
+</script>
+</body>
+</html>

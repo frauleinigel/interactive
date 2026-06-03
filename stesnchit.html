@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Интерактив: фраза для стеснительного читателя</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(145deg, #f5f0e7 0%, #e8dfd3 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 24px 16px;
+        }
+        .exercise-card {
+            max-width: 800px;
+            width: 100%;
+            background: #fffef7;
+            border-radius: 48px;
+            padding: 28px 24px 36px;
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.2);
+            transition: 0.2s;
+            border: 1px solid rgba(255,215,150,0.5);
+        }
+        h1 {
+            font-size: 1.9rem;
+            margin: 0 0 16px 0;
+            color: #2d4a2c;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: -0.2px;
+        }
+        .scenario {
+            background: #fef1cf;
+            padding: 18px 22px;
+            border-radius: 36px;
+            margin-bottom: 28px;
+            font-size: 1.05rem;
+            line-height: 1.4;
+            color: #3d2a1a;
+            border-left: 8px solid #ffb347;
+            font-weight: 500;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        .scenario:before {
+            content: "📖";
+            margin-right: 10px;
+            font-size: 1.3rem;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-bottom: 32px;
+        }
+        .option {
+            background: #fefaf2;
+            border-radius: 32px;
+            padding: 16px 22px;
+            border: 2px solid #ede3d0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            position: relative;
+        }
+        .option:hover {
+            background: #fff5e6;
+            border-color: #ffb86b;
+            transform: translateX(4px);
+        }
+        .option.selected {
+            background: #e9f5e6;
+            border-color: #4caf50;
+            box-shadow: 0 6px 14px rgba(76,175,80,0.2);
+        }
+        .option-letter {
+            font-weight: 800;
+            font-size: 1.4rem;
+            background: #e6d5b8;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 40px;
+            color: #4f3b22;
+            flex-shrink: 0;
+        }
+        .option-text {
+            font-size: 1rem;
+            line-height: 1.4;
+            color: #2c2b26;
+            font-weight: 500;
+            flex: 1;
+        }
+        .feedback {
+            background: #f9f3e8;
+            border-radius: 36px;
+            padding: 16px 22px;
+            margin: 10px 0 20px;
+            font-size: 0.95rem;
+            color: #2e3b2c;
+            border-left: 6px solid #8bc34a;
+            transition: 0.2s;
+        }
+        .feedback.correct {
+            background: #dff0e4;
+            border-left-color: #2e7d32;
+            color: #1d452b;
+        }
+        .feedback.wrong {
+            background: #ffe6e0;
+            border-left-color: #d9534f;
+            color: #a33a2e;
+        }
+        .check-btn {
+            background: #ff9800;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: white;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.15s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-top: 8px;
+        }
+        .check-btn:hover {
+            background: #e68900;
+            transform: scale(1.01);
+        }
+        .reset-btn {
+            background: #5f7f5c;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: white;
+            cursor: pointer;
+            width: auto;
+            margin-top: 16px;
+            margin-right: 12px;
+            transition: 0.15s;
+        }
+        .reset-btn:hover {
+            background: #3e5a3c;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+        .result-badge {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-top: 16px;
+            padding: 10px;
+            border-radius: 60px;
+            background: #f3eee6;
+            color: #2b572b;
+        }
+        hr {
+            margin: 16px 0;
+            border: none;
+            height: 1px;
+            background: #e2d9cc;
+        }
+        @media (max-width: 550px) {
+            .exercise-card {
+                padding: 20px 16px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .option-text {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="exercise-card" id="exerciseApp">
+    <h1>🗣️ Представьте ситуацию</h1>
+    <div class="scenario">
+        К стенду подошел стеснительный читатель, который смотрит на лепестки и не решается взять фломастер. 
+        Какая ваша фраза наиболее вероятно вовлечет его в процесс?
+    </div>
+
+    <div class="options" id="optionsContainer">
+        <!-- Варианты будут динамически заполнены, но можно и статически -->
+    </div>
+
+    <div class="feedback" id="feedbackArea">
+        ✨ Выберите один из вариантов и нажмите «Проверить».
+    </div>
+
+    <div class="button-group">
+        <button class="reset-btn" id="resetBtn">⟳ Сбросить выбор</button>
+        <button class="check-btn" id="checkBtn">Проверить ответ</button>
+    </div>
+    <div id="resultBadge" class="result-badge"></div>
+</div>
+
+<script>
+    // Данные упражнения
+    const questions = [
+        {
+            text: "«Напишите тоже что-нибудь, это обязательно для всех посетителей»",
+            isCorrect: false,
+            explanation: "Эта фраза звучит как принуждение. Такое давление отталкивает. Вариант неподходящий."
+        },
+        {
+            text: "«Хотите поделиться, что для вас значит семья? Вот фломастер, напишите свой вариант на любом лепестке и приклейте его к нашей ромашке»",
+            isCorrect: true,
+            explanation: "Вы правы! Это дружелюбное приглашение к действию, без давления, с заботой и вовлечением."
+        },
+        {
+            text: "«Не стесняйтесь, проходите мимо, не мешайте другим»",
+            isCorrect: false,
+            explanation: "Фраза звучит пренебрежительно и грубо. Она портит впечатление о библиотеке. Вариант неподходящий."
+        }
+    ];
+
+    let selectedIndex = null; // индекс выбранного варианта (0,1,2)
+    let checked = false;      // был ли произведена проверка
+
+    const optionsContainer = document.getElementById('optionsContainer');
+    const feedbackArea = document.getElementById('feedbackArea');
+    const checkBtn = document.getElementById('checkBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const resultBadge = document.getElementById('resultBadge');
+
+    // Рендерим варианты
+    function renderOptions() {
+        optionsContainer.innerHTML = '';
+        questions.forEach((opt, idx) => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'option';
+            if (selectedIndex === idx) optionDiv.classList.add('selected');
+            optionDiv.setAttribute('data-idx', idx);
+            
+            const letterSpan = document.createElement('div');
+            letterSpan.className = 'option-letter';
+            letterSpan.textContent = String.fromCharCode(65 + idx); // A, B, C
+            
+            const textSpan = document.createElement('div');
+            textSpan.className = 'option-text';
+            textSpan.textContent = opt.text;
+            
+            optionDiv.appendChild(letterSpan);
+            optionDiv.appendChild(textSpan);
+            
+            optionDiv.addEventListener('click', (e) => {
+                if (checked) {
+                    // Если уже проверяли, можно разрешить сбросить проверку и выбрать заново
+                    // сделаем так: при выборе нового варианта сбрасываем состояние проверки
+                    checked = false;
+                    resultBadge.innerHTML = '';
+                    feedbackArea.innerHTML = '✨ Выберите один из вариантов и нажмите «Проверить».';
+                    feedbackArea.className = 'feedback';
+                }
+                selectedIndex = idx;
+                renderOptions();   // обновить визуальное выделение
+            });
+            
+            optionsContainer.appendChild(optionDiv);
+        });
+    }
+
+    // Проверка ответа
+    function checkAnswer() {
+        if (selectedIndex === null) {
+            feedbackArea.innerHTML = '⚠️ Пожалуйста, выберите один из вариантов ответа.';
+            feedbackArea.className = 'feedback wrong';
+            resultBadge.innerHTML = '';
+            return;
+        }
+        
+        const isCorrect = questions[selectedIndex].isCorrect;
+        const explanation = questions[selectedIndex].explanation;
+        
+        if (isCorrect) {
+            feedbackArea.innerHTML = `✅ ${explanation}`;
+            feedbackArea.className = 'feedback correct';
+            resultBadge.innerHTML = '🎉 Отличный выбор! Вы проявили эмпатию и помогли читателю включиться в активность. 🎉';
+        } else {
+            feedbackArea.innerHTML = `❌ ${explanation}`;
+            feedbackArea.className = 'feedback wrong';
+            resultBadge.innerHTML = '😌 Попробуйте выбрать другой вариант — представьте себя на месте стеснительного читателя.';
+        }
+        checked = true;
+    }
+    
+    // Сброс выбора и состояния
+    function resetSelection() {
+        selectedIndex = null;
+        checked = false;
+        renderOptions();
+        feedbackArea.innerHTML = '✨ Выберите один из вариантов и нажмите «Проверить».';
+        feedbackArea.className = 'feedback';
+        resultBadge.innerHTML = '';
+    }
+    
+    // Инициализация
+    renderOptions();
+    checkBtn.addEventListener('click', checkAnswer);
+    resetBtn.addEventListener('click', resetSelection);
+</script>
+</body>
+</html>

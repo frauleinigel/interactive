@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Стреляем по целям | Семейный стенд</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(145deg, #d9e2dc 0%, #c2cfc4 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 30px 20px;
+        }
+
+        .game-container {
+            max-width: 1100px;
+            width: 100%;
+            background: #fff9ef;
+            border-radius: 60px;
+            padding: 28px 24px 40px;
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.25);
+            transition: 0.2s;
+            border: 1px solid #ffe1b3;
+        }
+
+        .title-section {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+        .title-section h1 {
+            font-size: 2.2rem;
+            margin: 0 0 10px;
+            color: #1e4d2e;
+            letter-spacing: -0.3px;
+            font-weight: 800;
+            text-shadow: 2px 2px 0 #e3c896;
+        }
+        .subhead {
+            font-size: 1.15rem;
+            color: #4e3a28;
+            background: #feeac1;
+            display: inline-block;
+            padding: 8px 24px;
+            border-radius: 60px;
+            font-weight: 600;
+            margin: 0;
+            max-width: 90%;
+        }
+
+        /* сетка карточек */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin: 35px 0 20px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 24px 16px;
+            text-align: center;
+            cursor: crosshair;
+            transition: all 0.15s ease;
+            box-shadow: 0 10px 18px rgba(0, 0, 0, 0.1);
+            border: 2px solid #f3deba;
+            font-weight: 600;
+            font-size: 1.05rem;
+            line-height: 1.35;
+            color: #2e3b2c;
+            position: relative;
+            backdrop-filter: blur(2px);
+        }
+        .card:hover {
+            transform: translateY(-6px) scale(1.02);
+            background: #fff7e8;
+            border-color: #ffa847;
+            box-shadow: 0 18px 28px rgba(0, 0, 0, 0.15);
+            cursor: crosshair;
+        }
+        .card:active {
+            transform: scale(0.98);
+        }
+
+        /* эффект выстрела (мигание) */
+        .shot-effect {
+            animation: pulse 0.2s ease-in-out;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); background: #fff2df; }
+            50% { transform: scale(1.02); background: #ffddb0; }
+            100% { transform: scale(1); background: #fff2df; }
+        }
+
+        /* центральная плашка для "В яблочко!" / "Мимо!" */
+        .feedback-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            color: white;
+            font-size: 2.8rem;
+            font-weight: 900;
+            padding: 20px 48px;
+            border-radius: 80px;
+            letter-spacing: 2px;
+            z-index: 1000;
+            white-space: nowrap;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.4);
+            border: 3px solid gold;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.1s ease;
+            pointer-events: none;
+            font-family: monospace;
+        }
+        .feedback-overlay.show {
+            opacity: 1;
+        }
+
+        /* плашка для финального поздравления */
+        .congrats-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #2e7d32e6;
+            backdrop-filter: blur(12px);
+            color: #ffefb9;
+            font-size: 2rem;
+            font-weight: bold;
+            padding: 25px 40px;
+            border-radius: 80px;
+            text-align: center;
+            z-index: 1100;
+            white-space: nowrap;
+            box-shadow: 0 0 30px gold;
+            border: 3px solid #ffd966;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .congrats-overlay.show {
+            opacity: 1;
+        }
+
+        .reset-btn {
+            background: #5f7f5c;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto 0;
+            transition: 0.15s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .reset-btn:hover {
+            background: #3e5a3c;
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 680px) {
+            .game-container {
+                padding: 20px 16px;
+            }
+            .title-section h1 {
+                font-size: 1.7rem;
+            }
+            .subhead {
+                font-size: 0.9rem;
+            }
+            .card {
+                padding: 18px 12px;
+                font-size: 0.9rem;
+            }
+            .feedback-overlay {
+                font-size: 1.8rem;
+                padding: 16px 32px;
+                white-space: nowrap;
+            }
+            .congrats-overlay {
+                font-size: 1.3rem;
+                padding: 16px 24px;
+                white-space: normal;
+                width: 80%;
+                text-align: center;
+            }
+        }
+        @media (max-width: 480px) {
+            .feedback-overlay {
+                font-size: 1.4rem;
+                padding: 12px 24px;
+            }
+            .congrats-overlay {
+                font-size: 1.1rem;
+                padding: 14px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="title-section">
+        <h1>🎯 Упражнение: стреляем по целям</h1>
+        <div class="subhead">
+            Попадите по карточкам с типами раздаточных материалов,<br> 
+            которые подходят для стенда ко Дню семьи, любви и верности.<br>
+            <span style="font-size: 0.9rem;">🔫 Клик по карточке — выстрел</span>
+        </div>
+    </div>
+
+    <div class="cards-grid" id="cardsGrid"></div>
+    <button class="reset-btn" id="resetBtn">⟳ Сбросить и начать заново</button>
+</div>
+
+<!-- плашка для "В яблочко!" / "Мимо!" -->
+<div id="resultPopup" class="feedback-overlay"></div>
+<!-- плашка для финального поздравления -->
+<div id="congratsPopup" class="congrats-overlay"></div>
+
+<script>
+    // ----- Данные карточек (с исправлением "семья") -----
+    const cardsData = [
+        {
+            text: "📚 Книжные закладки с изображением семьи",
+            isValid: true,
+            id: "card1"
+        },
+        {
+            text: "📜 Напечатанные стихотворения русских классиков о семье",
+            isValid: true,
+            id: "card2"
+        },
+        {
+            text: "💌 Открытки, которые транслируют семейные ценности",
+            isValid: true,
+            id: "card3"
+        },
+        {
+            text: "🎣 Флаер с купоном в магазин для охотников и рыбаков",
+            isValid: false,
+            id: "card4"
+        },
+        {
+            text: "📄 Бумажки со скопированным из Википедии определением слова «семья»",
+            isValid: false,
+            id: "card5"
+        },
+        {
+            text: "⚠️ Инструкции о вызове помощи в случае домашнего насилия",
+            isValid: false,
+            id: "card6"
+        }
+    ];
+
+    let validCardsRemaining = [];      // оставшиеся правильные цели
+    let autoResetTimer = null;         // таймер автоматического сброса после победы
+    let popupTimeout = null;
+    let congratsTimeout = null;
+
+    const gridContainer = document.getElementById('cardsGrid');
+    const popup = document.getElementById('resultPopup');
+    const congratsPopup = document.getElementById('congratsPopup');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // Показать результат выстрела (В яблочко! / Мимо!)
+    function showFeedback(isHit) {
+        const text = isHit ? "В яблочко! 🎯" : "Мимо! 💨";
+        popup.textContent = text;
+        popup.classList.add('show');
+        if (popupTimeout) clearTimeout(popupTimeout);
+        popupTimeout = setTimeout(() => {
+            popup.classList.remove('show');
+        }, 800);
+    }
+
+    // Показать финальное поздравление и запустить автосброс через 5 секунд
+    function showCongratsAndReset() {
+        congratsPopup.textContent = "🎉 Ура! Вы очень метко определили цели! 🎉";
+        congratsPopup.classList.add('show');
+        if (congratsTimeout) clearTimeout(congratsTimeout);
+        if (autoResetTimer) clearTimeout(autoResetTimer);
+        
+        // Через 5 секунд убираем поздравление и сбрасываем игру
+        autoResetTimer = setTimeout(() => {
+            congratsPopup.classList.remove('show');
+            resetGame();  // автоматический сброс
+        }, 5000);
+    }
+
+    // Проверка, уничтожены ли все верные карточки
+    function checkAllValidDestroyed() {
+        if (validCardsRemaining.length === 0) {
+            // Если все правильные цели поражены – показываем победу и через 5 сек сброс
+            showCongratsAndReset();
+        }
+    }
+
+    // Обработчик клика по карточке (выстрел)
+    function onCardClick(cardData, cardElement) {
+        // Анимация выстрела
+        cardElement.classList.add('shot-effect');
+        setTimeout(() => {
+            cardElement.classList.remove('shot-effect');
+        }, 200);
+        
+        if (cardData.isValid) {
+            // Попадание: правильная карточка исчезает
+            showFeedback(true);
+            cardElement.remove();
+            // Удаляем из массива оставшихся целей
+            const index = validCardsRemaining.findIndex(item => item.id === cardData.id);
+            if (index !== -1) validCardsRemaining.splice(index, 1);
+            checkAllValidDestroyed();
+        } else {
+            // Промах: карточка остаётся, только плашка "Мимо!"
+            showFeedback(false);
+        }
+    }
+
+    // Построение игрового поля (полный сброс)
+    function buildGame() {
+        gridContainer.innerHTML = '';
+        // Перемешиваем карточки для разнообразия
+        const shuffled = [...cardsData];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        
+        // Сохраняем только правильные цели (их id)
+        validCardsRemaining = shuffled.filter(card => card.isValid === true).map(c => ({ ...c }));
+        
+        // Создаём DOM-элементы
+        shuffled.forEach(card => {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'card';
+            cardDiv.textContent = card.text;
+            cardDiv.addEventListener('click', (e) => {
+                e.stopPropagation();
+                onCardClick(card, cardDiv);
+            });
+            gridContainer.appendChild(cardDiv);
+        });
+        
+        // Скрываем все плашки и отменяем таймеры сброса
+        congratsPopup.classList.remove('show');
+        if (congratsTimeout) clearTimeout(congratsTimeout);
+        if (popupTimeout) clearTimeout(popupTimeout);
+        if (autoResetTimer) clearTimeout(autoResetTimer);
+        popup.classList.remove('show');
+    }
+
+    // Функция сброса (вызывается вручную или автоматически)
+    function resetGame() {
+        // Отменяем таймер автосброса, чтобы не было двойного сброса
+        if (autoResetTimer) {
+            clearTimeout(autoResetTimer);
+            autoResetTimer = null;
+        }
+        buildGame();
+    }
+
+    // Инициализация
+    buildGame();
+    resetBtn.addEventListener('click', () => {
+        // При ручном сбросе отменяем таймер, если он был
+        if (autoResetTimer) {
+            clearTimeout(autoResetTimer);
+            autoResetTimer = null;
+        }
+        resetGame();
+    });
+</script>
+</body>
+</html>
