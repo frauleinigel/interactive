@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Интерактивный сценарий</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1e2a3a;
+            --accent: #2c7da0;
+            --success: #2e7d32;
+            --danger: #c62828;
+            --bg-grid: #f4f7fb;
+            --text: #0f172a;
+            --shadow-sm: 0 8px 20px -4px rgba(0, 0, 0, 0.05);
+            --border-radius: 20px;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-grid);
+            background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 28px 28px;
+            margin: 0;
+            padding: 28px 16px 48px;
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .journey-container {
+            max-width: 640px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+            letter-spacing: -0.2px;
+        }
+
+        .node-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.2rem;
+            margin-bottom: 0;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid #e2edf2;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .node-card.active {
+            display: block;
+            animation: fadeSlideUp 0.3s ease forwards;
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .node-card.danger {
+            border-left: 6px solid #c62828;
+            background: #fff5f5;
+        }
+        .node-card.success {
+            border-left: 6px solid #2e7d32;
+            background: #f1f9f0;
+        }
+
+        .node-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+        }
+
+        .node-text {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        .options-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 4px;
+        }
+        .choice-btn {
+            flex: 1 1 auto;
+            background: white;
+            border: 1.5px solid #cbd5e1;
+            padding: 8px 14px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            font-family: inherit;
+            color: #0f172a;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .choice-btn:hover {
+            border-color: #2c7da0;
+            background: #eef8ff;
+        }
+        .choice-btn.selected {
+            background: #2c7da0;
+            border-color: #2c7da0;
+            color: white;
+        }
+        .choice-btn:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        .arrow-stage {
+            display: flex;
+            justify-content: center;
+            margin: 0 0 2px;
+            height: 26px;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+        .arrow-stage.visible {
+            opacity: 1;
+        }
+        .arrow-svg {
+            width: 44px;
+            height: 24px;
+            fill: none;
+            stroke: #2c7da0;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+            stroke-dasharray: 120;
+            stroke-dashoffset: 120;
+            transition: stroke-dashoffset 0.55s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+        .arrow-stage.visible .arrow-svg {
+            stroke-dashoffset: 0;
+        }
+
+        footer {
+            margin-top: 32px;
+            font-size: 0.7rem;
+            text-align: center;
+            color: #5b6e8c;
+        }
+
+        .error-only {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+<div class="journey-container">
+    <div class="header">
+        <h1>Интерактивный сценарий</h1>
+    </div>
+
+    <div id="schemaFlow">
+        <!-- СТАРТ: Шаг 1 -->
+        <div class="node-card active" id="node-start">
+            <div class="node-text">Вы директор библиотеки. К вам пришла доброжелательная женщина с покрытой головой в мусульманском облачении. Она предлагает организовать совместный лекторий по традициям исламской культуры. Ваши действия?</div>
+            <div class="options-group">
+                <button class="choice-btn" data-next="node-check-reg" data-arrow="arrow-1">✅ Спрошу, зарегистрирована ли их организация официально</button>
+                <button class="choice-btn" data-next="node-error-reg" data-arrow="arrow-1">❌ Соглашусь, религиозные группы освобождены от регистрации</button>
+            </div>
+        </div>
+
+        <div class="arrow-stage" id="arrow-1"><svg class="arrow-svg" viewBox="0 0 60 40"><path d="M30 5 L30 30 M30 30 L22 22 M30 30 L38 22"/></svg></div>
+
+        <!-- ОШИБКА 1 -->
+        <div class="node-card danger" id="node-error-reg">
+            <div class="node-text error-only" style="margin-bottom: 16px;">⚠️ Ошибка! Вернитесь на шаг назад.</div>
+            <div class="options-group">
+                <button class="choice-btn" data-next="node-start" data-arrow="arrow-back1">↩ Вернуться на шаг назад</button>
+            </div>
+        </div>
+
+        <div class="arrow-stage" id="arrow-back1"><svg class="arrow-svg" viewBox="0 0 60 40"><path d="M30 5 L30 30 M30 30 L22 22 M30 30 L38 22"/></svg></div>
+
+        <!-- ШАГ 2 -->
+        <div class="node-card" id="node-check-reg">
+            <div class="node-text">Женщина утверждает, что организация зарегистрирована. Она готова предоставить документы. Ваши действия?</div>
+            <div class="options-group">
+                <button class="choice-btn" data-next="node-inn-check" data-arrow="arrow-2">📋 Попрошу ИНН и сверю данные в реестре Минюста РФ</button>
+                <button class="choice-btn" data-next="node-error-sign" data-arrow="arrow-2">✍️ Подпишу соглашение сразу, чтобы не затягивать проект</button>
+            </div>
+        </div>
+
+        <div class="arrow-stage" id="arrow-2"><svg class="arrow-svg" viewBox="0 0 60 40"><path d="M30 5 L30 30 M30 30 L22 22 M30 30 L38 22"/></svg></div>
+
+        <!-- ОШИБКА 2 -->
+        <div class="node-card danger" id="node-error-sign">
+            <div class="node-text error-only" style="margin-bottom: 16px;">⚠️ Ошибка! Вернитесь на шаг назад.</div>
+            <div class="options-group">
+                <button class="choice-btn" data-next="node-check-reg" data-arrow="arrow-back2">↩ Вернуться на шаг назад</button>
+            </div>
+        </div>
+
+        <div class="arrow-stage" id="arrow-back2"><svg class="arrow-svg" viewBox="0 0 60 40"><path d="M30 5 L30 30 M30 30 L22 22 M30 30 L38 22"/></svg></div>
+
+        <!-- ШАГ 3 -->
+        <div class="node-card" id="node-inn-check">
+            <div class="node-text">Вы нашли организацию в открытом реестре Минюста РФ. Её статус: «Исключенные» (юридическое лицо ликвидировано). Ваши действия?</div>
+            <div class="options-group">
+                <button class="choice-btn" data-next="node-error-wrong" data-arrow="arrow-3">⚠️ Не стану отменять проект, ведь организация реально существовала</button>
+                <button class="choice-btn" data-next="node-final-success" data-arrow="arrow-3">✅ Вежливо откажусь и объясню правовые последствия работы с ликвидированным юрлицом</button>
+            </div>
+        </div>
+
+        <div class="arrow-stage" id="arrow-3"><svg class="arrow-svg" viewBox="0 0 60 40"><path d="M30 5 L30 30 M30 30 L22 22 M30 30 L38 22"/></svg></div>
+
+        <!-- ОШИБКА 3 -->
+        <div class="node-card danger" id="node-error-wrong">
+            <div class="node-text error-only" style="margin-bottom: 16px;">⚠️ Ошибка! Вернитесь на шаг назад.</div>
+            <div class="options-group">
+                <button class="choice-btn" data-next="node-inn-check" data-arrow="arrow-back3">↩ Вернуться на шаг назад</button>
+            </div>
+        </div>
+
+        <div class="arrow-stage" id="arrow-back3"><svg class="arrow-svg" viewBox="0 0 60 40"><path d="M30 5 L30 30 M30 30 L22 22 M30 30 L38 22"/></svg></div>
+
+        <!-- ФИНАЛ УСПЕХА -->
+        <div class="node-card success" id="node-final-success">
+            <div class="node-title">🏆 Отлично!</div>
+            <div class="node-text" style="font-size: 1.1rem; font-weight: 500;">Вы защитили себя и библиотеку от штрафов и судов.</div>
+            <div class="options-group" style="margin-top: 16px;">
+                <button class="choice-btn" data-next="reset">🔄 Начать сценарий заново</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>Сделано в Школе менеджера культуры — Актион</footer>
+</div>
+
+<script>
+    let activeTransition = false;
+
+    // Функция активации узла: убирает active у всех, добавляет active целевому,
+    // сбрасывает disabled и selected у всех кнопок внутри целевого узла,
+    // а также скрывает все стрелки (опционально)
+    function setActiveNode(nodeId, keepArrow = false) {
+        // Скрываем все блоки
+        document.querySelectorAll('.node-card').forEach(node => {
+            node.classList.remove('active');
+        });
+        // Показываем нужный
+        const targetNode = document.getElementById(nodeId);
+        if (targetNode) targetNode.classList.add('active');
+
+        // Активируем все кнопки внутри активного блока (убираем disabled и selected)
+        const activeNode = document.querySelector('.node-card.active');
+        if (activeNode) {
+            const btns = activeNode.querySelectorAll('.choice-btn');
+            btns.forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('selected');
+            });
+        }
+
+        // Если не нужно сохранять стрелки, скрываем все
+        if (!keepArrow) {
+            document.querySelectorAll('.arrow-stage').forEach(arrow => {
+                arrow.classList.remove('visible');
+            });
+        }
+    }
+
+    // Обработчик клика по кнопке выбора
+    function handleChoice(btnElement) {
+        if (activeTransition) return;
+
+        const nextId = btnElement.getAttribute('data-next');
+        const arrowId = btnElement.getAttribute('data-arrow');
+
+        // Сброс (кнопка "начать заново")
+        if (nextId === 'reset') {
+            resetScenario();
+            return;
+        }
+
+        // Получаем текущий активный блок
+        const currentActive = document.querySelector('.node-card.active');
+        if (!currentActive) return;
+
+        // Блокируем все кнопки в текущем блоке, чтобы нельзя было нажать повторно
+        const currentBtns = currentActive.querySelectorAll('.choice-btn');
+        currentBtns.forEach(btn => {
+            btn.disabled = true;
+            if (btn === btnElement) btn.classList.add('selected');
+        });
+
+        // Показываем стрелку, если она указана
+        if (arrowId) {
+            const arrow = document.getElementById(arrowId);
+            if (arrow) arrow.classList.add('visible');
+        }
+
+        activeTransition = true;
+        setTimeout(() => {
+            // Активируем следующий узел, стрелки уже показаны — сохраняем их видимость
+            setActiveNode(nextId, true);
+            activeTransition = false;
+        }, 500);
+    }
+
+    // Полный сброс сценария
+    function resetScenario() {
+        if (activeTransition) return;
+        // Скрываем все стрелки
+        document.querySelectorAll('.arrow-stage').forEach(arrow => {
+            arrow.classList.remove('visible');
+        });
+        // Активируем стартовый узел
+        setActiveNode('node-start', false);
+        activeTransition = false;
+    }
+
+    // Делегирование событий (надёжнее, чем привязка по классам после загрузки)
+    document.getElementById('schemaFlow').addEventListener('click', (e) => {
+        const btn = e.target.closest('.choice-btn');
+        if (!btn) return;
+        e.preventDefault();
+        handleChoice(btn);
+    });
+
+    // Инициализация: убеждаемся, что активен только node-start и все кнопки активны
+    setActiveNode('node-start', false);
+</script>
+</body>
+</html>

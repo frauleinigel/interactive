@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Интерактив: партнёр из еврейской общины</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(145deg, #e0d6c8 0%, #cfc2ae 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Roboto', 'Inter', system-ui, sans-serif;
+            padding: 24px;
+        }
+
+        .interactive-card {
+            max-width: 880px;
+            width: 100%;
+            background: #ffffffea;
+            backdrop-filter: blur(2px);
+            border-radius: 64px;
+            box-shadow: 0 30px 50px -15px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            border: 1px solid #f3e7d9;
+            position: relative;
+        }
+
+        .card-inner {
+            padding: 40px 36px 48px;
+            position: relative;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 1.85rem;
+            font-weight: 700;
+            color: #2d2b26;
+            margin-bottom: 32px;
+            letter-spacing: -0.2px;
+            border-bottom: 3px solid #e0cbaa;
+            display: inline-block;
+            width: 100%;
+            padding-bottom: 14px;
+        }
+
+        .partner-block {
+            background: #fffaf2;
+            border-radius: 56px;
+            padding: 28px 28px;
+            margin: 16px 0 24px;
+            text-align: center;
+            box-shadow: 0 12px 22px rgba(0, 0, 0, 0.08);
+            border: 1px solid #ecdcaa;
+        }
+
+        .partner-emojis {
+            font-size: 5rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            background: #fef5e8;
+            padding: 12px 24px;
+            border-radius: 100px;
+            width: fit-content;
+            margin: 0 auto 20px auto;
+            box-shadow: inset 0 1px 4px #0001, 0 6px 12px -6px rgba(0,0,0,0.1);
+        }
+
+        .partner-quote {
+            font-size: 1.28rem;
+            line-height: 1.45;
+            color: #2c3e2f;
+            background: #fef8ed;
+            padding: 20px 26px;
+            border-radius: 48px;
+            font-weight: 500;
+            position: relative;
+            border-left: 7px solid #c49a6c;
+            text-align: left;
+            margin-top: 12px;
+        }
+
+        .instruction {
+            text-align: center;
+            font-size: 1.08rem;
+            font-weight: 600;
+            color: #4a3721;
+            margin: 20px 0 26px;
+            background: #fff0df;
+            display: inline-block;
+            width: auto;
+            padding: 10px 28px;
+            border-radius: 60px;
+            letter-spacing: 0.3px;
+        }
+
+        .arrows-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0 30px;
+        }
+
+        .choice-card {
+            flex: 1;
+            min-width: 270px;
+            background: linear-gradient(115deg, #feeedb, #ffe2c4);
+            border-radius: 80px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
+            border: 1px solid #ffcf8a;
+        }
+
+        .choice-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 22px 32px -12px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(115deg, #ffe9d0, #ffd9ae);
+        }
+
+        .arrow-btn {
+            width: 100%;
+            background: transparent;
+            border: none;
+            padding: 18px 20px;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: inherit;
+            color: #2c2b26;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            transition: 0.2s;
+            border-radius: 80px;
+        }
+
+        .big-arrow {
+            font-size: 2.8rem;
+            font-weight: 400;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            background: radial-gradient(circle at 30% 20%, #ffdd99, #ffb347);
+            border-radius: 64px;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255,255,200,0.8);
+            transition: all 0.25s ease;
+            color: #3b2a18;
+            text-shadow: 0 1px 0 rgba(255,255,200,0.5);
+        }
+
+        .choice-card:hover .big-arrow {
+            background: radial-gradient(circle at 30% 20%, #ffc97a, #ff9f1c);
+            transform: scale(1.1) rotate(3deg);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+        }
+
+        .choice-card:hover .big-arrow.left-arrow {
+            animation: swingLeft 0.4s ease-in-out;
+        }
+
+        .choice-card:hover .big-arrow.right-arrow {
+            animation: swingRight 0.4s ease-in-out;
+        }
+
+        @keyframes swingLeft {
+            0% { transform: translateX(0) scale(1); }
+            50% { transform: translateX(-6px) scale(1.08); }
+            100% { transform: translateX(0) scale(1.1); }
+        }
+
+        @keyframes swingRight {
+            0% { transform: translateX(0) scale(1); }
+            50% { transform: translateX(6px) scale(1.08); }
+            100% { transform: translateX(0) scale(1.1); }
+        }
+
+        .btn-text {
+            flex: 1;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: left;
+            line-height: 1.3;
+            letter-spacing: 0.2px;
+        }
+
+        /* Центральная плашка с увеличенным временем показа (8 секунд) */
+        .center-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            background: #2c2b2b;
+            color: white;
+            padding: 18px 36px;
+            border-radius: 80px;
+            font-weight: 700;
+            font-size: 1.3rem;
+            text-align: center;
+            white-space: nowrap;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.3);
+            border-left: 8px solid gold;
+            backdrop-filter: blur(12px);
+            animation: fadeInOutLong 8s ease forwards;
+            pointer-events: none;
+        }
+
+        .center-message.error {
+            background: #b13b3b;
+            border-left-color: #ffbc6e;
+        }
+
+        .center-message.success {
+            background: #1f7840;
+            border-left-color: #f9e45b;
+        }
+
+        @keyframes fadeInOutLong {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            5% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+            10% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            90% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.95); visibility: hidden; }
+        }
+
+        @media (max-width: 700px) {
+            .card-inner {
+                padding: 28px 20px 36px;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+            .partner-quote {
+                font-size: 1rem;
+                padding: 16px 20px;
+            }
+            .big-arrow {
+                font-size: 2rem;
+                width: 52px;
+                height: 52px;
+            }
+            .btn-text {
+                font-size: 0.85rem;
+            }
+            .choice-card {
+                min-width: 220px;
+            }
+            .center-message {
+                font-size: 1rem;
+                padding: 14px 28px;
+                white-space: nowrap;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .center-message {
+                white-space: normal;
+                max-width: 85vw;
+                text-align: center;
+                font-size: 0.9rem;
+                padding: 12px 20px;
+            }
+        }
+
+        footer {
+            margin-top: 28px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #9b8e78;
+            border-top: 1px solid #e2d5c2;
+            padding-top: 18px;
+        }
+    </style>
+</head>
+<body>
+<div class="interactive-card">
+    <div class="card-inner">
+        <h2>🤝 К вам обратился будущий партнер из еврейской общины</h2>
+
+        <div class="partner-block">
+            <div class="partner-emojis">
+                <span>🧔‍♂️</span>
+                <span>✡️</span>
+            </div>
+            <div class="partner-quote">
+                Хочу открыть на базе вашей библиотеки систематическую школу иудаизма с итоговой аттестацией и выдачей дипломов. Образовательная лицензия есть.
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <div class="instruction">Перед вами две стрелки с возможными решениями. Кликните на верное направление.</div>
+        </div>
+
+        <div class="arrows-container">
+            <div class="choice-card">
+                <button class="arrow-btn" id="optionWrongBtn">
+                    <span class="big-arrow left-arrow">←</span>
+                    <span class="btn-text">Будем работать на основании ОКВЭД библиотеки</span>
+                </button>
+            </div>
+            <div class="choice-card">
+                <button class="arrow-btn" id="optionCorrectBtn">
+                    <span class="btn-text">Предложу договор аренды залов</span>
+                    <span class="big-arrow right-arrow">→</span>
+                </button>
+            </div>
+        </div>
+
+        <footer>Сделано в Школе менеджера культуры — Актион</footer>
+    </div>
+</div>
+
+<script>
+    const wrongBtn = document.getElementById('optionWrongBtn');
+    const correctBtn = document.getElementById('optionCorrectBtn');
+
+    function showCenteredMessage(text, isError) {
+        const existing = document.querySelector('.center-message');
+        if (existing) existing.remove();
+
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'center-message';
+        if (isError) {
+            msgDiv.classList.add('error');
+        } else {
+            msgDiv.classList.add('success');
+        }
+        msgDiv.textContent = text;
+        document.body.appendChild(msgDiv);
+
+        // Удаляем через 8 секунд, под анимацию
+        setTimeout(() => {
+            if (msgDiv && msgDiv.parentNode) msgDiv.remove();
+        }, 8000);
+    }
+
+    wrongBtn.addEventListener('click', () => {
+        showCenteredMessage('❌ Ошибка! Выберите другой вариант!', true);
+    });
+
+    correctBtn.addEventListener('click', () => {
+        showCenteredMessage('✅ Верно! Вы справились с этим заданием!', false);
+    });
+</script>
+</body>
+</html>
