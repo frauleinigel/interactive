@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Памятка руководителю</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f0f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .widget {
+            max-width: 780px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            padding: 28px 30px 30px;
+            border: 1px solid #e0e9e9;
+        }
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            background: #f8fbfb;
+            border-radius: 16px;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            border: 1px solid #e6efef;
+        }
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .header-left h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0b2b2b;
+            letter-spacing: -0.4px;
+            line-height: 1.2;
+        }
+        .header-left h1 .lightbulb {
+            margin-right: 6px;
+        }
+        .header-left .sub {
+            font-size: 14px;
+            color: #3d5a5a;
+            font-weight: 400;
+            border-left: 4px solid #C8102E;
+            padding-left: 14px;
+            background: rgba(200, 16, 46, 0.04);
+            border-radius: 0 8px 8px 0;
+            padding: 4px 14px 4px 18px;
+            display: inline-block;
+        }
+        .btn-print {
+            background: #C8102E;
+            border: none;
+            border-radius: 40px;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.15s;
+            box-shadow: 0 4px 12px rgba(200, 16, 46, 0.25);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .btn-print:hover {
+            background: #a00d24;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(200, 16, 46, 0.35);
+        }
+        .btn-print:active {
+            transform: scale(0.97);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 6px;
+            border-bottom: 2px solid #e3ebeb;
+            margin-bottom: 18px;
+            padding-bottom: 0;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 20px 12px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #4d5f5f;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: 0.15s;
+            margin-bottom: -2px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tab-btn:hover {
+            color: #1a2b2b;
+            background: #f2f8f8;
+        }
+        .tab-btn.active {
+            color: #00A5A5;
+            border-bottom: 3px solid #00A5A5;
+            background: #f7fcfc;
+        }
+        .tab-content {
+            display: none;
+            background: #fcfefe;
+            border-radius: 0 0 16px 16px;
+            padding: 6px 0 8px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+            margin: 6px 0 8px;
+        }
+        .checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 8px 8px 8px 4px;
+            font-size: 15px;
+            line-height: 1.45;
+            color: #1a2b2b;
+            border-bottom: 1px solid #edf3f3;
+        }
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+        .checklist input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 3px;
+            flex-shrink: 0;
+            accent-color: #00A5A5;
+            cursor: pointer;
+        }
+        .checklist .label {
+            flex: 1;
+        }
+        .block-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #003333;
+            margin: 18px 0 6px;
+            padding-left: 12px;
+            border-left: 4px solid #00A5A5;
+        }
+        .block-title:first-of-type {
+            margin-top: 0;
+        }
+
+        .advice {
+            background: #e8f5e9;
+            border-left: 4px solid #2e7d32;
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin: 20px 0 6px;
+            display: flex;
+            gap: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #1e2e1e;
+        }
+        .advice .badge {
+            background: #2e7d32;
+            color: #fff;
+            font-weight: 700;
+            font-size: 12px;
+            padding: 2px 12px;
+            border-radius: 30px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .footer {
+            border-top: 1px solid #e0e9e9;
+            margin-top: 20px;
+            padding-top: 14px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #6b7f7f;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .widget { padding: 16px; }
+            .widget-header { flex-direction: column; align-items: stretch; padding: 16px; }
+            .header-left h1 { font-size: 20px; }
+            .header-left .sub { font-size: 13px; }
+            .btn-print { align-self: flex-start; }
+            .tabs { flex-wrap: wrap; gap: 4px; }
+            .tab-btn { font-size: 13px; padding: 8px 12px 10px; }
+        }
+
+        @media print {
+            .btn-print { display: none; }
+            .tabs { display: none; }
+            .tab-content { display: block !important; }
+            .widget { border: 1px solid #ccc; box-shadow: none; }
+            .checklist input[type="checkbox"] { accent-color: #000; }
+            .widget-header { background: #fff; border: 1px solid #ccc; }
+        }
+    </style>
+</head>
+<body>
+    <div class="widget" id="widget">
+
+        <div class="widget-header">
+            <div class="header-left">
+                <h1><span class="lightbulb">💡</span>Памятка руководителю<br>учреждения культуры</h1>
+                <div class="sub">Практические рекомендации по безопасности</div>
+            </div>
+            <button class="btn-print" id="printBtn">🖨️ Распечатать памятку</button>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="tab1">🗣️ Инструктажи</button>
+            <button class="tab-btn" data-tab="tab2">🛡️ Меры безопасности</button>
+            <button class="tab-btn" data-tab="tab3">🏋️ Практика</button>
+        </div>
+
+        <div class="tab-content active" id="tab1">
+            <div class="block-title">Проведите внеплановые инструктажи</div>
+            <ul class="checklist">
+                <li><input type="checkbox"><span class="label">Действия при обнаружении подозрительного предмета</span></li>
+                <li><input type="checkbox"><span class="label">Алгоритм при угрозе по телефону</span></li>
+                <li><input type="checkbox"><span class="label">Реакция на признаки химических/биологических веществ</span></li>
+                <li><input type="checkbox"><span class="label">Распознавание фишинговых рассылок</span></li>
+                <li><input type="checkbox"><span class="label">Признаки вербовки в соцсетях</span></li>
+            </ul>
+            <div class="advice">
+                <span class="badge">Совет</span>
+                <span>При нехватке ресурсов обращайтесь к учредителю или в профильные ведомства.</span>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab2">
+            <div class="block-title">Проверьте и усильте меры</div>
+            <ul class="checklist">
+                <li><input type="checkbox"><span class="label"><strong>Самообследование</strong> — оценка текущего уровня безопасности</span></li>
+                <li><input type="checkbox"><span class="label"><strong>Паспорт безопасности</strong> — актуализация, согласование с ФСБ и Росгвардией</span></li>
+                <li><input type="checkbox"><span class="label"><strong>Хранение и передача</strong> — надёжное обращение с документами</span></li>
+                <li><input type="checkbox"><span class="label"><strong>Пропускной режим</strong> — учёт посетителей, ограничение стоянки</span></li>
+                <li><input type="checkbox"><span class="label"><strong>Инженерно-техническая защита</strong> — проверка видео, сигнализации</span></li>
+            </ul>
+        </div>
+
+        <div class="tab-content" id="tab3">
+            <div class="block-title">Отработайте на практике</div>
+            <ul class="checklist">
+                <li><input type="checkbox"><span class="label"><strong>Учебно-тренировочные эвакуации</strong> — регулярные занятия</span></li>
+                <li><input type="checkbox"><span class="label"><strong>Профилактика терроризма</strong> — беседы, тематические выставки</span></li>
+                <li><input type="checkbox"><span class="label"><strong>Связь с силовыми ведомствами</strong> — контакт с ФСБ, МВД, Росгвардией</span></li>
+            </ul>
+            <div class="advice" style="margin-top:10px;">
+                <span class="badge">Совет</span>
+                <span>При сложностях запрашивайте поддержку учредителя.</span>
+            </div>
+        </div>
+
+        <div class="footer">
+            <span>Сделано в Актион Культура</span>
+            <span>Актуально в 2026 году</span>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Вкладки
+            const tabs = document.querySelectorAll('.tab-btn');
+            const contents = {
+                tab1: document.getElementById('tab1'),
+                tab2: document.getElementById('tab2'),
+                tab3: document.getElementById('tab3')
+            };
+            tabs.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabId = this.dataset.tab;
+                    tabs.forEach(b => b.classList.remove('active'));
+                    Object.values(contents).forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    if (contents[tabId]) contents[tabId].classList.add('active');
+                });
+            });
+
+            // Сохранение чекбоксов
+            const checkboxes = document.querySelectorAll('.checklist input[type="checkbox"]');
+            checkboxes.forEach((cb, index) => {
+                const saved = localStorage.getItem('widget_check_' + index);
+                if (saved === 'true') cb.checked = true;
+                cb.addEventListener('change', function() {
+                    localStorage.setItem('widget_check_' + index, this.checked);
+                });
+            });
+
+            // --- ПЕЧАТЬ ---
+            const printBtn = document.getElementById('printBtn');
+            if (printBtn) {
+                printBtn.addEventListener('click', function(e) {
+                    e.preventDefault(); // на случай, если кнопка внутри формы
+                    // Проверяем, доступен ли window.print()
+                    if (typeof window.print === 'function') {
+                        window.print();
+                    } else {
+                        alert('Функция печати не поддерживается в этом браузере.');
+                    }
+                });
+            }
+        })();
+    </script>
+</body>
+</html>
