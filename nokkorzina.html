@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина управленческих решений</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: #f2f4f8;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 40px;
+            padding: 32px 30px 40px;
+            border: 2px solid #000000;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #000000;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sub {
+            font-size: 16px;
+            color: #000000;
+            margin-bottom: 28px;
+            border-left: 4px solid #000000;
+            padding-left: 16px;
+            background: #f8f8f8;
+            padding: 10px 16px;
+            border-radius: 12px;
+        }
+
+        .game-area {
+            display: flex;
+            flex-direction: row;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .cards-area {
+            flex: 2;
+            min-width: 300px;
+        }
+
+        .cards-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .card-item {
+            background: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 18px;
+            padding: 14px 20px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #000000;
+            cursor: grab;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 0 #000000;
+            user-select: none;
+        }
+
+        .card-item:hover:not(.placed):not(.locked) {
+            background: #f2f2f2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #000000;
+        }
+
+        .card-item:active:not(.placed):not(.locked) {
+            cursor: grabbing;
+            opacity: 0.6;
+        }
+
+        .card-item .emoji {
+            font-size: 20px;
+        }
+
+        .card-item.placed {
+            opacity: 0.3;
+            cursor: default;
+            pointer-events: none;
+            background: #e8e8e8;
+            transform: none;
+            box-shadow: 0 2px 0 #000000;
+        }
+
+        .card-item.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+            background: #f5f5f5;
+            transform: none;
+            box-shadow: 0 2px 0 #000000;
+        }
+
+        .basket-area {
+            flex: 1;
+            min-width: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .basket {
+            width: 100%;
+            min-height: 320px;
+            border: 4px dashed #000000;
+            border-radius: 40px 40px 20px 20px;
+            padding: 20px 16px;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .basket.drag-over {
+            background: #f0f0f0;
+            border-color: #000000;
+        }
+
+        .basket-icon {
+            font-size: 56px;
+            line-height: 1;
+            margin-bottom: 6px;
+            filter: grayscale(0);
+        }
+
+        .basket-label {
+            font-weight: 600;
+            font-size: 16px;
+            color: #000000;
+            border-top: 2px solid #000000;
+            padding-top: 10px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .basket-items {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+        }
+
+        .basket-item {
+            background: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 14px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #000000;
+            text-align: center;
+            box-shadow: 0 2px 0 #000000;
+            animation: popIn 0.25s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0.4; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .basket-empty {
+            color: #888;
+            font-size: 14px;
+            font-weight: 400;
+            padding: 12px 0;
+        }
+
+        .toast-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.35);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            backdrop-filter: blur(3px);
+        }
+
+        .toast-overlay.active {
+            display: flex;
+        }
+
+        .toast-box {
+            background: #ffffff;
+            border: 4px solid #000000;
+            border-radius: 40px;
+            padding: 36px 48px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+            animation: toastIn 0.3s ease;
+        }
+
+        @keyframes toastIn {
+            0% { transform: scale(0.85) translateY(20px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .toast-box .toast-emoji {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .toast-box .toast-text {
+            font-size: 22px;
+            font-weight: 700;
+            color: #000000;
+            line-height: 1.4;
+        }
+
+        .toast-box .toast-sub {
+            font-size: 16px;
+            font-weight: 400;
+            color: #000000;
+            margin-top: 8px;
+            opacity: 0.8;
+        }
+
+        .complete-banner {
+            margin-top: 24px;
+            padding: 18px 24px;
+            background: #d4edda;
+            border: 3px solid #28a745;
+            border-radius: 30px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: #155724;
+            display: none;
+        }
+
+        .complete-banner.visible {
+            display: block;
+            animation: fadeSlide 0.5s ease;
+        }
+
+        @keyframes fadeSlide {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn-reset {
+            background: #ffffff;
+            color: #000000;
+            border: 2px solid #000000;
+            padding: 12px 32px;
+            border-radius: 60px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+            margin-top: 18px;
+        }
+
+        .btn-reset:hover {
+            background: #f0f0f0;
+        }
+
+        .status-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 6px;
+        }
+
+        @media (max-width: 700px) {
+            .game-area { flex-direction: column; }
+            .basket { min-height: 200px; }
+            .toast-box { padding: 28px 20px; }
+            .toast-box .toast-text { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🧺 Корзина управленческих решений</h1>
+    <div class="sub">Перенесите карточки с <strong>верными</strong> решениями в корзину. Ошибочные — не трогайте.</div>
+
+    <div class="game-area">
+        <div class="cards-area">
+            <div class="cards-grid" id="cardsContainer">
+                <!-- Карточки будут вставлены JS -->
+            </div>
+        </div>
+
+        <div class="basket-area">
+            <div class="basket" id="basket">
+                <div class="basket-icon">🧺</div>
+                <div class="basket-items" id="basketItems">
+                    <div class="basket-empty">Перетащите сюда верные решения</div>
+                </div>
+                <div class="basket-label">КОРЗИНА</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="complete-banner" id="completeBanner">
+        ✅ Вы справились с заданием! В корзине только то, что нужно!
+    </div>
+
+    <button class="btn-reset" id="resetBtn">⟳ Начать заново</button>
+</div>
+
+<!-- Всплывающая табличка по центру -->
+<div class="toast-overlay" id="toastOverlay">
+    <div class="toast-box">
+        <span class="toast-emoji" id="toastEmoji">✅</span>
+        <div class="toast-text" id="toastText">Верно! Сытый и согретый гость — самый лояльный.</div>
+        <div class="toast-sub" id="toastSub"> </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const items = [
+            {
+                id: 'coffee',
+                text: 'Организовать кофейную зону или установить автоматы с напитками и снеками',
+                emoji: '☕',
+                correct: true,
+                toast: 'Верно! Сытый и согретый гость — самый лояльный и доброжелательный респондент.'
+            },
+            {
+                id: 'mailing',
+                text: 'Настроить систему персональных рассылок и поздравлений для постоянных гостей',
+                emoji: '📧',
+                correct: true,
+                toast: 'Верно! Так будет проще собрать лояльное «ядро» аудитории, которое поддержит вас при проверке.'
+            },
+            {
+                id: 'promise',
+                text: 'Применять правило «обещать меньше, а делать больше»',
+                emoji: '✨',
+                correct: true,
+                toast: 'Верно! Это гарантирует «вау-эффект» и восторженные рекомендации друзьям.'
+            },
+            {
+                id: 'backstage',
+                text: 'Проводить экскурсии «за кулисы» и рассказывать о внутренней жизни учреждения',
+                emoji: '🎭',
+                correct: true,
+                toast: 'Верно! Это повышает эмпатию: люди начинают понимать реальные сложности и снижают завышенные требования.'
+            },
+            {
+                id: 'early',
+                text: 'Начинать рабочий день сотрудников одновременно с открытием дверей для посетителей',
+                emoji: '⏰',
+                correct: false,
+                toast: 'Ошибка! Это гарантирует очереди на входе и неготовность залов к приему.'
+            },
+            {
+                id: 'ignore',
+                text: 'Игнорировать негативные комментарии на сайте и в соцсетях',
+                emoji: '📵',
+                correct: false,
+                toast: 'Ошибка! Это провоцирует публичные скандалы и официальные жалобы в вышестоящие органы.'
+            },
+            {
+                id: 'sanitary',
+                text: 'Отказаться от санитарных дней ради максимального времени работы учреждения',
+                emoji: '🧹',
+                correct: false,
+                toast: 'Ошибка! Это ведет к ухудшению чистоты, что посетители охотно отметят в анкетах.'
+            }
+        ];
+
+        let placedIds = [];
+        let totalCorrect = items.filter(i => i.correct).length;
+        let toastTimer = null;
+        let isComplete = false;
+
+        const cardsContainer = document.getElementById('cardsContainer');
+        const basketItems = document.getElementById('basketItems');
+        const completeBanner = document.getElementById('completeBanner');
+        const toastOverlay = document.getElementById('toastOverlay');
+        const toastText = document.getElementById('toastText');
+        const toastEmoji = document.getElementById('toastEmoji');
+        const toastSub = document.getElementById('toastSub');
+        const resetBtn = document.getElementById('resetBtn');
+        const basket = document.getElementById('basket');
+
+        function isGameComplete() {
+            const correctPlaced = items.filter(i => i.correct && placedIds.includes(i.id)).length;
+            return correctPlaced === totalCorrect;
+        }
+
+        function renderCards() {
+            const complete = isGameComplete();
+            cardsContainer.innerHTML = '';
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'card-item';
+                if (placedIds.includes(item.id)) {
+                    div.classList.add('placed');
+                } else if (complete && !item.correct) {
+                    // Если игра завершена — блокируем все оставшиеся неверные карточки
+                    div.classList.add('locked');
+                }
+                div.dataset.id = item.id;
+                div.dataset.correct = item.correct;
+                div.draggable = !div.classList.contains('placed') && !div.classList.contains('locked');
+                div.innerHTML = `<span class="emoji">${item.emoji}</span> ${item.text}`;
+
+                if (div.draggable) {
+                    div.addEventListener('dragstart', handleDragStart);
+                    div.addEventListener('dragend', handleDragEnd);
+                }
+
+                cardsContainer.appendChild(div);
+            });
+            renderBasket();
+            checkComplete();
+        }
+
+        function renderBasket() {
+            basketItems.innerHTML = '';
+            const placedCorrect = items.filter(i => placedIds.includes(i.id) && i.correct);
+            if (placedCorrect.length === 0) {
+                basketItems.innerHTML = '<div class="basket-empty">Перетащите сюда верные решения</div>';
+            } else {
+                placedCorrect.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'basket-item';
+                    div.textContent = `${item.emoji} ${item.text}`;
+                    basketItems.appendChild(div);
+                });
+            }
+        }
+
+        function checkComplete() {
+            const complete = isGameComplete();
+            if (complete) {
+                completeBanner.classList.add('visible');
+                isComplete = true;
+                // Блокируем все оставшиеся неверные карточки
+                renderCards(); // перерендер для блокировки
+            } else {
+                completeBanner.classList.remove('visible');
+                isComplete = false;
+            }
+        }
+
+        function showToast(message, isError = false) {
+            if (toastTimer) {
+                clearTimeout(toastTimer);
+                toastOverlay.classList.remove('active');
+                toastTimer = null;
+            }
+
+            toastEmoji.textContent = isError ? '❌' : '✅';
+            toastText.textContent = message;
+            toastSub.textContent = isError ? 'Попробуйте перенести только верные решения' : ' ';
+            toastOverlay.classList.add('active');
+
+            toastTimer = setTimeout(() => {
+                toastOverlay.classList.remove('active');
+                toastTimer = null;
+            }, 5000);
+        }
+
+        let draggedId = null;
+
+        function handleDragStart(e) {
+            const el = e.target.closest('.card-item');
+            if (!el) return;
+            if (el.classList.contains('placed') || el.classList.contains('locked')) {
+                e.preventDefault();
+                return false;
+            }
+            draggedId = el.dataset.id;
+            e.dataTransfer.setData('text/plain', draggedId);
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => el.style.opacity = '0.4', 0);
+        }
+
+        function handleDragEnd(e) {
+            const el = e.target.closest('.card-item');
+            if (el) el.style.opacity = '1';
+            basket.classList.remove('drag-over');
+        }
+
+        basket.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            basket.classList.add('drag-over');
+        });
+
+        basket.addEventListener('dragleave', () => {
+            basket.classList.remove('drag-over');
+        });
+
+        basket.addEventListener('drop', (e) => {
+            e.preventDefault();
+            basket.classList.remove('drag-over');
+
+            // Если игра уже завершена — ничего не делаем
+            if (isComplete) {
+                showToast('Задание уже выполнено! Все верные решения в корзине.', true);
+                return;
+            }
+
+            const id = e.dataTransfer.getData('text/plain');
+            if (!id) return;
+
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+
+            if (placedIds.includes(id)) return;
+
+            if (!item.correct) {
+                showToast(item.toast, true);
+                return;
+            }
+
+            // Правильная карточка
+            placedIds.push(id);
+            renderCards();
+            renderBasket();
+            checkComplete();
+            showToast(item.toast, false);
+        });
+
+        document.addEventListener('dragover', (e) => e.preventDefault());
+        document.addEventListener('drop', (e) => e.preventDefault());
+
+        function resetGame() {
+            if (toastTimer) {
+                clearTimeout(toastTimer);
+                toastOverlay.classList.remove('active');
+                toastTimer = null;
+            }
+            placedIds = [];
+            isComplete = false;
+            renderCards();
+            renderBasket();
+            completeBanner.classList.remove('visible');
+        }
+
+        resetBtn.addEventListener('click', resetGame);
+
+        // Инициализация
+        renderCards();
+        renderBasket();
+        checkComplete();
+    })();
+</script>
+</body>
+</html>
