@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Конструктор: точки касания</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(145deg, #f0f4fa 0%, #e6ecf5 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .app {
+            max-width: 960px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            border-radius: 32px;
+            padding: 24px 28px 30px;
+            box-shadow: 0 24px 56px rgba(0, 20, 40, 0.10), 0 8px 20px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1a2b4c;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+        }
+        h1 small {
+            font-size: 15px;
+            font-weight: 400;
+            color: #5b6f87;
+            margin-left: auto;
+        }
+        .sub {
+            color: #2c3e6b;
+            border-bottom: 2px solid rgba(26, 43, 76, 0.08);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 14px;
+        }
+        .progress-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            color: #1a2b4c;
+        }
+        .progress-bar {
+            width: 140px;
+            height: 7px;
+            background: #dce3ec;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #2c6b9e, #c0392b);
+            border-radius: 12px;
+            transition: width 0.4s ease;
+        }
+        .progress-text {
+            font-size: 14px;
+            min-width: 34px;
+            text-align: right;
+        }
+
+        .rows {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+        .row {
+            display: grid;
+            grid-template-columns: 28px 1fr 1fr 1fr 36px;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 14px;
+            padding: 6px 12px 6px 10px;
+            border: 1.5px solid transparent;
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+            min-height: 54px;
+        }
+        .row.correct {
+            background: #e8f0fe;
+            border-color: #1a5276;
+            box-shadow: 0 0 0 3px rgba(26, 82, 118, 0.15);
+        }
+        .row.correct .cell-drop.filled-emotion,
+        .row.correct .cell-drop.filled-need {
+            border-color: #b0c4de;
+            background: #f8faff;
+        }
+        .row-number {
+            font-weight: 600;
+            color: #8a9bb0;
+            font-size: 13px;
+            text-align: center;
+        }
+        .cell-touch {
+            font-weight: 600;
+            color: #ffffff;
+            background: #1a5276;
+            border-radius: 40px;
+            padding: 4px 10px;
+            text-align: center;
+            white-space: normal;
+            word-break: break-word;
+            border: none;
+            font-size: 12px;
+            line-height: 1.3;
+            min-height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cell-drop {
+            background: white;
+            border: 2px dashed #b0c4de;
+            border-radius: 12px;
+            padding: 4px 6px;
+            min-height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #8a9bb0;
+            transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+            cursor: grab;
+            text-align: center;
+            word-break: break-word;
+            line-height: 1.2;
+        }
+        .cell-drop.filled {
+            border-style: solid;
+            border-color: #b0c4de;
+            background: #f8faff;
+            color: #1a2b4c;
+        }
+        .cell-drop.filled-emotion {
+            border-color: #2c6b9e;
+            background: #e6f0fa;
+        }
+        .cell-drop.filled-need {
+            border-color: #c0392b;
+            background: #fce8e6;
+        }
+        .cell-drop.dragover {
+            border-color: #1a5276;
+            background: #d4e2f0;
+            box-shadow: 0 0 0 3px rgba(26, 82, 118, 0.15);
+        }
+        .cell-drop .card-label {
+            pointer-events: none;
+            user-select: none;
+        }
+        .indicator {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            background: #eef2f6;
+            color: #b0c0d0;
+            transition: all 0.4s;
+            border: 2px solid transparent;
+        }
+        .indicator.done {
+            background: #27ae60;
+            color: white;
+            border-color: #1e8449;
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.25);
+        }
+        .indicator.done::after {
+            content: "✓";
+        }
+        .indicator:not(.done)::after {
+            content: "○";
+        }
+
+        .pool-section {
+            margin-top: 4px;
+        }
+        .pool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            color: #1a2b4c;
+            font-weight: 500;
+            font-size: 13px;
+        }
+        .pool-header span {
+            background: rgba(26, 43, 76, 0.06);
+            padding: 2px 14px;
+            border-radius: 40px;
+            font-size: 12px;
+        }
+        .card-pool {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            padding: 14px 18px;
+            min-height: 80px;
+            border: 1.5px dashed #b0c4de;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        .card-pool.drag-over {
+            border-color: #1a5276;
+            background: rgba(26, 82, 118, 0.04);
+        }
+        .pool-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        .pool-group-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1a2b4c;
+            background: rgba(26, 43, 76, 0.05);
+            padding: 2px 12px;
+            border-radius: 30px;
+            margin-right: 4px;
+            letter-spacing: 0.3px;
+        }
+        .pool-card {
+            background: white;
+            border: 1.5px solid #b0c4de;
+            border-radius: 40px;
+            padding: 5px 18px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #1a2b4c;
+            cursor: grab;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            transition: transform 0.12s, box-shadow 0.2s, border-color 0.2s;
+            user-select: none;
+            touch-action: none;
+        }
+        .pool-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            border-color: #8aaac0;
+        }
+        .pool-card:active {
+            cursor: grabbing;
+            transform: scale(0.95);
+        }
+        .pool-card.dragging {
+            opacity: 0.3;
+        }
+        .pool-card.card-emotion {
+            border-left: 4px solid #2c6b9e;
+        }
+        .pool-card.card-need {
+            border-left: 4px solid #c0392b;
+        }
+        .empty-msg {
+            color: #a0b2c7;
+            font-size: 13px;
+            padding: 6px 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            border: none;
+            border-radius: 60px;
+            padding: 10px 28px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eef2f6;
+            color: #1a2b4c;
+        }
+        .btn-primary {
+            background: #1a5276;
+            color: white;
+            box-shadow: 0 6px 18px rgba(26, 82, 118, 0.15);
+        }
+        .btn-primary:hover {
+            background: #0e3a56;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(26, 82, 118, 0.2);
+        }
+        .btn-success {
+            background: #27ae60;
+            color: white;
+            box-shadow: 0 6px 18px rgba(39, 174, 96, 0.2);
+        }
+        .btn-success:hover {
+            background: #1e8449;
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid #b0c4de;
+        }
+        .btn-outline:hover {
+            background: #f5f8fc;
+            border-color: #8aaac0;
+        }
+
+        .toast {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #c0392b;
+            color: white;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 15px;
+            box-shadow: 0 12px 40px rgba(192, 57, 43, 0.25);
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(6px);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 1000;
+            animation: fade 0.25s ease;
+        }
+        .modal.open {
+            display: flex;
+        }
+        .modal-box {
+            background: white;
+            border-radius: 28px;
+            max-width: 820px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px 32px 32px;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.15);
+            animation: slide 0.3s ease;
+        }
+        .modal-box h2 {
+            font-size: 22px;
+            color: #1a2b4c;
+            margin-bottom: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-box .close {
+            background: none;
+            border: none;
+            font-size: 26px;
+            color: #8a9bb0;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .modal-box .close:hover {
+            color: #1a2b4c;
+        }
+        .modal-sub {
+            color: #1a2b4c;
+            border-bottom: 2px solid #eef2f6;
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        .summary-table th {
+            background: #e6f0fa;
+            color: #1a2b4c;
+            font-weight: 600;
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 2px solid #b0c4de;
+        }
+        .summary-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #eef2f6;
+            vertical-align: middle;
+        }
+        .summary-table .num {
+            color: #8a9bb0;
+            font-weight: 500;
+            text-align: center;
+            width: 36px;
+        }
+        .summary-table .touch {
+            font-weight: 600;
+            color: #1a2b4c;
+        }
+        .summary-table .emotion {
+            color: #1a5276;
+        }
+        .summary-table .need {
+            color: #c0392b;
+        }
+        .badge-correct {
+            display: inline-block;
+            background: #27ae60;
+            color: white;
+            border-radius: 40px;
+            padding: 0 10px;
+            font-size: 11px;
+            font-weight: 600;
+            line-height: 22px;
+            margin-left: 6px;
+        }
+        .badge-wrong {
+            color: #c0392b;
+            font-weight: 700;
+            margin-left: 6px;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        @keyframes fade {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slide {
+            from { opacity: 0; transform: translateY(24px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @media (max-width: 700px) {
+            .app { padding: 16px 14px 22px; }
+            .row { grid-template-columns: 22px 1fr 1fr 1fr 28px; gap: 4px; padding: 4px 8px; min-height: 46px; }
+            .cell-touch { font-size: 11px; padding: 2px 6px; }
+            .cell-drop { font-size: 11px; min-height: 34px; padding: 2px 4px; }
+            .indicator { width: 24px; height: 24px; font-size: 14px; }
+            .pool-card { font-size: 12px; padding: 4px 12px; }
+            .progress-bar { width: 100px; }
+            .modal-box { padding: 20px 16px 24px; }
+            .summary-table th, .summary-table td { padding: 6px 8px; font-size: 11px; }
+            .btn { padding: 8px 18px; font-size: 12px; }
+            .toast { font-size: 13px; padding: 10px 20px; top: 16px; }
+        }
+        @media (max-width: 460px) {
+            .row { grid-template-columns: 18px 1fr 1fr 1fr 24px; gap: 3px; min-height: 40px; }
+            .cell-drop { min-height: 30px; font-size: 10px; }
+            .cell-touch { font-size: 10px; padding: 2px 4px; }
+            .indicator { width: 20px; height: 20px; font-size: 12px; }
+            .pool-group-title { font-size: 10px; padding: 0 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app">
+        <h1>
+            🧩 Конструктор
+            <small>Точка → Эмоция → Потребность</small>
+        </h1>
+        <div class="sub">
+            <span>Соедините карточки с ячейками в каждом ряду</span>
+            <div class="progress-wrap">
+                <span>Прогресс</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+                </div>
+                <span class="progress-text" id="progressText">0/5</span>
+            </div>
+        </div>
+
+        <div class="rows" id="rowsContainer"></div>
+
+        <div class="pool-section">
+            <div class="pool-header">
+                <span>📦 Карточки (перетащите в ячейки)</span>
+                <span id="poolCount">10</span>
+            </div>
+            <div class="card-pool" id="cardPool">
+                <div class="pool-group" id="emotionGroup">
+                    <span class="pool-group-title">😊 Эмоции</span>
+                </div>
+                <div class="pool-group" id="needGroup">
+                    <span class="pool-group-title">💡 Потребности</span>
+                </div>
+                <div class="empty-msg" id="emptyMsg">✨ Все карточки расставлены</div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-outline" id="resetBtn">⟳ Сбросить</button>
+            <button class="btn btn-primary" id="summaryBtn">📋 Собрать памятку</button>
+        </div>
+    </div>
+
+    <!-- Тост ошибки -->
+    <div class="toast" id="errorToast">⚠️ Ошибка, перетащите другую карточку</div>
+
+    <!-- Модалка -->
+    <div class="modal" id="summaryModal">
+        <div class="modal-box">
+            <h2>
+                📋 Памятка
+                <button class="close" id="modalClose">✕</button>
+            </h2>
+            <div class="modal-sub" id="modalSub">Правильные цепочки</div>
+            <table class="summary-table">
+                <thead>
+                    <tr><th>#</th><th>Точка касания</th><th>Эмоция</th><th>Потребность</th></tr>
+                </thead>
+                <tbody id="summaryBody"></tbody>
+            </table>
+            <div class="modal-actions">
+                <button class="btn btn-outline" id="printBtn">🖨️ Печать</button>
+                <button class="btn btn-success" id="modalClose2">✓ Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ─── ДАННЫЕ ──────────────────────────────────────────
+        // Изменены эмоции: "Расслабление" → "Спокойствие", "Эмоциональный подъём" → "Воодушевление увиденным"
+        const TOUCHES = ['Касса', 'Гардероб', 'Фойе (ожидание события)', 'Зал', 'Выход из зала'];
+        const MATCHES = {
+            'Касса': { emotion: 'Удовлетворение от выгоды', need: 'Закрепить ощущение «мы молодцы» и сориентироваться в бонусах' },
+            'Гардероб': { emotion: 'Любопытство', need: 'Отметить начало вечера маленькой покупкой' },
+            'Фойе (ожидание события)': { emotion: 'Спокойствие', need: 'Занять паузу вкусным ритуалом' },
+            'Зал': { emotion: 'Вовлечённость', need: 'Углубить понимание' },
+            'Выход из зала': { emotion: 'Воодушевление увиденным', need: 'Зафиксировать событие' }
+        };
+        const ALL_CARDS = [
+            { type: 'emotion', label: 'Удовлетворение от выгоды' },
+            { type: 'emotion', label: 'Любопытство' },
+            { type: 'emotion', label: 'Спокойствие' },
+            { type: 'emotion', label: 'Вовлечённость' },
+            { type: 'emotion', label: 'Воодушевление увиденным' },
+            { type: 'need', label: 'Закрепить ощущение «мы молодцы» и сориентироваться в бонусах' },
+            { type: 'need', label: 'Отметить начало вечера маленькой покупкой' },
+            { type: 'need', label: 'Занять паузу вкусным ритуалом' },
+            { type: 'need', label: 'Углубить понимание' },
+            { type: 'need', label: 'Зафиксировать событие' }
+        ];
+
+        // ─── СОСТОЯНИЕ ──────────────────────────────────────
+        let rows = [];
+        let poolCards = [];
+        let dragInfo = null;
+        let toastTimer = null;
+
+        // ─── ИНИЦИАЛИЗАЦИЯ ──────────────────────────────────
+        function init() {
+            rows = TOUCHES.map(touch => ({
+                touch,
+                emotion: null,
+                need: null,
+                correct: false
+            }));
+            poolCards = ALL_CARDS.map((c, i) => ({
+                ...c,
+                id: 'c' + i + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6)
+            }));
+            shuffle(poolCards);
+            renderAll();
+            updateProgress();
+        }
+
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // ─── РЕНДЕРИНГ ──────────────────────────────────────
+        function renderAll() {
+            renderRows();
+            renderPool();
+            updateProgress();
+        }
+
+        function renderRows() {
+            const container = document.getElementById('rowsContainer');
+            container.innerHTML = '';
+            rows.forEach((row, idx) => {
+                const div = document.createElement('div');
+                div.className = 'row' + (row.correct ? ' correct' : '');
+                div.dataset.idx = idx;
+
+                const num = document.createElement('div');
+                num.className = 'row-number';
+                num.textContent = idx + 1;
+                div.appendChild(num);
+
+                const touch = document.createElement('div');
+                touch.className = 'cell-touch';
+                touch.textContent = row.touch;
+                div.appendChild(touch);
+
+                const emCell = createDropCell(idx, 'emotion', row.emotion);
+                div.appendChild(emCell);
+
+                const needCell = createDropCell(idx, 'need', row.need);
+                div.appendChild(needCell);
+
+                const ind = document.createElement('div');
+                ind.className = 'indicator' + (row.correct ? ' done' : '');
+                div.appendChild(ind);
+
+                container.appendChild(div);
+            });
+        }
+
+        function createDropCell(rowIdx, slot, value) {
+            const cell = document.createElement('div');
+            cell.className = 'cell-drop';
+            cell.dataset.rowIdx = rowIdx;
+            cell.dataset.slot = slot;
+            if (value) {
+                cell.classList.add('filled', slot === 'emotion' ? 'filled-emotion' : 'filled-need');
+                const span = document.createElement('span');
+                span.className = 'card-label';
+                span.textContent = value;
+                cell.appendChild(span);
+                cell.dataset.value = value;
+                cell.draggable = true;
+            } else {
+                cell.textContent = slot === 'emotion' ? '⬡ эмоция' : '⬡ потребность';
+                cell.dataset.value = '';
+                cell.draggable = false;
+            }
+            cell.addEventListener('dragover', onDragOver);
+            cell.addEventListener('dragenter', e => e.preventDefault());
+            cell.addEventListener('dragleave', onDragLeave);
+            cell.addEventListener('drop', onDrop);
+            cell.addEventListener('dragstart', onCellDragStart);
+            cell.addEventListener('dragend', onDragEnd);
+            return cell;
+        }
+
+        function renderPool() {
+            const pool = document.getElementById('cardPool');
+            const empty = document.getElementById('emptyMsg');
+            const emotionGroup = document.getElementById('emotionGroup');
+            const needGroup = document.getElementById('needGroup');
+            while (emotionGroup.children.length > 1) {
+                emotionGroup.removeChild(emotionGroup.lastChild);
+            }
+            while (needGroup.children.length > 1) {
+                needGroup.removeChild(needGroup.lastChild);
+            }
+
+            const emotionCards = poolCards.filter(c => c.type === 'emotion');
+            const needCards = poolCards.filter(c => c.type === 'need');
+
+            emotionCards.forEach(card => {
+                const div = createPoolCard(card);
+                emotionGroup.appendChild(div);
+            });
+            needCards.forEach(card => {
+                const div = createPoolCard(card);
+                needGroup.appendChild(div);
+            });
+
+            if (poolCards.length === 0) {
+                empty.style.display = 'block';
+            } else {
+                empty.style.display = 'none';
+            }
+            document.getElementById('poolCount').textContent = poolCards.length;
+        }
+
+        function createPoolCard(card) {
+            const div = document.createElement('div');
+            div.className = 'pool-card ' + (card.type === 'emotion' ? 'card-emotion' : 'card-need');
+            div.textContent = card.label;
+            div.draggable = true;
+            div.dataset.cardId = card.id;
+            div.dataset.cardType = card.type;
+            div.dataset.cardLabel = card.label;
+            div.addEventListener('dragstart', onPoolDragStart);
+            div.addEventListener('dragend', onDragEnd);
+            return div;
+        }
+
+        function updateProgress() {
+            const correct = rows.filter(r => r.correct).length;
+            document.getElementById('progressFill').style.width = (correct / 5 * 100) + '%';
+            document.getElementById('progressText').textContent = correct + '/5';
+            const btn = document.getElementById('summaryBtn');
+            if (correct === 5) {
+                btn.classList.add('btn-success');
+                btn.classList.remove('btn-primary');
+                btn.textContent = '🎉 Все готово! Памятка';
+            } else {
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-primary');
+                btn.textContent = '📋 Собрать памятку';
+            }
+        }
+
+        // ─── DRAG & DROP ──────────────────────────────────
+        function onPoolDragStart(e) {
+            const card = e.target.closest('.pool-card');
+            if (!card) return;
+            const id = card.dataset.cardId;
+            const data = poolCards.find(c => c.id === id);
+            if (!data) return;
+            dragInfo = { type: data.type, label: data.label, id, source: 'pool' };
+            e.dataTransfer.setData('text/plain', JSON.stringify(dragInfo));
+            e.dataTransfer.effectAllowed = 'move';
+            card.classList.add('dragging');
+            setTimeout(() => card.classList.remove('dragging'), 100);
+        }
+
+        function onCellDragStart(e) {
+            const cell = e.target.closest('.cell-drop');
+            if (!cell || !cell.classList.contains('filled')) return;
+            const rowIdx = parseInt(cell.dataset.rowIdx);
+            const slot = cell.dataset.slot;
+            const value = cell.dataset.value;
+            if (!value) return;
+            dragInfo = { type: slot, label: value, id: 'cell-' + rowIdx + '-' + slot, source: 'cell', rowIdx, slot };
+            e.dataTransfer.setData('text/plain', JSON.stringify(dragInfo));
+            e.dataTransfer.effectAllowed = 'move';
+            cell.style.opacity = '0.4';
+            setTimeout(() => cell.style.opacity = '1', 100);
+        }
+
+        function onDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const cell = e.target.closest('.cell-drop');
+            if (cell && !cell.classList.contains('filled')) {
+                cell.classList.add('dragover');
+            }
+            const pool = document.getElementById('cardPool');
+            if (pool.contains(e.target)) {
+                pool.classList.add('drag-over');
+            }
+        }
+
+        function onDragLeave(e) {
+            const cell = e.target.closest('.cell-drop');
+            if (cell) cell.classList.remove('dragover');
+            const pool = document.getElementById('cardPool');
+            if (pool.contains(e.target)) {
+                pool.classList.remove('drag-over');
+            }
+        }
+
+        function onDrop(e) {
+            e.preventDefault();
+            document.querySelectorAll('.cell-drop.dragover').forEach(el => el.classList.remove('dragover'));
+            document.getElementById('cardPool').classList.remove('drag-over');
+
+            const raw = e.dataTransfer.getData('text/plain');
+            if (!raw) return;
+            let data;
+            try { data = JSON.parse(raw); } catch { return; }
+            if (!data) return;
+
+            const target = e.target.closest('.cell-drop');
+            if (!target) return;
+            const rowIdx = parseInt(target.dataset.rowIdx);
+            const slot = target.dataset.slot;
+            if (isNaN(rowIdx) || data.type !== slot) {
+                showErrorToast();
+                return;
+            }
+
+            const row = rows[rowIdx];
+            const match = MATCHES[row.touch];
+            if (!match) return;
+
+            let expected;
+            if (slot === 'emotion') expected = match.emotion;
+            else expected = match.need;
+
+            if (data.label !== expected) {
+                showErrorToast();
+                return;
+            }
+
+            const oldVal = slot === 'emotion' ? row.emotion : row.need;
+            if (oldVal) {
+                const cardObj = ALL_CARDS.find(c => c.label === oldVal && c.type === slot);
+                if (cardObj) {
+                    const exists = poolCards.some(p => p.label === cardObj.label && p.type === cardObj.type);
+                    if (!exists) {
+                        poolCards.push({ ...cardObj, id: 'c-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6) });
+                    }
+                }
+            }
+
+            if (data.source === 'pool') {
+                const idx = poolCards.findIndex(c => c.id === data.id);
+                if (idx !== -1) poolCards.splice(idx, 1);
+            } else if (data.source === 'cell') {
+                const oldRow = rows[data.rowIdx];
+                if (oldRow) {
+                    if (data.slot === 'emotion') oldRow.emotion = null;
+                    else oldRow.need = null;
+                }
+            }
+
+            if (slot === 'emotion') row.emotion = data.label;
+            else row.need = data.label;
+
+            validateRow(rowIdx);
+            renderAll();
+            updateProgress();
+        }
+
+        document.getElementById('cardPool').addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+            const raw = e.dataTransfer.getData('text/plain');
+            if (!raw) return;
+            let data;
+            try { data = JSON.parse(raw); } catch { return; }
+            if (!data || data.source !== 'cell') return;
+
+            const row = rows[data.rowIdx];
+            if (!row) return;
+            if (data.slot === 'emotion') {
+                if (row.emotion === data.label) row.emotion = null;
+                else return;
+            } else {
+                if (row.need === data.label) row.need = null;
+                else return;
+            }
+            const cardObj = ALL_CARDS.find(c => c.label === data.label && c.type === data.slot);
+            if (cardObj) {
+                const exists = poolCards.some(p => p.label === cardObj.label && p.type === cardObj.type);
+                if (!exists) {
+                    poolCards.push({ ...cardObj, id: 'c-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6) });
+                }
+            }
+            validateRow(data.rowIdx);
+            renderAll();
+            updateProgress();
+        });
+
+        document.getElementById('cardPool').addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('drag-over');
+        });
+        document.getElementById('cardPool').addEventListener('dragleave', function(e) {
+            this.classList.remove('drag-over');
+        });
+
+        function onDragEnd(e) {
+            document.querySelectorAll('.cell-drop.dragover').forEach(el => el.classList.remove('dragover'));
+            document.getElementById('cardPool').classList.remove('drag-over');
+            const card = e.target.closest('.pool-card');
+            if (card) card.classList.remove('dragging');
+            const cell = e.target.closest('.cell-drop');
+            if (cell) cell.style.opacity = '1';
+            dragInfo = null;
+        }
+
+        function validateRow(idx) {
+            const row = rows[idx];
+            const match = MATCHES[row.touch];
+            if (!match) { row.correct = false; return; }
+            row.correct = (row.emotion === match.emotion && row.need === match.need);
+            if (row.correct && (!row.emotion || !row.need)) row.correct = false;
+        }
+
+        function showErrorToast() {
+            const toast = document.getElementById('errorToast');
+            toast.classList.add('show');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        // ─── СБРОС ──────────────────────────────────────────
+        function resetGame() {
+            if (!confirm('Вернуть все карточки в исходное положение?')) return;
+            rows.forEach(r => { r.emotion = null; r.need = null; r.correct = false; });
+            poolCards = ALL_CARDS.map((c, i) => ({
+                ...c,
+                id: 'c' + i + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6)
+            }));
+            shuffle(poolCards);
+            renderAll();
+            updateProgress();
+            const btn = document.getElementById('summaryBtn');
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-primary');
+            btn.textContent = '📋 Собрать памятку';
+        }
+
+        // ─── ПАМЯТКА ──────────────────────────────────────
+        function openSummary() {
+            const modal = document.getElementById('summaryModal');
+            const tbody = document.getElementById('summaryBody');
+            tbody.innerHTML = '';
+            let allCorrect = true;
+            TOUCHES.forEach((touch, idx) => {
+                const match = MATCHES[touch];
+                const row = rows.find(r => r.touch === touch);
+                const isCorrect = row ? row.correct : false;
+                if (!isCorrect) allCorrect = false;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="num">${idx+1}</td>
+                    <td class="touch">${touch}</td>
+                    <td class="emotion">${row?.emotion || '—'} ${row?.emotion === match.emotion ? '<span class="badge-correct">✓</span>' : (row?.emotion ? '<span class="badge-wrong">✗</span>' : '')}</td>
+                    <td class="need">${row?.need || '—'} ${row?.need === match.need ? '<span class="badge-correct">✓</span>' : (row?.need ? '<span class="badge-wrong">✗</span>' : '')}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            const sub = document.getElementById('modalSub');
+            if (!allCorrect) {
+                sub.innerHTML = '⚠️ Не все цепочки верны. Исправьте отмеченные ✗ и откройте памятку снова.';
+                sub.style.color = '#b45309';
+            } else {
+                sub.innerHTML = '✅ Все цепочки собраны верно! Отличная работа.';
+                sub.style.color = '#166534';
+            }
+            modal.classList.add('open');
+        }
+
+        function closeSummary() {
+            document.getElementById('summaryModal').classList.remove('open');
+        }
+
+        function printSummary() {
+            const win = window.open('', '_blank', 'width=900,height=700');
+            if (!win) { alert('Разрешите всплывающие окна для печати.'); return; }
+            win.document.write(`
+                <html><head><title>Памятка</title>
+                <style>
+                    body { font-family: 'Segoe UI', sans-serif; padding: 40px; max-width: 820px; margin: 0 auto; }
+                    h2 { font-size: 26px; margin-bottom: 4px; color: #1a2b4c; }
+                    .sub { color: #1a2b4c; margin-bottom: 20px; border-bottom: 2px solid #b0c4de; padding-bottom: 12px; }
+                    table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 14px; }
+                    th { background: #e6f0fa; padding: 10px 12px; text-align: left; border-bottom: 2px solid #b0c4de; color: #1a2b4c; }
+                    td { padding: 10px 12px; border-bottom: 1px solid #eee; vertical-align: middle; }
+                    .badge { display: inline-block; background: #27ae60; color: #fff; border-radius: 40px; padding: 0 10px; font-size: 12px; line-height: 22px; }
+                    .wrong { color: #c0392b; font-weight: 700; }
+                    .footer { margin-top: 32px; color: #8a9bb0; font-size: 13px; text-align: center; border-top: 1px solid #eee; padding-top: 16px; }
+                </style>
+                </head><body>
+                <h2>📋 Памятка</h2>
+                <div class="sub">Правильные цепочки «Точка → Эмоция → Потребность»</div>
+                <table>
+                    <thead><tr><th>#</th><th>Точка касания</th><th>Эмоция</th><th>Потребность</th></tr></thead>
+                    <tbody>
+            `);
+            TOUCHES.forEach((touch, idx) => {
+                const match = MATCHES[touch];
+                const row = rows.find(r => r.touch === touch);
+                const e = row?.emotion || '—';
+                const n = row?.need || '—';
+                const eOk = e === match.emotion;
+                const nOk = n === match.need;
+                win.document.write(`
+                    <tr>
+                        <td style="text-align:center;color:#8a9bb0;">${idx+1}</td>
+                        <td><strong>${touch}</strong></td>
+                        <td>${e} ${eOk ? '<span class="badge">✓</span>' : (e !== '—' ? '<span class="wrong">✗</span>' : '')}</td>
+                        <td>${n} ${nOk ? '<span class="badge">✓</span>' : (n !== '—' ? '<span class="wrong">✗</span>' : '')}</td>
+                    </tr>
+                `);
+            });
+            win.document.write(`
+                    </tbody>
+                </table>
+                <div class="footer">Сгенерировано в интерактивном конструкторе</div>
+                <script>
+                    window.onload = function() { window.print(); }
+                <\/script>
+            `);
+            win.document.write('</body></html>');
+            win.document.close();
+        }
+
+        // ─── ПОДПИСКА НА СОБЫТИЯ ──────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+            document.getElementById('resetBtn').addEventListener('click', resetGame);
+            document.getElementById('summaryBtn').addEventListener('click', openSummary);
+            document.getElementById('modalClose').addEventListener('click', closeSummary);
+            document.getElementById('modalClose2').addEventListener('click', closeSummary);
+            document.getElementById('printBtn').addEventListener('click', printSummary);
+            document.getElementById('summaryModal').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) closeSummary();
+            });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSummary(); });
+        });
+    </script>
+</body>
+</html>
