@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Памятка по защите книг</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f0f0f0;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 20px;
+        }
+
+        .card {
+            max-width: 780px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 40px 44px 36px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+            border: 1px solid #e0e0e0;
+        }
+
+        .card h1 {
+            font-size: 38px;
+            font-weight: 700;
+            color: #cc0000;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .card .subhead {
+            font-size: 22px;
+            font-weight: 500;
+            color: #1e1e1e;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 16px;
+        }
+
+        .card .section {
+            margin-bottom: 24px;
+        }
+
+        .card .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e1e1e;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card .section-title .num {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            background: #2c2c2c;
+            color: #fff;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            font-size: 16px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* Общий стиль для всех списков */
+        .card ul {
+            list-style: none;
+            padding-left: 44px;
+            margin-bottom: 8px;
+        }
+
+        .card ul li {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #1e1e1e;
+            margin-bottom: 6px;
+            position: relative;
+            padding-left: 24px;
+        }
+
+        /* Раздел 1 — звёздочки */
+        .card ul.star-list li::before {
+            content: "✦";
+            position: absolute;
+            left: 0;
+            color: #666;
+            font-size: 20px;
+        }
+
+        /* Раздел 2 — зелёные галочки */
+        .card ul.check-list li::before {
+            content: "✔";
+            position: absolute;
+            left: 0;
+            color: #2e7d32;
+            font-size: 20px;
+        }
+
+        /* Раздел 3 — красные крестики */
+        .card ul.bad-list {
+            padding-left: 44px;
+        }
+
+        .card ul.bad-list li {
+            padding-left: 32px;
+        }
+
+        .card ul.bad-list li::before {
+            content: "❌";
+            position: absolute;
+            left: 0;
+            font-size: 20px;
+        }
+
+        .card ul li strong {
+            font-weight: 600;
+            color: #000;
+        }
+
+        /* Кнопка */
+        .pdf-btn {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 32px auto 0;
+            padding: 16px 28px;
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+            background: #cc0000;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 6px 16px rgba(204, 0, 0, 0.25);
+            letter-spacing: 0.3px;
+            text-align: center;
+        }
+
+        .pdf-btn:hover {
+            background: #b30000;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(204, 0, 0, 0.3);
+        }
+
+        .pdf-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* Печать */
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+                display: block;
+            }
+            .card {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 30px 40px !important;
+                max-width: 100% !important;
+                border-radius: 0 !important;
+            }
+            .pdf-btn {
+                display: none !important;
+            }
+            .card .section-title .num {
+                background: #2c2c2c !important;
+                color: #fff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .card h1 {
+                color: #cc0000 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .card ul.star-list li::before,
+            .card ul.check-list li::before,
+            .card ul.bad-list li::before {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 28px 20px 30px;
+            }
+            .card h1 {
+                font-size: 30px;
+            }
+            .card .subhead {
+                font-size: 18px;
+            }
+            .card ul {
+                padding-left: 20px;
+            }
+            .card ul li {
+                font-size: 16px;
+                padding-left: 20px;
+            }
+            .card .section-title {
+                font-size: 18px;
+            }
+            .card ul.bad-list {
+                padding-left: 20px;
+            }
+            .card ul.bad-list li {
+                padding-left: 28px;
+            }
+            .pdf-btn {
+                max-width: 100%;
+                font-size: 18px;
+                padding: 14px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card" id="reminder">
+        <h1>Памятка</h1>
+        <div class="subhead">Как защитить книги при повреждениях</div>
+
+        <!-- Раздел 1 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="num">1</span>
+                <span>Подберите средство под проблему:</span>
+            </div>
+            <ul class="star-list">
+                <li><strong>Потертая мягкая обложка</strong> → Защитная пленка.</li>
+                <li><strong>Надорванный корешок</strong> → Библиотечный тейп.</li>
+                <li><strong>Разрыв страницы</strong> → Архивная рисовая бумага.</li>
+            </ul>
+        </div>
+
+        <!-- Раздел 2 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="num">2</span>
+                <span>Соблюдайте правила:</span>
+            </div>
+            <ul class="check-list">
+                <li><strong>Принцип обратимости</strong> — любой ремонт должен легко сниматься профессионалом в будущем.</li>
+                <li><strong>Качество материалов</strong> — используйте только специализированные средства.</li>
+                <li><strong>Аккуратность</strong> — всегда применяйте вспомогательный инструмент (косточка, калька) вместо подручных средств.</li>
+            </ul>
+        </div>
+
+        <!-- Раздел 3 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="num">3</span>
+                <span>НЕ используйте:</span>
+            </div>
+            <ul class="bad-list">
+                <li>Офисный/канцелярский скотч.</li>
+                <li>Агрессивные клеи.</li>
+                <li>Бытовые приборы.</li>
+            </ul>
+        </div>
+
+        <button class="pdf-btn" id="savePdf">Сохранить PDF</button>
+    </div>
+
+    <script>
+        document.getElementById('savePdf').addEventListener('click', function() {
+            window.print();
+        });
+    </script>
+</body>
+</html>

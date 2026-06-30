@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Знакомая ситуация?</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(145deg, #f0f2f5 0%, #d9e0e8 100%);
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      padding: 16px;
+    }
+
+    #app {
+      position: relative;
+      max-width: 540px;
+      width: 100%;
+      padding: 44px 32px 50px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border-radius: 48px;
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    #app p {
+      font-size: 30px;
+      font-weight: 700;
+      color: #0b1e33;
+      margin-bottom: 38px;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 4px rgba(255, 255, 255, 0.5);
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      position: relative;
+      min-width: 140px;
+      padding: 18px 38px;
+      font-size: 24px;
+      font-weight: 700;
+      border: none;
+      border-radius: 60px;
+      cursor: pointer;
+      color: #fff;
+      letter-spacing: 0.5px;
+      transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 8px 0 0 rgba(0, 0, 0, 0.2), 0 10px 20px -6px rgba(0, 0, 0, 0.3);
+      transform: translateY(0);
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .btn-yes {
+      background: linear-gradient(145deg, #2ecc71, #1ea85a);
+      box-shadow: 0 8px 0 0 #0f7a3e, 0 10px 20px -6px rgba(0, 0, 0, 0.3);
+    }
+    .btn-yes:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 0 0 #0f7a3e, 0 18px 30px -8px rgba(0, 0, 0, 0.35);
+      background: linear-gradient(145deg, #3adb7a, #24b862);
+    }
+    .btn-yes:active {
+      transform: translateY(6px) scale(0.96);
+      box-shadow: 0 2px 0 0 #0f7a3e, 0 6px 12px -4px rgba(0, 0, 0, 0.3);
+      transition-duration: 0.06s;
+    }
+
+    .btn-no {
+      background: linear-gradient(145deg, #e74c3c, #c0392b);
+      box-shadow: 0 8px 0 0 #922b21, 0 10px 20px -6px rgba(0, 0, 0, 0.3);
+    }
+    .btn-no:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 0 0 #922b21, 0 18px 30px -8px rgba(0, 0, 0, 0.35);
+      background: linear-gradient(145deg, #f05a4a, #d14434);
+    }
+    .btn-no:active {
+      transform: translateY(6px) scale(0.96);
+      box-shadow: 0 2px 0 0 #922b21, 0 6px 12px -4px rgba(0, 0, 0, 0.3);
+      transition-duration: 0.06s;
+    }
+
+    #message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      width: 90%;
+      max-width: 400px;
+      padding: 28px 20px;
+      background: rgba(10, 20, 40, 0.92);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 30px 50px -15px rgba(0, 0, 0, 0.6);
+      color: #f0f9ff;
+      font-size: 26px;
+      font-weight: 600;
+      line-height: 1.4;
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 20;
+    }
+
+    #message.visible {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    @media (max-width: 500px) {
+      #app {
+        padding: 32px 16px 40px;
+      }
+      #app p {
+        font-size: 24px;
+        margin-bottom: 28px;
+      }
+      .btn {
+        min-width: 110px;
+        padding: 14px 28px;
+        font-size: 20px;
+      }
+      #message {
+        font-size: 20px;
+        padding: 20px 16px;
+        width: 92%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <p>Знакомая ситуация?</p>
+
+  <div class="button-group">
+    <button class="btn btn-yes" id="yesBtn">Да</button>
+    <button class="btn btn-no" id="noBtn">Нет</button>
+  </div>
+
+  <div id="message"></div>
+</div>
+
+<script>
+  (function() {
+    const messageEl = document.getElementById('message');
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn = document.getElementById('noBtn');
+
+    let timeoutId = null;
+
+    function showMessage(text) {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+
+      messageEl.textContent = text;
+      messageEl.classList.add('visible');
+
+      timeoutId = setTimeout(() => {
+        messageEl.classList.remove('visible');
+        timeoutId = null;
+      }, 3000);
+    }
+
+    yesBtn.addEventListener('click', function() {
+      showMessage('Конечно, это классика!');
+    });
+
+    noBtn.addEventListener('click', function() {
+      showMessage('Значит, крупно повезло! Но это вопрос времени.');
+    });
+  })();
+</script>
+
+</body>
+</html>

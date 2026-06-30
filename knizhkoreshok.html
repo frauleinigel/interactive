@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Заботимся о книжном корешке</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(145deg, #f0f4f8 0%, #dae2ec 100%);
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 820px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 48px;
+      padding: 32px 30px 40px;
+      box-shadow: 0 30px 60px -15px rgba(40, 60, 80, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1e2a3a;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .step {
+      display: none;
+    }
+    .step.active { display: block; }
+
+    .cards {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      flex: 0 1 auto;
+      min-width: 140px;
+      padding: 14px 20px;
+      background: #ffffff;
+      border-radius: 40px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.02);
+      font-size: 18px;
+      font-weight: 500;
+      color: #1e2a3a;
+      text-align: center;
+      cursor: grab;
+      user-select: none;
+      transition: all 0.15s;
+      border: 2px solid #dce3ec;
+      touch-action: none;
+    }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px -8px rgba(0,0,0,0.15); }
+    .card:active { cursor: grabbing; transform: scale(0.96); }
+    .card.dragging { opacity: 0.4; transform: scale(0.95); }
+    .card.correct { background: #d4edda; border-color: #28a745; opacity: 0.7; cursor: default; }
+    .card.wrong { background: #f8d7da; border-color: #dc3545; opacity: 0.7; cursor: default; }
+
+    .desk {
+      position: relative;
+      width: 100%;
+      height: 260px;
+      background: linear-gradient(145deg, #b0bcca, #95a3b5);
+      border-radius: 28px;
+      box-shadow: inset 0 6px 12px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.15);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 28px;
+      transition: background 0.2s;
+      border: 2px dashed rgba(255,255,255,0.2);
+    }
+
+    .book-area {
+      position: relative;
+      width: 180px;
+      height: 240px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(255,255,240,0.15);
+      border-radius: 16px;
+      border: 2px dashed rgba(255,255,200,0.3);
+      transition: all 0.2s;
+      cursor: default;
+    }
+    .book-area.drag-over {
+      background: rgba(255,255,240,0.3);
+      border-color: #8a9aae;
+      transform: scale(1.02);
+    }
+    .book-icon {
+      font-size: 80px;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.2));
+      user-select: none;
+      pointer-events: none;
+    }
+    .book-label {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(30, 42, 58, 0.7);
+      color: #f0f4f8;
+      padding: 4px 16px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 500;
+      backdrop-filter: blur(4px);
+      white-space: nowrap;
+    }
+
+    .next-btn {
+      display: block;
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto;
+      padding: 16px 28px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      background: #b0a08c;
+      border: none;
+      border-radius: 60px;
+      cursor: not-allowed;
+      transition: all 0.25s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      letter-spacing: 0.5px;
+      opacity: 0.5;
+      transform: scale(0.98);
+    }
+    .next-btn.active {
+      background: #5d7a4a;
+      cursor: pointer;
+      opacity: 1;
+      transform: scale(1);
+      box-shadow: 0 8px 24px -6px rgba(93, 122, 74, 0.4);
+    }
+    .next-btn.active:hover { background: #4d6a3a; transform: translateY(-2px); }
+    .next-btn.active:active { transform: scale(0.96); }
+
+    .toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      background: rgba(20, 30, 45, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 28px 32px;
+      border-radius: 32px;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 30px 60px -15px rgba(0,0,0,0.6);
+      color: #f0f4f8;
+      font-size: 24px;
+      font-weight: 600;
+      text-align: center;
+      max-width: 460px;
+      width: 90%;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      line-height: 1.4;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    .toast.success { border-color: #7cb86a; }
+    .toast.error { border-color: #d97a7a; }
+
+    /* Результат с сердечками */
+    .result-step {
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .result-step .book-icon {
+      font-size: 100px;
+      display: inline-block;
+      position: relative;
+      z-index: 2;
+      animation: floatBook 2.8s ease-in-out infinite alternate;
+    }
+    @keyframes floatBook {
+      0% { transform: scale(1) rotate(-2deg); }
+      100% { transform: scale(1.05) rotate(2deg); }
+    }
+
+    .hearts-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .heart {
+      position: absolute;
+      font-size: 30px;
+      color: #e74c3c;
+      animation: floatHeart 2s ease-out forwards; /* ускорено до 2с */
+      opacity: 0;
+      bottom: -10px; /* чтобы начинали снизу */
+    }
+
+    @keyframes floatHeart {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(0.5) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-350px) scale(1.3) rotate(40deg);
+      }
+    }
+
+    .result-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #1e2a3a;
+      line-height: 1.6;
+      max-width: 600px;
+      margin: 20px auto 0;
+      background: rgba(240, 244, 248, 0.6);
+      padding: 24px 28px;
+      border-radius: 28px;
+      border: 1px solid #dce3ec;
+      position: relative;
+      z-index: 2;
+    }
+    .result-text strong { color: #2a6b8f; font-weight: 700; }
+
+    .reset-btn {
+      display: block;
+      width: 100%;
+      max-width: 320px;
+      margin: 24px auto 0;
+      padding: 16px 28px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      background: #7a5d4a;
+      border: none;
+      border-radius: 60px;
+      cursor: pointer;
+      transition: all 0.25s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      letter-spacing: 0.5px;
+      position: relative;
+      z-index: 2;
+    }
+    .reset-btn:hover { background: #5d4a3a; transform: translateY(-2px); }
+    .reset-btn:active { transform: scale(0.96); }
+
+    @media (max-width: 640px) {
+      .container { padding: 24px 16px 32px; }
+      h1 { font-size: 22px; }
+      .desk { height: 200px; }
+      .book-area { width: 140px; height: 180px; }
+      .book-icon { font-size: 60px; }
+      .result-step .book-icon { font-size: 70px; }
+      .card { min-width: 100px; padding: 10px 16px; font-size: 15px; }
+      .toast { font-size: 18px; padding: 20px 18px; }
+      .result-text { font-size: 18px; padding: 18px 20px; }
+    }
+    @media (max-width: 480px) {
+      .cards { gap: 10px; }
+      .card { min-width: 80px; font-size: 13px; padding: 8px 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Упражнение №2: Заботимся о книжном корешке</h1>
+
+  <!-- ШАГ 1 -->
+  <div class="step active" id="step1">
+    <p style="font-size:18px; font-weight:500; margin-bottom:16px; color:#1e2a3a;">
+      1. Выберите предмет для ремонта поврежденного корешка — перетащите его на книгу
+    </p>
+
+    <div class="cards" id="cards1">
+      <div class="card" draggable="true" data-step="1" data-correct="false" data-answer="Канцелярский скотч">Канцелярский скотч</div>
+      <div class="card" draggable="true" data-step="1" data-correct="true" data-answer="Библиотечная лента (тейп) на тканевой основе">Библиотечная лента (тейп) на тканевой основе</div>
+      <div class="card" draggable="true" data-step="1" data-correct="false" data-answer="Бумажная лента на клейстере">Бумажная лента на клейстере</div>
+    </div>
+
+    <div class="desk" id="desk1">
+      <div class="book-area" id="bookArea1" data-step="1">
+        <div class="book-icon">📕</div>
+        <span class="book-label">КНИГА</span>
+      </div>
+    </div>
+
+    <button class="next-btn" id="nextBtn1" disabled>Перейти к следующему шагу</button>
+  </div>
+
+  <!-- ШАГ 2 -->
+  <div class="step" id="step2">
+    <p style="font-size:18px; font-weight:500; margin-bottom:16px; color:#1e2a3a;">
+      2. Как правильно наклеить ленту на корешок? Перетащите нужную карточку на книгу
+    </p>
+
+    <div class="cards" id="cards2">
+      <div class="card" draggable="true" data-step="2" data-correct="false" data-answer="Наклеить ленту только на саму обложку">Наклеить ленту только на саму обложку</div>
+      <div class="card" draggable="true" data-step="2" data-correct="true" data-answer="Наклеить ленту точно по центру корешка, плотно прижимая ее к сгибу">Наклеить ленту точно по центру корешка, плотно прижимая ее к сгибу</div>
+      <div class="card" draggable="true" data-step="2" data-correct="false" data-answer="Натянуть ленту максимально сильно">Натянуть ленту максимально сильно</div>
+    </div>
+
+    <div class="desk" id="desk2">
+      <div class="book-area" id="bookArea2" data-step="2">
+        <div class="book-icon">📕</div>
+        <span class="book-label">КНИГА</span>
+      </div>
+    </div>
+
+    <button class="next-btn" id="nextBtn2" disabled>Перейти к следующему шагу</button>
+  </div>
+
+  <!-- ШАГ 3 -->
+  <div class="step" id="step3">
+    <p style="font-size:18px; font-weight:500; margin-bottom:16px; color:#1e2a3a;">
+      3. Лента приложена. Как добиться максимального сцепления? Перетащите на книгу верную карточку
+    </p>
+
+    <div class="cards" id="cards3">
+      <div class="card" draggable="true" data-step="3" data-correct="false" data-answer="Прогладить ногтем">Прогладить ногтем</div>
+      <div class="card" draggable="true" data-step="3" data-correct="false" data-answer="Протереть сверху влажной тряпкой">Протереть сверху влажной тряпкой</div>
+      <div class="card" draggable="true" data-step="3" data-correct="true" data-answer="Использовать косточку, аккуратно продавливая ленту в углубление сгиба">Использовать косточку, аккуратно продавливая ленту в углубление сгиба</div>
+    </div>
+
+    <div class="desk" id="desk3">
+      <div class="book-area" id="bookArea3" data-step="3">
+        <div class="book-icon">📕</div>
+        <span class="book-label">КНИГА</span>
+      </div>
+    </div>
+
+    <button class="next-btn" id="nextBtn3" disabled>Перейти к результату</button>
+  </div>
+
+  <!-- РЕЗУЛЬТАТ (шаг 4) -->
+  <div class="step result-step" id="step4">
+    <div class="book-icon">📕</div>
+    <div class="hearts-container" id="heartsContainer"></div>
+    <div class="result-text">
+      <strong>Отлично! Корешок надежно армирован.</strong> Благодаря работе косточкой, лента плотно прилегла к бумаге, сохраняя подвижность сгиба. Книга готова к активному использованию, а тейп продержится долго!
+    </div>
+    <button class="reset-btn" id="resetBtn">Начать заново</button>
+  </div>
+
+  <!-- Плашка -->
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+  (function() {
+    // --- Состояние для трёх шагов ---
+    const stepStatus = { 1: false, 2: false, 3: false };
+    let toastTimeout = null;
+    const toastEl = document.getElementById('toast');
+    const heartsContainer = document.getElementById('heartsContainer');
+    let heartsInterval = null;
+
+    function hideToast() {
+      if (toastTimeout) {
+        clearTimeout(toastTimeout);
+        toastTimeout = null;
+      }
+      toastEl.classList.remove('show');
+    }
+
+    function showToast(text, isSuccess) {
+      hideToast();
+      toastEl.textContent = text;
+      toastEl.className = 'toast' + (isSuccess ? ' success' : ' error');
+      toastEl.classList.add('show');
+      toastTimeout = setTimeout(() => {
+        toastEl.classList.remove('show');
+        toastTimeout = null;
+      }, 4000);
+    }
+
+    function getErrorMessage(step, cardText) {
+      if (step === 1) {
+        if (cardText.includes('Канцелярский скотч')) return 'Ошибка! Скотч со временем пересохнет, пожелтеет и оторвет фрагменты бумаги при попытке его удалить.';
+        if (cardText.includes('Бумажная лента')) return 'Ошибка! Бумажная лента недостаточно прочна для места сгиба, книга быстро порвется снова.';
+        return 'Ошибка!';
+      } else if (step === 2) {
+        if (cardText.includes('Наклеить ленту только на саму обложку')) return 'Ошибка! Лента должна захватывать и корешок, и обе стороны обложки для создания жесткого каркаса.';
+        if (cardText.includes('Натянуть ленту максимально сильно')) return 'Ошибка! Если натянуть ленту слишком сильно, книга не будет открываться, а сгиб моментально лопнет.';
+        return 'Ошибка!';
+      } else if (step === 3) {
+        if (cardText.includes('Прогладить ногтем')) return 'Ошибка! Можно прорезать ленту или оставить некрасивый след.';
+        if (cardText.includes('Протереть сверху влажной тряпкой')) return 'Ошибка! Влага может испортить клеевой слой тейпа.';
+        return 'Ошибка!';
+      }
+      return 'Ошибка!';
+    }
+
+    // --- Запуск сердечек (ускоренный и с большим размером) ---
+    function startHearts() {
+      if (heartsInterval) clearInterval(heartsInterval);
+      heartsContainer.innerHTML = '';
+      let count = 0;
+      const maxHearts = 60; // больше сердечек
+
+      heartsInterval = setInterval(() => {
+        if (count >= maxHearts) {
+          clearInterval(heartsInterval);
+          heartsInterval = null;
+          return;
+        }
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        const symbols = ['❤️', '💖', '💗', '💓', '♥️'];
+        heart.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        heart.style.left = (5 + Math.random() * 90) + '%';
+        // Увеличенный размер
+        const size = 28 + Math.random() * 30; // от 28 до 58px
+        heart.style.fontSize = size + 'px';
+        // Ускоренная анимация (время 1.5-2.5 сек)
+        const duration = 1.5 + Math.random() * 1.0;
+        heart.style.animationDuration = duration + 's';
+        heart.style.animationDelay = (Math.random() * 0.3) + 's';
+        heartsContainer.appendChild(heart);
+        count++;
+
+        // Удаляем сердечко после анимации
+        setTimeout(() => {
+          if (heart.parentNode) heart.remove();
+        }, (duration + 0.5) * 1000);
+      }, 120); // чаще (120 мс)
+    }
+
+    function stopHearts() {
+      if (heartsInterval) {
+        clearInterval(heartsInterval);
+        heartsInterval = null;
+      }
+      heartsContainer.innerHTML = '';
+    }
+
+    // --- Обработчики перетаскивания ---
+    document.addEventListener('dragstart', function(e) {
+      const card = e.target.closest('.card');
+      if (!card) return;
+      if (card.classList.contains('correct') || card.classList.contains('wrong')) {
+        e.preventDefault();
+        return;
+      }
+      const step = parseInt(card.dataset.step);
+      const activeStep = document.querySelector('.step.active');
+      if (!activeStep) return;
+      const stepId = activeStep.id;
+      const expectedStep = parseInt(stepId.replace('step', ''));
+      if (step !== expectedStep) {
+        e.preventDefault();
+        showToast('Перетащите карточку, которая относится к текущему шагу', false);
+        return;
+      }
+      e.dataTransfer.setData('text/plain', JSON.stringify({
+        step: step,
+        correct: card.dataset.correct === 'true',
+        text: card.textContent.trim()
+      }));
+      card.classList.add('dragging');
+    });
+
+    document.addEventListener('dragend', function(e) {
+      const card = e.target.closest('.card');
+      if (card) card.classList.remove('dragging');
+    });
+
+    document.addEventListener('dragover', function(e) {
+      const bookArea = e.target.closest('.book-area');
+      if (!bookArea) return;
+      e.preventDefault();
+      bookArea.classList.add('drag-over');
+    });
+
+    document.addEventListener('dragleave', function(e) {
+      const bookArea = e.target.closest('.book-area');
+      if (!bookArea) return;
+      bookArea.classList.remove('drag-over');
+    });
+
+    document.addEventListener('drop', function(e) {
+      const bookArea = e.target.closest('.book-area');
+      if (!bookArea) return;
+      e.preventDefault();
+      bookArea.classList.remove('drag-over');
+
+      const rawData = e.dataTransfer.getData('text/plain');
+      if (!rawData) return;
+      let data;
+      try { data = JSON.parse(rawData); } catch { return; }
+
+      const stepNumber = parseInt(bookArea.dataset.step);
+      if (data.step !== stepNumber) {
+        showToast('Перетащите карточку, которая относится к текущему шагу', false);
+        return;
+      }
+      if (stepStatus[stepNumber]) {
+        showToast('Вы уже правильно выполнили этот шаг!', true);
+        return;
+      }
+
+      const isCorrect = data.correct;
+      let message;
+      if (isCorrect) {
+        if (stepNumber === 1) message = 'Верно! Это именно то, что нужно!';
+        else if (stepNumber === 2) message = 'Верно! Все как по инструкции!';
+        else if (stepNumber === 3) message = 'Верно!';
+        else message = 'Верно!';
+      } else {
+        message = getErrorMessage(stepNumber, data.text);
+      }
+
+      if (!isCorrect) {
+        showToast(message, false);
+        const allCards = document.querySelectorAll('#cards' + stepNumber + ' .card');
+        allCards.forEach(c => {
+          if (c.textContent.trim() === data.text) {
+            c.classList.add('wrong');
+            setTimeout(() => c.classList.remove('wrong'), 1500);
+          }
+        });
+        return;
+      }
+
+      showToast(message, true);
+      stepStatus[stepNumber] = true;
+
+      const allCards = document.querySelectorAll('#cards' + stepNumber + ' .card');
+      allCards.forEach(c => {
+        if (c.textContent.trim() === data.text) {
+          c.classList.add('correct');
+        }
+        c.draggable = false;
+      });
+
+      const nextBtn = document.getElementById('nextBtn' + stepNumber);
+      if (nextBtn) {
+        nextBtn.disabled = false;
+        nextBtn.classList.add('active');
+      }
+    });
+
+    // --- Навигация ---
+    function goToStep(stepNumber) {
+      hideToast();
+      if (stepNumber !== 4) stopHearts();
+      document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+      document.getElementById('step' + stepNumber).classList.add('active');
+      if (stepNumber === 4) {
+        startHearts();
+      }
+    }
+
+    // --- Сброс ---
+    function resetAll() {
+      hideToast();
+      stopHearts();
+      stepStatus[1] = false;
+      stepStatus[2] = false;
+      stepStatus[3] = false;
+      for (let s = 1; s <= 3; s++) {
+        const cards = document.querySelectorAll('#cards' + s + ' .card');
+        cards.forEach(c => {
+          c.draggable = true;
+          c.classList.remove('correct', 'wrong');
+        });
+        const btn = document.getElementById('nextBtn' + s);
+        if (btn) {
+          btn.disabled = true;
+          btn.classList.remove('active');
+        }
+        const area = document.getElementById('bookArea' + s);
+        if (area) area.classList.remove('drag-over');
+      }
+      goToStep(1);
+    }
+
+    // --- Обработчики кнопок ---
+    document.getElementById('nextBtn1').addEventListener('click', function() {
+      if (stepStatus[1]) goToStep(2);
+    });
+    document.getElementById('nextBtn2').addEventListener('click', function() {
+      if (stepStatus[2]) goToStep(3);
+    });
+    document.getElementById('nextBtn3').addEventListener('click', function() {
+      if (stepStatus[3]) goToStep(4);
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', resetAll);
+
+    // Старт
+    goToStep(1);
+  })();
+</script>
+</body>
+</html>
