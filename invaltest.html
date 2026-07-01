@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Интерактивное упражнение — Доступность библиотеки</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', system-ui, -apple-system, sans-serif;
+            background: #f6f8fa;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+
+        .card {
+            max-width: 820px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08), 0 6px 20px rgba(0, 0, 0, 0.02);
+            padding: 40px 44px 48px;
+            transition: box-shadow 0.2s;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 24px 18px 32px;
+                border-radius: 20px;
+            }
+        }
+
+        .main-title {
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: #d32f2f; /* красный заголовок */
+            margin-bottom: 28px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e9edf4;
+        }
+
+        .question-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-bottom: 32px;
+        }
+
+        .question-item {
+            background: #f9fafc;
+            border-radius: 16px;
+            padding: 18px 22px 18px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px 16px;
+            border: 1px solid #e9edf4;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .question-item:hover {
+            border-color: #cbd5e1;
+            background: #f7f9fd;
+        }
+
+        .question-item .q-text {
+            flex: 1 1 280px;
+            font-size: 16px;
+            line-height: 1.5;
+            color: #000000; /* чёрный шрифт */
+            font-weight: 450;
+        }
+
+        .question-item .q-text .q-num {
+            display: inline-block;
+            font-weight: 600;
+            color: #2a4b7c;
+            margin-right: 4px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+            background: #eef2f7;
+            border-radius: 40px;
+            padding: 4px;
+        }
+
+        .btn-group .opt {
+            border: none;
+            background: transparent;
+            padding: 8px 20px;
+            border-radius: 32px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s, box-shadow 0.3s, color 0.2s;
+            color: #4a5f7a;
+            letter-spacing: 0.01em;
+            min-width: 60px;
+            text-align: center;
+            will-change: transform;
+        }
+
+        .btn-group .opt:hover {
+            color: #0b1a33;
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(1.04);
+        }
+
+        .btn-group .opt:active {
+            transform: scale(0.94);
+        }
+
+        .btn-group .opt.active-yes {
+            background: #1f8b4c;
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(31, 139, 76, 0.35);
+            transform: scale(1.05);
+        }
+
+        .btn-group .opt.active-yes:hover {
+            background: #1a7a42;
+            transform: scale(1.06);
+        }
+
+        .btn-group .opt.active-no {
+            background: #c73b3b;
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(199, 59, 59, 0.35);
+            transform: scale(1.05);
+        }
+
+        .btn-group .opt.active-no:hover {
+            background: #b13232;
+            transform: scale(1.06);
+        }
+
+        .btn-group .opt:focus-visible {
+            outline: 2px solid #2a4b7c;
+            outline-offset: 2px;
+        }
+
+        .submit-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
+            margin: 8px 0 16px;
+        }
+
+        .btn-check, .btn-reset {
+            border: none;
+            font-size: 17px;
+            font-weight: 600;
+            padding: 14px 40px;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+            letter-spacing: 0.02em;
+        }
+
+        .btn-check {
+            background: #1f3a5f;
+            color: white;
+            box-shadow: 0 4px 14px rgba(31, 58, 95, 0.20);
+        }
+
+        .btn-check:hover {
+            background: #142b47;
+            box-shadow: 0 6px 20px rgba(31, 58, 95, 0.30);
+            transform: scale(1.02);
+        }
+
+        .btn-check:active {
+            transform: scale(0.97);
+        }
+
+        .btn-check:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-reset {
+            background: #e2e8f0;
+            color: #1a2b44;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        }
+
+        .btn-reset:hover {
+            background: #d0d8e4;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+            transform: scale(1.02);
+        }
+
+        .btn-reset:active {
+            transform: scale(0.97);
+        }
+
+        .result-area {
+            margin-top: 28px;
+            border-radius: 20px;
+            padding: 24px 28px;
+            background: #f2f5fa;
+            border: 1px solid #e2e8f0;
+            display: none;
+            animation: fadeSlide 0.35s ease;
+        }
+
+        .result-area.visible {
+            display: block;
+        }
+
+        @keyframes fadeSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-area .result-badge {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .result-area .result-badge .badge-icon {
+            font-size: 28px;
+        }
+
+        .result-area .result-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #1a2b44;
+        }
+
+        .result-area .result-text strong {
+            color: #0b1a33;
+        }
+
+        /* result variants */
+        .result-great {
+            border-left: 6px solid #1f8b4c;
+            background: #edf7f2;
+        }
+        .result-great .result-badge {
+            color: #1a7a42;
+        }
+
+        .result-fix {
+            border-left: 6px solid #d68a2c;
+            background: #fcf5ea;
+        }
+        .result-fix .result-badge {
+            color: #b8731f;
+        }
+
+        .result-intervene {
+            border-left: 6px solid #b13232;
+            background: #fdf0ef;
+        }
+        .result-intervene .result-badge {
+            color: #a12828;
+        }
+
+        .footer-note {
+            margin-top: 24px;
+            font-size: 14px;
+            color: #7a8da0;
+            text-align: center;
+            border-top: 1px solid #e9edf4;
+            padding-top: 18px;
+            letter-spacing: 0.01em;
+        }
+
+        /* small screens */
+        @media (max-width: 550px) {
+            .question-item {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 16px 16px 18px;
+            }
+            .question-item .q-text {
+                flex: 1 1 auto;
+                font-size: 15px;
+            }
+            .btn-group {
+                align-self: flex-start;
+                width: 100%;
+                justify-content: stretch;
+                border-radius: 40px;
+            }
+            .btn-group .opt {
+                flex: 1;
+                text-align: center;
+                padding: 10px 8px;
+                font-size: 14px;
+            }
+            .btn-check, .btn-reset {
+                width: 100%;
+                padding: 14px 20px;
+                font-size: 16px;
+            }
+            .result-area {
+                padding: 20px 18px;
+            }
+            .result-area .result-badge {
+                font-size: 19px;
+                flex-wrap: wrap;
+            }
+            .card {
+                padding: 20px 14px 28px;
+            }
+            .main-title {
+                font-size: 22px;
+            }
+        }
+
+        /* utility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card" role="main" aria-labelledby="main-title">
+        <!-- Заголовок красный -->
+        <h1 class="main-title" id="main-title">Ответьте "Да" или "Нет"</h1>
+
+        <!-- Вопросы -->
+        <div class="question-list" id="questionList" role="group" aria-label="Вопросы упражнения">
+
+            <!-- Вопрос 1 -->
+            <div class="question-item" data-q="0">
+                <span class="q-text">
+                    <span class="q-num">1.</span>
+                    Смогу ли я в течение 30 секунд дойти от машины на парковке до входа, не маневрируя между бордюрами и чужими авто?
+                </span>
+                <span class="btn-group" role="radiogroup" aria-label="Ответ на вопрос 1">
+                    <button class="opt" role="radio" aria-checked="false" data-value="yes">Да</button>
+                    <button class="opt" role="radio" aria-checked="false" data-value="no">Нет</button>
+                </span>
+            </div>
+
+            <!-- Вопрос 2 -->
+            <div class="question-item" data-q="1">
+                <span class="q-text">
+                    <span class="q-num">2.</span>
+                    Есть ли где присесть, если кнопка вызова сотрудника на входе не отвечает сразу, а мне тяжело стоять?
+                </span>
+                <span class="btn-group" role="radiogroup" aria-label="Ответ на вопрос 2">
+                    <button class="opt" role="radio" aria-checked="false" data-value="yes">Да</button>
+                    <button class="opt" role="radio" aria-checked="false" data-value="no">Нет</button>
+                </span>
+            </div>
+
+            <!-- Вопрос 3 -->
+            <div class="question-item" data-q="2">
+                <span class="q-text">
+                    <span class="q-num">3.</span>
+                    Справится ли человек в коляске с дверью без моей помощи, если я занят в другом зале?
+                </span>
+                <span class="btn-group" role="radiogroup" aria-label="Ответ на вопрос 3">
+                    <button class="opt" role="radio" aria-checked="false" data-value="yes">Да</button>
+                    <button class="opt" role="radio" aria-checked="false" data-value="no">Нет</button>
+                </span>
+            </div>
+
+            <!-- Вопрос 4 -->
+            <div class="question-item" data-q="3">
+                <span class="q-text">
+                    <span class="q-num">4.</span>
+                    Могу ли я зайти в туалет с коляской, не отодвигая швабры, коробки и ведра?
+                </span>
+                <span class="btn-group" role="radiogroup" aria-label="Ответ на вопрос 4">
+                    <button class="opt" role="radio" aria-checked="false" data-value="yes">Да</button>
+                    <button class="opt" role="radio" aria-checked="false" data-value="no">Нет</button>
+                </span>
+            </div>
+
+            <!-- Вопрос 5 -->
+            <div class="question-item" data-q="4">
+                <span class="q-text">
+                    <span class="q-num">5.</span>
+                    Пойму ли я в библиотеке, куда идти, если у меня завязаны глаза или я не слышу обращенной ко мне речи?
+                </span>
+                <span class="btn-group" role="radiogroup" aria-label="Ответ на вопрос 5">
+                    <button class="opt" role="radio" aria-checked="false" data-value="yes">Да</button>
+                    <button class="opt" role="radio" aria-checked="false" data-value="no">Нет</button>
+                </span>
+            </div>
+
+        </div>
+
+        <!-- Кнопки: Проверить и Начать заново -->
+        <div class="submit-row">
+            <button class="btn-check" id="checkBtn" aria-label="Проверить ответы">Проверить</button>
+            <button class="btn-reset" id="resetBtn" aria-label="Начать заново">Начать заново</button>
+        </div>
+
+        <!-- Область результата -->
+        <div class="result-area" id="resultArea" role="status" aria-live="polite">
+            <div class="result-badge">
+                <span class="badge-icon" id="resultIcon">🎉</span>
+                <span id="resultTitle">Заголовок</span>
+            </div>
+            <div class="result-text" id="resultText">
+                Текст результата
+            </div>
+        </div>
+
+        <!-- Нижний колонтитул -->
+        <div class="footer-note">
+            Сделано в Школе менеджера культуры ◦ Актион
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            const questionItems = document.querySelectorAll('.question-item');
+            const checkBtn = document.getElementById('checkBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const resultArea = document.getElementById('resultArea');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultText = document.getElementById('resultText');
+            const resultIcon = document.getElementById('resultIcon');
+
+            // Состояние ответов: массив из 5 элементов: 'yes' или 'no' или null
+            let answers = new Array(5).fill(null);
+
+            // --- функция сброса ---
+            function resetAll() {
+                // Сбросить массив ответов
+                answers.fill(null);
+
+                // Убрать активные классы со всех кнопок
+                document.querySelectorAll('.opt').forEach(btn => {
+                    btn.classList.remove('active-yes', 'active-no');
+                    btn.setAttribute('aria-checked', 'false');
+                });
+
+                // Сбросить стили вопросов (убрать подсветку)
+                questionItems.forEach(item => {
+                    item.style.borderColor = '#e9edf4';
+                    item.style.background = '#f9fafc';
+                });
+
+                // Скрыть результат
+                resultArea.classList.remove('visible', 'result-great', 'result-fix', 'result-intervene');
+                resultArea.style.display = 'none';
+
+                // Сбросить текст результата (опционально)
+                resultIcon.textContent = '🎉';
+                resultTitle.textContent = 'Заголовок';
+                resultText.textContent = 'Текст результата';
+            }
+
+            // --- обработка кликов по кнопкам Да/Нет ---
+            questionItems.forEach((item, index) => {
+                const group = item.querySelector('.btn-group');
+                const btns = group.querySelectorAll('.opt');
+
+                btns.forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        const value = this.dataset.value; // 'yes' или 'no'
+
+                        // Снять активность со всех кнопок в этой группе
+                        btns.forEach(b => {
+                            b.classList.remove('active-yes', 'active-no');
+                            b.setAttribute('aria-checked', 'false');
+                        });
+
+                        // Активировать нажатую
+                        if (value === 'yes') {
+                            this.classList.add('active-yes');
+                        } else {
+                            this.classList.add('active-no');
+                        }
+                        this.setAttribute('aria-checked', 'true');
+
+                        // Сохранить ответ
+                        answers[index] = value;
+
+                        // Сбросить результат при изменении ответа
+                        resultArea.classList.remove('visible', 'result-great', 'result-fix', 'result-intervene');
+                        resultArea.style.display = 'none';
+
+                        // Сбросить подсветку вопроса
+                        item.style.borderColor = '#e9edf4';
+                        item.style.background = '#f9fafc';
+                    });
+                });
+            });
+
+            // --- функция подсчёта результатов ---
+            function getResult() {
+                // Проверяем, все ли вопросы отвечены
+                if (answers.some(a => a === null)) {
+                    return { type: 'incomplete' };
+                }
+
+                const noCount = answers.filter(a => a === 'no').length;
+
+                if (noCount === 0) {
+                    return {
+                        type: 'great',
+                        title: 'Вы — молодцы',
+                        icon: '🌟',
+                        text: 'Поздравляем! Ваша библиотека — зона комфорта для посетителей с инвалидностью. Но не расслабляйтесь: оборудование имеет свойство ломаться. Проверяйте его регулярно.'
+                    };
+                } else if (noCount === 1) {
+                    return {
+                        type: 'fix',
+                        title: 'Нужна доработка',
+                        icon: '🔧',
+                        text: 'Вы нашли «слабое звено». Сосредоточьтесь на нем. Если библиотека не в силах исправить проблему архитектурно — пропишите алгоритм ситуационной помощи для этого конкретного места.'
+                    };
+                } else { // noCount > 1
+                    return {
+                        type: 'intervene',
+                        title: 'Требуется вмешательство',
+                        icon: '🚨',
+                        text: 'У вашей библиотеки есть барьеры. Пригласите постоянных читателей с инвалидностью на "тест-драйв" помещения — они покажут, что нужно менять в первую очередь.'
+                    };
+                }
+            }
+
+            // --- обработка нажатия "Проверить" ---
+            checkBtn.addEventListener('click', function() {
+                // Сначала проверим, все ли вопросы отвечены
+                const allAnswered = answers.every(a => a !== null);
+
+                if (!allAnswered) {
+                    // Подсветим незаполненные вопросы
+                    questionItems.forEach((item, idx) => {
+                        if (answers[idx] === null) {
+                            item.style.borderColor = '#c73b3b';
+                            item.style.background = '#fef6f5';
+                            setTimeout(() => {
+                                item.style.borderColor = '#e9edf4';
+                                item.style.background = '#f9fafc';
+                            }, 1800);
+                        }
+                    });
+
+                    // Покажем сообщение в области результата
+                    resultArea.className = 'result-area visible';
+                    resultArea.style.display = 'block';
+                    resultIcon.textContent = '⚠️';
+                    resultTitle.textContent = 'Не все вопросы отмечены';
+                    resultText.textContent = 'Пожалуйста, ответьте на все вопросы, выбрав «Да» или «Нет» для каждого.';
+                    resultArea.classList.remove('result-great', 'result-fix', 'result-intervene');
+                    return;
+                }
+
+                // Получаем результат
+                const res = getResult();
+
+                // Показываем результат
+                resultArea.style.display = 'block';
+                resultArea.className = 'result-area visible';
+
+                // Убираем предыдущие классы стилей
+                resultArea.classList.remove('result-great', 'result-fix', 'result-intervene');
+
+                if (res.type === 'great') {
+                    resultArea.classList.add('result-great');
+                    resultIcon.textContent = res.icon;
+                    resultTitle.textContent = res.title;
+                    resultText.textContent = res.text;
+                } else if (res.type === 'fix') {
+                    resultArea.classList.add('result-fix');
+                    resultIcon.textContent = res.icon;
+                    resultTitle.textContent = res.title;
+                    resultText.textContent = res.text;
+                } else if (res.type === 'intervene') {
+                    resultArea.classList.add('result-intervene');
+                    resultIcon.textContent = res.icon;
+                    resultTitle.textContent = res.title;
+                    resultText.textContent = res.text;
+                }
+
+                // Прокрутим к результату
+                resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+
+            // --- обработка нажатия "Начать заново" ---
+            resetBtn.addEventListener('click', resetAll);
+
+            // --- клавиатурная навигация для радиогрупп ---
+            document.querySelectorAll('.btn-group').forEach(group => {
+                const btns = group.querySelectorAll('.opt');
+                btns.forEach((btn, idx) => {
+                    btn.addEventListener('keydown', function(e) {
+                        const parent = this.closest('.btn-group');
+                        const siblings = parent.querySelectorAll('.opt');
+                        let nextIdx = idx;
+
+                        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            nextIdx = (idx + 1) % siblings.length;
+                        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            nextIdx = (idx - 1 + siblings.length) % siblings.length;
+                        } else {
+                            return;
+                        }
+
+                        siblings[nextIdx].focus();
+                        siblings[nextIdx].click();
+                    });
+                });
+            });
+
+            console.log('Интерактивное упражнение загружено. Текст не изменён.');
+        })();
+    </script>
+
+</body>
+</html>

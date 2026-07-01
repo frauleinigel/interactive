@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Интерактивное упражнение – ситуации общения</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+            background: #f0f4fa;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+
+        .card {
+            max-width: 780px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08), 0 6px 20px rgba(0, 0, 0, 0.02);
+            padding: 36px 40px 44px;
+            transition: box-shadow 0.2s;
+            position: relative;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 24px 18px 32px;
+                border-radius: 20px;
+            }
+        }
+
+        .main-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #d32f2f;
+            margin-bottom: 6px;
+        }
+
+        .instruction {
+            font-size: 16px;
+            color: #2c3e50;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e9edf4;
+        }
+
+        .progress {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 28px;
+            justify-content: center;
+        }
+
+        .progress-dot {
+            width: 40px;
+            height: 8px;
+            border-radius: 8px;
+            background: #dde2ea;
+            transition: background 0.3s;
+        }
+
+        .progress-dot.active {
+            background: #1f3a5f;
+        }
+
+        .progress-dot.done {
+            background: #1f8b4c;
+        }
+
+        .question-area {
+            margin-bottom: 28px;
+        }
+
+        .question-number {
+            font-weight: 600;
+            color: #1f3a5f;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .question-text {
+            font-size: 20px;
+            font-weight: 500;
+            color: #0b1a33;
+            line-height: 1.4;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 24px;
+        }
+
+        .option-btn {
+            background: #f9fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 16px 22px;
+            font-size: 16px;
+            text-align: left;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s, transform 0.1s;
+            color: #1a2b44;
+            font-weight: 450;
+            line-height: 1.5;
+            width: 100%;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: #a0b3cc;
+            background: #f2f6fe;
+            transform: scale(1.01);
+        }
+
+        .option-btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option-btn .opt-label {
+            font-weight: 600;
+            margin-right: 6px;
+        }
+
+        /* плашка (модальное окно) */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(3px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .overlay.visible {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 28px;
+            max-width: 500px;
+            width: 100%;
+            padding: 32px 36px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.85);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal .modal-icon {
+            font-size: 44px;
+            margin-bottom: 12px;
+        }
+
+        .modal .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .modal .modal-desc {
+            font-size: 18px;
+            line-height: 1.5;
+            color: #1a2b44;
+            margin-bottom: 20px;
+        }
+
+        .modal .modal-btn {
+            background: #1f3a5f;
+            border: none;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            padding: 12px 36px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 4px 12px rgba(31, 58, 95, 0.25);
+        }
+
+        .modal .modal-btn:hover {
+            background: #142b47;
+            transform: scale(1.02);
+        }
+
+        .modal .modal-btn:active {
+            transform: scale(0.96);
+        }
+
+        .modal-error .modal-title {
+            color: #c73b3b;
+        }
+        .modal-error .modal-btn {
+            background: #c73b3b;
+        }
+        .modal-error .modal-btn:hover {
+            background: #b13232;
+        }
+
+        .modal-success .modal-title {
+            color: #1f8b4c;
+        }
+        .modal-success .modal-btn {
+            background: #1f8b4c;
+        }
+        .modal-success .modal-btn:hover {
+            background: #1a7a42;
+        }
+
+        .footer-note {
+            margin-top: 28px;
+            font-size: 14px;
+            color: #7a8da0;
+            text-align: center;
+            border-top: 1px solid #e9edf4;
+            padding-top: 18px;
+            letter-spacing: 0.01em;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .congrats {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .congrats h2 {
+            color: #1f8b4c;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .congrats p {
+            font-size: 18px;
+            color: #2c3e50;
+        }
+
+        @media (max-width: 550px) {
+            .question-text {
+                font-size: 18px;
+            }
+            .option-btn {
+                padding: 14px 18px;
+                font-size: 15px;
+            }
+            .modal {
+                padding: 24px 20px;
+            }
+            .modal .modal-title {
+                font-size: 20px;
+            }
+            .modal .modal-desc {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card" role="main">
+        <h1 class="main-title">Интерактивное упражнение</h1>
+        <div class="instruction">📝 Выберите один вариант ответа для каждой ситуации.</div>
+
+        <!-- Индикатор прогресса -->
+        <div class="progress" id="progressBar">
+            <span class="progress-dot active" data-step="0"></span>
+            <span class="progress-dot" data-step="1"></span>
+            <span class="progress-dot" data-step="2"></span>
+            <span class="progress-dot" data-step="3"></span>
+        </div>
+
+        <!-- Блок текущего вопроса -->
+        <div id="questionBlock">
+            <div class="question-area">
+                <div class="question-number" id="stepLabel">Ситуация 1 из 4</div>
+                <div class="question-text" id="questionText">♿ Читатель на коляске хочет книгу с высокой полки</div>
+            </div>
+            <div class="options" id="optionsContainer">
+                <!-- кнопки будут вставлены JS -->
+            </div>
+        </div>
+
+        <!-- Блок завершения -->
+        <div id="finishBlock" class="hidden congrats">
+            <h2>🎉 Поздравляем, вы завершили практику!</h2>
+            <p>Теперь готовы принимать читателей с инвалидностью в библиотеке на все 100%.</p>
+        </div>
+
+        <div class="footer-note">
+            Сделано в Школе менеджера культуры ◦ Актион
+        </div>
+    </div>
+
+    <!-- Плашка (модальное окно) -->
+    <div class="overlay" id="modalOverlay">
+        <div class="modal" id="modalContent">
+            <div class="modal-icon" id="modalIcon">✔️</div>
+            <div class="modal-title" id="modalTitle">Заголовок</div>
+            <div class="modal-desc" id="modalDesc">Пояснение</div>
+            <button class="modal-btn" id="modalBtn">Продолжить</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // Данные: ситуации, варианты ответов, пояснения и флаг верности
+            const situations = [{
+                id: 0,
+                question: '♿ Читатель на коляске хочет книгу с высокой полки',
+                options: [
+                    { text: 'Молча подойти сзади и начать везти коляску к стеллажу.', hint: 'Ошибка! Вы нарушаете личные границы человека.', correct: false },
+                    { text: 'Спросить: «Вам помочь дотянуться до книги или я могу принести её вам?»', hint: 'Верно! Вы предлагаете выбор и сохраняете самостоятельность читателя.', correct: true },
+                    { text: 'Сказать, что это опасно, и запретить приближаться к стеллажам.', hint: 'Ошибка! Вы ограничиваете права читателя. Задача — помочь, а не запрещать.', correct: false }
+                ]
+            }, {
+                id: 1,
+                question: '🕶️ Незрячий читатель растерянно стоит в центре зала',
+                options: [
+                    { text: 'Подойти сзади и взять его под локоть, чтобы направить к столу.', hint: 'Ошибка! Резкое прикосновение напугает человека и может привести к потере равновесия.', correct: false },
+                    { text: 'Подойти спереди, представиться и спросить: «Здравствуйте, я библиотекарь. Вам нужна помощь в ориентации?»', hint: 'Верно! Вы обозначаете себя, не пугаете и предлагаете адресную помощь.', correct: true },
+                    { text: 'Громко крикнуть из-за стойки: «Вам куда надо?!»', hint: 'Ошибка! Неэтично и бесполезно: человек не поймет, к кому вы обращаетесь и где вы находитесь.', correct: false }
+                ]
+            }, {
+                id: 2,
+                question: '🦻 Читатель с нарушением слуха не понимает вашу речь',
+                options: [
+                    { text: 'Продолжать говорить громче и активно жестикулировать.', hint: 'Ошибка! Громкая речь не помогает человеку, если он не слышит. Жестикуляция может только сильнее запутать.', correct: false },
+                    { text: 'Написать вопрос на листе бумаги или набрать его в телефоне.', hint: 'Верно! Письменная коммуникация — самый надежный и уважительный способ передачи информации.', correct: true },
+                    { text: 'Позвать коллегу и попросить его «перевести» сказанное криком.', hint: 'Ошибка! Это выглядит унизительно для читателя и не решает проблему понимания.', correct: false }
+                ]
+            }, {
+                id: 3,
+                question: '🧠 Читатель с ментальными особенностями путано объясняет запрос',
+                options: [
+                    { text: 'Сказать: «Вы говорите слишком долго, давайте побыстрее».', hint: 'Ошибка! Грубость недопустима. Читатель может замкнуться и уйти без нужной услуги.', correct: false },
+                    { text: 'Внимательно слушать, задавать короткие уточняющие вопросы и предложить визуальный каталог.', hint: 'Верно! Вы помогаете структурировать запрос, не торопя человека.', correct: true },
+                    { text: 'Сделать вид, что вы заняты, и дать любую книгу из подборки «Популярное».', hint: 'Ошибка! Это имитация помощи. Вы не выполнили запрос читателя, а просто «отделались» от него.', correct: false }
+                ]
+            }];
+
+            // DOM элементы
+            const stepLabel = document.getElementById('stepLabel');
+            const questionText = document.getElementById('questionText');
+            const optionsContainer = document.getElementById('optionsContainer');
+            const progressDots = document.querySelectorAll('.progress-dot');
+            const questionBlock = document.getElementById('questionBlock');
+            const finishBlock = document.getElementById('finishBlock');
+
+            // Модальное окно
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modalIcon = document.getElementById('modalIcon');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalDesc = document.getElementById('modalDesc');
+            const modalBtn = document.getElementById('modalBtn');
+
+            let currentStep = 0; // 0 .. 3
+            let isWaitingForCorrect = false; // блокировка выбора, пока не выбран правильный
+
+            // Функция обновления прогресса
+            function updateProgress(step) {
+                progressDots.forEach((dot, idx) => {
+                    dot.classList.remove('active', 'done');
+                    if (idx < step) dot.classList.add('done');
+                    else if (idx === step) dot.classList.add('active');
+                });
+            }
+
+            // Функция рендеринга вопроса
+            function renderQuestion(step) {
+                const situation = situations[step];
+                stepLabel.textContent = `Ситуация ${step+1} из ${situations.length}`;
+                questionText.textContent = situation.question;
+
+                // Очистить контейнер
+                optionsContainer.innerHTML = '';
+
+                // Создать кнопки вариантов
+                situation.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    // добавляем букву варианта
+                    const letter = String.fromCharCode(65 + idx); // A, B, C
+                    btn.innerHTML = `<span class="opt-label">${letter})</span> ${opt.text}`;
+                    btn.dataset.optIndex = idx;
+                    btn.dataset.correct = opt.correct ? 'true' : 'false';
+                    btn.dataset.hint = opt.hint;
+                    btn.addEventListener('click', onOptionClick);
+                    optionsContainer.appendChild(btn);
+                });
+
+                // Сброс состояния ожидания
+                isWaitingForCorrect = false;
+                // Включаем все кнопки (они могут быть отключены после ошибки)
+                document.querySelectorAll('.option-btn').forEach(b => b.disabled = false);
+            }
+
+            // Обработчик клика по варианту
+            function onOptionClick(e) {
+                const btn = e.currentTarget;
+                // Если уже ждём правильный ответ, игнорируем клики
+                if (isWaitingForCorrect) return;
+
+                const isCorrect = btn.dataset.correct === 'true';
+                const hint = btn.dataset.hint;
+
+                // Показываем плашку с пояснением
+                showModal(hint, isCorrect);
+
+                if (isCorrect) {
+                    // Верный ответ – блокируем все кнопки, чтобы нельзя было выбрать повторно
+                    document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+                    // Устанавливаем состояние ожидания (чтобы следующий клик не сработал)
+                    isWaitingForCorrect = true;
+                    // Кнопка в модалке будет "Следующая ситуация"
+                    modalBtn.textContent = 'Следующая ситуация';
+                    modalBtn.dataset.action = 'next';
+                } else {
+                    // Ошибочный ответ – оставляем кнопки активными, но показываем плашку с кнопкой "Попробовать снова"
+                    // Блокируем только что нажатую кнопку? Нет, мы не блокируем все, чтобы можно было выбрать другой вариант.
+                    // Но чтобы избежать повторного клика по той же кнопке, можно её временно отключить.
+                    btn.disabled = true; // отключаем именно эту кнопку, чтобы не нажимали повторно
+                    // Но также нужно разрешить выбрать другие варианты. 
+                    // Однако мы не хотим, чтобы пользователь мог кликнуть другой вариант, пока не закроет плашку? 
+                    // По условию: "Если пользователь отвечает ошибочно, ты его не пропускаешь к следующей ситуации, пока он не ответит верно."
+                    // Это значит, что он может выбрать другой вариант, но переход к следующей ситуации только после верного.
+                    // Сейчас мы не блокируем другие кнопки, они активны. Но чтобы избежать одновременных кликов, мы установим isWaitingForCorrect = true,
+                    // но тогда он не сможет кликнуть на другие варианты, пока не закроет плашку? Лучше сделать так: при ошибке плашка появляется, 
+                    // и мы блокируем все кнопки (чтобы нельзя было выбрать другой вариант, пока не закроет плашку). После закрытия плашки (нажатие "Попробовать снова") 
+                    // мы снимаем блокировку и делаем все кнопки активными (кроме той, которую уже нажали? но можно все сбросить и заново отрендерить вопрос? 
+                    // Проще: при ошибке мы блокируем все кнопки, а при закрытии плашки разблокируем их и сбрасываем состояние.
+                    // Однако тогда пользователь сможет нажать на ту же кнопку снова. Лучше при ошибке мы помечаем эту кнопку как disabled, 
+                    // а остальные оставляем активными, но при этом блокируем возможность перехода. Но плашка должна оставаться до тех пор, пока не нажмут "Попробовать снова".
+                    // Я поступлю так: при ошибке показываем плашку, все кнопки блокируем (disabled), чтобы нельзя было кликнуть, пока не закроют плашку. 
+                    // При закрытии (кнопка "Попробовать снова") мы разблокируем все кнопки, но ту, что нажали, делаем disabled? 
+                    // Но тогда он не сможет выбрать тот же вариант, но может выбрать другой. Это логично.
+                    // Итак, реализуем:
+                    // - при ошибке: блокируем все кнопки, показываем плашку.
+                    // - при клике "Попробовать снова": разблокируем все кнопки, кроме той, что нажали (disabled), чтобы не нажимали её снова.
+                    // - но если он выберет другой вариант, то может быть снова ошибка или верный.
+                    // Это корректно.
+
+                    // Блокируем все кнопки
+                    document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+                    // Сохраняем ссылку на нажатую кнопку, чтобы при сбросе её отключить.
+                    // Но лучше просто при сбросе (закрытии плашки) мы отключим эту конкретную кнопку, остальные включим.
+                    // Запомним её.
+                    const wrongBtn = btn;
+                    modalBtn.textContent = 'Попробовать снова';
+                    modalBtn.dataset.action = 'retry';
+                    // При клике на кнопку "Попробовать снова" мы разблокируем все, кроме wrongBtn
+                    // Сохраним wrongBtn в дата-атрибуте модалки или в замыкании.
+                    // Используем глобальную переменную
+                    window._wrongBtn = wrongBtn;
+                }
+            }
+
+            // Функция показа модального окна
+            function showModal(hint, isCorrect) {
+                // Определяем иконку, заголовок, класс
+                const modal = document.getElementById('modalContent');
+                // Убираем предыдущие классы
+                modal.classList.remove('modal-error', 'modal-success');
+                if (isCorrect) {
+                    modal.classList.add('modal-success');
+                    modalIcon.textContent = '✅';
+                    modalTitle.textContent = 'Верно!';
+                } else {
+                    modal.classList.add('modal-error');
+                    modalIcon.textContent = '❌';
+                    modalTitle.textContent = 'Ошибка';
+                }
+                modalDesc.textContent = hint;
+                modalOverlay.classList.add('visible');
+            }
+
+            // Обработчик клика по кнопке в модалке
+            modalBtn.addEventListener('click', function() {
+                const action = this.dataset.action;
+                if (action === 'next') {
+                    // Переход к следующей ситуации
+                    // Убираем плашку
+                    modalOverlay.classList.remove('visible');
+                    // Переходим к следующему шагу
+                    currentStep++;
+                    if (currentStep < situations.length) {
+                        renderQuestion(currentStep);
+                        updateProgress(currentStep);
+                    } else {
+                        // Все ситуации пройдены
+                        questionBlock.classList.add('hidden');
+                        finishBlock.classList.remove('hidden');
+                        // Обновляем прогресс (все точки done)
+                        progressDots.forEach(d => d.classList.remove('active', 'done'));
+                        progressDots.forEach(d => d.classList.add('done'));
+                    }
+                    // Сбрасываем состояние ожидания
+                    isWaitingForCorrect = false;
+                } else if (action === 'retry') {
+                    // Попробовать снова – закрыть плашку и разблокировать кнопки, кроме ошибочной
+                    modalOverlay.classList.remove('visible');
+                    // Разблокировать все кнопки, кроме той, что вызвала ошибку
+                    document.querySelectorAll('.option-btn').forEach(b => {
+                        b.disabled = false;
+                    });
+                    // Отключить именно ту кнопку, на которую нажали (сохранили в _wrongBtn)
+                    if (window._wrongBtn) {
+                        window._wrongBtn.disabled = true;
+                        window._wrongBtn = null;
+                    }
+                    // Снимаем блокировку
+                    isWaitingForCorrect = false;
+                }
+            });
+
+            // Инициализация
+            function init() {
+                currentStep = 0;
+                renderQuestion(0);
+                updateProgress(0);
+                finishBlock.classList.add('hidden');
+                questionBlock.classList.remove('hidden');
+                modalOverlay.classList.remove('visible');
+                // Сброс глобальной переменной
+                window._wrongBtn = null;
+                // Убираем все блокировки
+                isWaitingForCorrect = false;
+            }
+
+            init();
+
+            // Для кнопки "Попробовать снова" также можно закрыть по клику на фон
+            modalOverlay.addEventListener('click', function(e) {
+                if (e.target === modalOverlay) {
+                    // Если клик по фону, но у нас есть кнопка, закрывать только если это не ошибка? 
+                    // Лучше не закрывать по фону, чтобы не сбивать с толку.
+                    // Оставим только по кнопке.
+                }
+            });
+
+        })();
+    </script>
+
+</body>
+</html>
