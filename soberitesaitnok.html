@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Упражнение: соберите сайт</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    body {
+      background: #ffffff;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #111;
+      min-height: 100vh;
+      justify-content: center;
+    }
+    .container {
+      max-width: 1100px;
+      width: 100%;
+      background: white;
+      padding: 25px;
+      border-radius: 16px;
+      border: 1px solid #d0d7de;
+      position: relative;
+    }
+    h1 {
+      font-size: 28px;
+      margin-top: 0;
+      text-align: center;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      color: #b91c1c;
+    }
+    .sub {
+      text-align: center;
+      color: #333;
+      margin-bottom: 25px;
+      font-size: 16px;
+    }
+    .site-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #f2f4f6;
+      padding: 15px;
+      border-radius: 12px;
+      border: 2px solid #cbd5e1;
+      min-height: 420px;
+    }
+    .zone {
+      background: white;
+      border-radius: 10px;
+      padding: 12px 18px;
+      border: 2px solid #d0d7de;
+      transition: background 0.2s;
+      min-height: 65px;
+    }
+    .zone-label {
+      font-weight: 600;
+      font-size: 15px;
+      color: #111;
+      margin-bottom: 6px;
+    }
+    .zone-drop {
+      min-height: 44px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .zone-drop .placed-item {
+      background: #e6f0fa;
+      padding: 5px 14px;
+      border-radius: 30px;
+      font-size: 14px;
+      border: 1px solid #1a56db;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #111;
+    }
+    .zone-drop .placed-item.correct {
+      background: #d1fae5;
+      border-color: #1a56db;
+      color: #111;
+    }
+    .items-pool {
+      margin-top: 25px;
+      padding: 18px;
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 2px solid #d0d7de;
+    }
+    .items-pool h3 {
+      margin-top: 0;
+      font-size: 16px;
+      color: #111;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+    .items-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .drag-item {
+      background: #ffffff;
+      padding: 8px 18px;
+      border-radius: 40px;
+      border: 2px solid #1a56db;
+      color: #1a56db;
+      font-weight: 500;
+      font-size: 14px;
+      cursor: grab;
+      user-select: none;
+      box-shadow: 0 1px 4px rgba(26,86,219,0.15);
+      transition: 0.15s;
+      display: inline-block;
+    }
+    .drag-item:active {
+      cursor: grabbing;
+      opacity: 0.6;
+    }
+    .drag-item.dragging {
+      opacity: 0.4;
+    }
+    .drag-item.placed {
+      opacity: 0.2;
+      pointer-events: none;
+      border-color: #94a3b8;
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    /* ПЛАШКИ ПО ЦЕНТРУ ЭКРАНА */
+    .toast-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(4px);
+    }
+    .toast-overlay.show {
+      display: flex;
+    }
+    .toast-box {
+      background: white;
+      border-radius: 24px;
+      padding: 40px 48px;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      text-align: center;
+      animation: popIn 0.3s ease-out;
+    }
+    .toast-box.error {
+      border-left: 8px solid #b91c1c;
+    }
+    .toast-box.success {
+      border-left: 8px solid #0b7e3d;
+    }
+    .toast-box.warning {
+      border-left: 8px solid #e67e22;
+    }
+    .toast-box .icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+    .toast-box .title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .toast-box .title.error-title { color: #b91c1c; }
+    .toast-box .title.success-title { color: #0b7e3d; }
+    .toast-box .title.warning-title { color: #e67e22; }
+    .toast-box .message {
+      font-size: 18px;
+      line-height: 1.5;
+      color: #111;
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .result {
+      margin-top: 25px;
+      padding: 18px;
+      background: #f8fafc;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 500;
+      color: #111;
+      border: 1px solid #d0d7de;
+    }
+    .result span {
+      color: #1a56db;
+      font-weight: 700;
+    }
+    .btn-reset {
+      margin-top: 12px;
+      background: #1a56db;
+      color: white;
+      border: none;
+      padding: 10px 30px;
+      border-radius: 40px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-reset:hover {
+      background: #0f3f9e;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>💻 Упражнение: соберите сайт</h1>
+  <p class="sub">Перетащите каждый элемент в ту зону, где его будет удобно искать посетителю. Учитывайте логику навигации.</p>
+
+  <!-- Оверлей для плашек -->
+  <div id="toastOverlay" class="toast-overlay">
+    <div id="toastBox" class="toast-box">
+      <div id="toastIcon" class="icon"></div>
+      <div id="toastTitle" class="title"></div>
+      <div id="toastMessage" class="message"></div>
+    </div>
+  </div>
+
+  <div class="site-layout" id="siteLayout">
+    <div class="zone" data-zone="header">
+      <div class="zone-label">ШАПКА</div>
+      <div class="zone-drop" id="zone-header"></div>
+    </div>
+    <div class="zone" data-zone="menu">
+      <div class="zone-label">НАВИГАЦИОННАЯ ПАНЕЛЬ</div>
+      <div class="zone-drop" id="zone-menu"></div>
+    </div>
+    <div class="zone" data-zone="main">
+      <div class="zone-label">ОСНОВНОЙ КОНТЕНТ</div>
+      <div class="zone-drop" id="zone-main"></div>
+    </div>
+    <div class="zone" data-zone="footer">
+      <div class="zone-label">ПОДВАЛ</div>
+      <div class="zone-drop" id="zone-footer"></div>
+    </div>
+    <div class="zone" data-zone="page">
+      <div class="zone-label">ОТДЕЛЬНАЯ СТРАНИЦА</div>
+      <div class="zone-drop" id="zone-page"></div>
+    </div>
+  </div>
+
+  <div class="items-pool" id="itemsPool">
+    <h3>Элементы для размещения</h3>
+    <div class="items-grid" id="itemsGrid"></div>
+  </div>
+
+  <div class="result" id="resultArea">
+    <span id="scoreText">0</span> из <span id="totalText">9</span> элементов размещены правильно
+    <br>
+    <button class="btn-reset" id="resetBtn">🔄 Начать заново</button>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const itemsData = [
+      {
+        id: 'search',
+        label: '🔍 Поиск',
+        correctZone: 'header',
+        alternativeZones: ['menu'],
+        reason: 'Поиск должен быть в шапке, чтобы посетитель мог найти нужное с любой страницы, не листая сайт.',
+        wrongReason: 'Поиск должен быть всегда на виду, чтобы посетитель мог найти нужное без прокрутки страницы. В этой зоне он теряет свою функцию быстрого доступа.',
+        alternativeMessage: 'Попробуйте разместить поиск в другой зоне.'
+      },
+      {
+        id: 'menu',
+        label: '📋 Меню',
+        correctZone: 'menu',
+        alternativeZones: ['header'],
+        reason: 'Меню — главный инструмент навигации. Его место на навигационной панели, чтобы посетитель сразу видел разделы.',
+        wrongReason: 'Меню — главный навигационный инструмент. Если разместить его здесь, посетителю будет сложно сориентироваться и найти нужный раздел.',
+        alternativeMessage: 'Попробуйте разместить меню в другой зоне.'
+      },
+      {
+        id: 'contacts',
+        label: '📞 Контакты (телефон, почта)',
+        correctZone: 'footer',
+        alternativeZones: ['header'],
+        reason: 'Контакты удобно размещать в подвале — они всегда под рукой, но не отвлекают от основного содержания.',
+        wrongReason: 'Контакты должны находиться там, где посетитель привык их искать, чтобы не тратить время на поиски. Эта зона для этого не подходит.',
+        alternativeMessage: 'Попробуйте разместить контакты в другой зоне.'
+      },
+      {
+        id: 'schedule',
+        label: '🕒 Режим работы',
+        correctZone: 'footer',
+        reason: 'Режим работы логично размещать в подвале — посетители ищут его внизу страницы, как и контакты.',
+        wrongReason: 'Режим работы обычно ищут в том же месте, что и контакты. В этой зоне он будет не на своём месте и его сложнее заметить.'
+      },
+      {
+        id: 'sitemap',
+        label: '🗺️ Карта сайта',
+        correctZone: 'page',
+        reason: 'Карта сайта должна быть на отдельной странице — это оглавление всего ресурса, чтобы посетитель мог быстро сориентироваться.',
+        wrongReason: 'Карта сайта — это вспомогательный инструмент, который не должен перегружать основное содержание. Размещая её здесь, вы усложняете восприятие страницы.'
+      },
+      {
+        id: 'charter',
+        label: '📄 Устав учреждения',
+        correctZone: 'main',
+        reason: 'Устав — документ, его логично размещать в основном контенте, в разделе «Документы».',
+        wrongReason: 'Устав — официальный документ, и посетители ожидают найти его среди других документов. В этой зоне он будет неочевиден.'
+      },
+      {
+        id: 'plan',
+        label: '📊 План ФХД',
+        correctZone: 'main',
+        reason: 'План ФХД — финансовый документ, он должен быть в основном контенте, в разделе с отчётами и документами.',
+        wrongReason: 'План ФХД — финансовый документ, его логично размещать вместе с отчётностью. Здесь он будет выглядеть случайно.'
+      },
+      {
+        id: 'prices',
+        label: '💰 Информация о ценах',
+        correctZone: 'main',
+        reason: 'Цены на услуги должны быть в основном контенте, чтобы посетитель мог их увидеть, не уходя в другие разделы.',
+        wrongReason: 'Информация о ценах относится к услугам, её место рядом с описанием услуг. В этой зоне она будет оторвана от контекста.'
+      },
+      {
+        id: 'survey',
+        label: '📝 Анкета для опроса',
+        correctZone: 'footer',
+        alternativeZones: ['page'],
+        reason: 'Анкету удобно размещать в подвале — она всегда доступна, но не мешает основному контенту.',
+        wrongReason: 'Анкета для опроса не должна перекрывать основной контент и отвлекать посетителя. В этой зоне она мешает восприятию информации.',
+        alternativeMessage: 'Попробуйте добавить анкету для опроса в другой раздел.'
+      }
+    ];
+
+    const zoneIds = ['header', 'menu', 'main', 'footer', 'page'];
+    const zoneDropMap = {
+      header: document.getElementById('zone-header'),
+      menu: document.getElementById('zone-menu'),
+      main: document.getElementById('zone-main'),
+      footer: document.getElementById('zone-footer'),
+      page: document.getElementById('zone-page')
+    };
+    const itemsGrid = document.getElementById('itemsGrid');
+    const toastOverlay = document.getElementById('toastOverlay');
+    const toastBox = document.getElementById('toastBox');
+    const toastIcon = document.getElementById('toastIcon');
+    const toastTitle = document.getElementById('toastTitle');
+    const toastMessage = document.getElementById('toastMessage');
+    const scoreSpan = document.getElementById('scoreText');
+    const totalSpan = document.getElementById('totalText');
+
+    let placedItems = {};
+    let toastTimer = null;
+
+    function updateScore() {
+      const placed = Object.keys(placedItems).length;
+      scoreSpan.textContent = placed;
+      totalSpan.textContent = itemsData.length;
+    }
+
+    function createDragItem(item) {
+      const div = document.createElement('div');
+      div.className = 'drag-item';
+      div.dataset.id = item.id;
+      div.dataset.correctZone = item.correctZone;
+      div.textContent = item.label;
+      div.draggable = true;
+
+      div.addEventListener('dragstart', function(e) {
+        e.dataTransfer.setData('text/plain', this.dataset.id);
+        this.classList.add('dragging');
+      });
+      div.addEventListener('dragend', function(e) {
+        this.classList.remove('dragging');
+      });
+
+      return div;
+    }
+
+    function renderItems() {
+      itemsGrid.innerHTML = '';
+      itemsData.forEach(item => {
+        if (!placedItems[item.id]) {
+          const el = createDragItem(item);
+          itemsGrid.appendChild(el);
+        }
+      });
+    }
+
+    function resetAll() {
+      zoneIds.forEach(id => {
+        zoneDropMap[id].innerHTML = '';
+      });
+      placedItems = {};
+      updateScore();
+      renderItems();
+      toastOverlay.classList.remove('show');
+      if (toastTimer) {
+        clearTimeout(toastTimer);
+        toastTimer = null;
+      }
+    }
+
+    function showToast(type, titleText, messageText) {
+      toastOverlay.classList.remove('show');
+      if (toastTimer) {
+        clearTimeout(toastTimer);
+        toastTimer = null;
+      }
+
+      toastBox.className = 'toast-box';
+      if (type === 'error') {
+        toastBox.classList.add('error');
+        toastIcon.textContent = '❌';
+        toastTitle.className = 'title error-title';
+        toastTitle.textContent = titleText || 'Ошибка!';
+      } else if (type === 'warning') {
+        toastBox.classList.add('warning');
+        toastIcon.textContent = '⚠️';
+        toastTitle.className = 'title warning-title';
+        toastTitle.textContent = titleText || 'Обратите внимание!';
+      } else {
+        toastBox.classList.add('success');
+        toastIcon.textContent = '✅';
+        toastTitle.className = 'title success-title';
+        toastTitle.textContent = titleText || 'Верно!';
+      }
+      toastMessage.textContent = messageText || '';
+
+      toastOverlay.classList.add('show');
+
+      toastTimer = setTimeout(() => {
+        toastOverlay.classList.remove('show');
+        toastTimer = null;
+      }, 4000);
+    }
+
+    function placeItem(itemId, zoneId) {
+      const item = itemsData.find(i => i.id === itemId);
+      if (!item) return false;
+      if (placedItems[itemId]) return false;
+
+      const isAlternative = item.alternativeZones && item.alternativeZones.includes(zoneId);
+
+      if (item.correctZone === zoneId) {
+        placedItems[itemId] = zoneId;
+        const zoneDrop = zoneDropMap[zoneId];
+        const span = document.createElement('span');
+        span.className = 'placed-item correct';
+        span.textContent = item.label;
+        zoneDrop.appendChild(span);
+
+        const dragEl = itemsGrid.querySelector(`.drag-item[data-id="${itemId}"]`);
+        if (dragEl) dragEl.remove();
+
+        updateScore();
+        showToast('success', 'Верно!', item.reason);
+        return true;
+      } else if (isAlternative) {
+        showToast('warning', 'Вариант допустим, но есть лучше', item.alternativeMessage || 'Попробуйте разместить этот элемент в другой зоне.');
+        return false;
+      } else {
+        showToast('error', 'Ошибка!', item.wrongReason);
+        return false;
+      }
+    }
+
+    zoneIds.forEach(zoneId => {
+      const zone = zoneDropMap[zoneId];
+      zone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+      });
+      zone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        const data = e.dataTransfer.getData('text/plain');
+        if (!data) return;
+        const itemId = data;
+        if (placedItems[itemId]) return;
+        placeItem(itemId, zoneId);
+      });
+    });
+
+    document.addEventListener('dragover', function(e) {
+      e.preventDefault();
+    });
+    document.addEventListener('drop', function(e) {
+      e.preventDefault();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', resetAll);
+
+    totalSpan.textContent = itemsData.length;
+    resetAll();
+  })();
+</script>
+</body>
+</html>

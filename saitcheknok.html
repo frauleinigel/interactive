@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивный чек-лист аудита сайта</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        body {
+            background: #f5f7fa;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 1300px;
+            width: 100%;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        h1 {
+            font-size: 26px;
+            margin-top: 0;
+            color: #1a2a3a;
+        }
+        .toolbar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 40px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #e8ecf1;
+            color: #1a2a3a;
+        }
+        .btn-primary {
+            background: #16a34a; /* зелёный */
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #15803d;
+        }
+        .btn-outline {
+            border: 1px solid #d0d7de;
+            background: white;
+        }
+        .btn-outline:hover {
+            background: #f0f2f5;
+        }
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        th {
+            background: #f0f4f8;
+            color: #1e293b;
+            font-weight: 600;
+            text-align: left;
+            padding: 12px 10px;
+            border-bottom: 2px solid #d0d7de;
+        }
+        td {
+            padding: 10px 10px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+        .col-check {
+            width: 40px;
+            text-align: center;
+        }
+        .col-name {
+            font-weight: bold;
+            color: #7e22ce; /* фиолетовый */
+        }
+        .col-detail {
+            color: #b91c1c;  /* красный */
+            font-style: italic;
+        }
+        .col-doc {
+            width: 220px;
+            font-size: 13px;
+            color: #475569;
+        }
+        .checkbox {
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            border: 2px solid #94a3b8;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            line-height: 18px;
+            font-size: 16px;
+            color: #1a56db;
+            user-select: none;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        .checkbox.checked {
+            border-color: #1a56db;
+            background: #e6f0fa;
+            animation: pop 0.2s ease;
+        }
+        .checkbox.checked::after {
+            content: "✓";
+        }
+        @keyframes pop {
+            0% { transform: scale(0.5); opacity: 0.5; }
+            70% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        tr.done td {
+            background-color: #f8fafc;
+        }
+        tr.done .col-name {
+            text-decoration: line-through;
+            color: #94a3b8;
+        }
+        tr.done .col-detail {
+            text-decoration: line-through;
+            color: #94a3b8;
+        }
+        @media print {
+            body {
+                background: white;
+                margin: 0.5in;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 10px;
+                border-radius: 0;
+            }
+            .toolbar {
+                display: none !important;
+            }
+            .btn {
+                display: none !important;
+            }
+            th, td {
+                padding: 6px 8px;
+            }
+            .checkbox {
+                border: 1px solid #333;
+                line-height: 16px;
+                font-size: 14px;
+                width: 18px;
+                height: 18px;
+            }
+            .checkbox.checked::after {
+                content: "✓";
+            }
+            tr.done td {
+                background-color: #f0f0f0 !important;
+            }
+            tr.done .col-name,
+            tr.done .col-detail {
+                text-decoration: none !important;
+                color: #000 !important;
+            }
+            .col-doc {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="checklistContainer">
+    <h1>Интерактивный чек-лист аудита сайта ✅</h1>
+    <div class="toolbar">
+        <button class="btn btn-primary" onclick="window.print()">📄 Сохранить PDF / Печать</button>
+        <button class="btn btn-outline" onclick="resetAll()">🔄 Сбросить все</button>
+        <span style="margin-left: auto; font-size: 14px; color: #64748b;">Отмечено: <span id="counter">0</span> из <span id="total">0</span></span>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="col-check">✓</th>
+                <th>Что проверить</th>
+                <th>На что обратить внимание</th>
+                <th class="col-doc">Нормативный документ</th>
+            </tr>
+        </thead>
+        <tbody id="checklistBody">
+            <!-- строки добавляются скриптом -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const items = [
+        { check: "Правило двух кликов", detail: "Любой документ открывается максимум за 2 клика с главной страницы.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Карта сайта", detail: "Есть отдельная страница со ссылками на все разделы.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Поиск по сайту", detail: "Поиск работает, виден на всех страницах, ищет внутри файлов.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Круглосуточный доступ", detail: "Сайт доступен 24/7 без регистрации и ввода персональных данных.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Актуальность информации", detail: "Информация обновляется в течение 10 рабочих дней после изменений.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Полное и сокращенное наименование", detail: "Соответствует уставу, указаны оба варианта.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Место нахождения", detail: "Указаны и юридический, и почтовый адреса, даже если они совпадают.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Схема проезда", detail: "Интерактивная карта дополнена текстовым описанием маршрута.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Дата создания организации", detail: "Указан год (или точная дата) основания.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Сведения об учредителе", detail: "Полное наименование органа власти со ссылкой на его сайт.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Учредительные документы", detail: "Размещены копии устава, свидетельства о регистрации, решения о создании.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Структура и органы управления", detail: "Опубликована схема или список отделов и подразделений.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Режим и график работы", detail: "Расписание по дням недели, время перерывов, санитарные дни.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Контактные телефоны и e-mail", detail: "Указаны действующие номера с кодом города и рабочая почта.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Сведения о руководстве", detail: "Указаны Ф. И. О. и должности директора, замов, главбуха.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Филиалы (при наличии)", detail: "По каждому филиалу: адрес, контакты, режим работы, Ф. И. О. руководителя.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Перечень услуг", detail: "Платные и бесплатные услуги четко разделены, есть описания.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Цены (тарифы) на услуги", detail: "Размещена ссылка на актуальный приказ об утверждении цен.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "План ФХД", detail: "Опубликован документ на текущий год и плановый период.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Отчет о результатах деятельности", detail: "Размещен подлинный отчет за прошлый год с подписями.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Отчет о выполнении госзадания", detail: "Опубликован отчет за последний завершенный период.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Материально-техническая база", detail: "Описаны помещения, оборудование, наличие интернета и фондов.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Копии лицензий", detail: "Размещены сканы лицензий на все виды регулируемой деятельности.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Афиша мероприятий", detail: "Опубликован актуальный план событий с датами и ценами.", doc: "Приказ Минкультуры № 277 от 20.02.2015" },
+        { check: "Дистанционные способы связи", detail: "Телефон, email, форма обращений, FAQ, анкета, запись онлайн — все работает.", doc: "Приказ Минкультуры № 599 от 27.04.2018" },
+        { check: "Ссылка на bus.gov.ru", detail: "На сайте есть прямая ссылка на карточку учреждения на bus.gov.ru.", doc: "Приказ Минфина № 66н от 07.05.2019" },
+        { check: "Электронный опрос получателей", detail: "Анкета доступна онлайн, посетители информируются через QR-коды и объявления.", doc: "Приказ № 675н от 30.10.2018" },
+        { check: "Результаты НОК", detail: "Размещены аналитический отчет, баллы и место в рейтинге.", doc: "Приказ Минкультуры № 599 от 27.04.2018" },
+        { check: "План устранения недостатков", detail: "Опубликован утвержденный план с конкретными сроками.", doc: "Приказ Минкультуры № 599 от 27.04.2018" },
+        { check: "Отчет о выполнении плана", detail: "Размещено подтверждение, что все недостатки устранены.", doc: "Приказ Минкультуры № 599 от 27.04.2018" },
+        { check: "Обязательный публичный отчет", detail: "Отчет составлен и опубликован по установленной форме.", doc: "Постановление Правительства № 457 от 17.04.2018" },
+        { check: "Русский язык контента", detail: "Вся информация, кнопки и формы переведены. Русский текст первый.", doc: "Федеральный закон № 168-ФЗ от 24.06.2025" },
+        { check: "Доступность для инвалидов", detail: "Сайт управляется с клавиатуры, масштаб 200% работает без искажений.", doc: "Постановление Правительства № 102 от 07.02.2026" },
+        { check: "Российская авторизация", detail: "Полностью удален вход через Google, Apple ID и другие зарубежные базы.", doc: "Федеральный закон от 26.06.2026 № 199-ФЗ" },
+        { check: "Идентификация домена", detail: "Домен зарегистрирован на юрлицо и верифицирован через ЕСИА.", doc: "Федеральный закон № 569-ФЗ от 29.12.2025" },
+        { check: "Персональные данные", detail: "Опубликована политика конфиденциальности, сбор согласий, предупреждение о cookies.", doc: "Федеральный закон № 152-ФЗ от 27.07.2006" }
+    ];
+
+    const tbody = document.getElementById('checklistBody');
+    const counterSpan = document.getElementById('counter');
+    const totalSpan = document.getElementById('total');
+
+    let checkedState = new Array(items.length).fill(false);
+
+    function render() {
+        tbody.innerHTML = '';
+        items.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            if (checkedState[index]) tr.classList.add('done');
+
+            // checkbox
+            const tdCheck = document.createElement('td');
+            tdCheck.className = 'col-check';
+            const cb = document.createElement('span');
+            cb.className = 'checkbox' + (checkedState[index] ? ' checked' : '');
+            cb.setAttribute('data-index', index);
+            cb.addEventListener('click', function(e) {
+                const idx = parseInt(this.dataset.index);
+                toggleItem(idx);
+            });
+            tdCheck.appendChild(cb);
+            tr.appendChild(tdCheck);
+
+            // Что проверить (фиолетовый, жирный)
+            const tdName = document.createElement('td');
+            tdName.className = 'col-name';
+            tdName.textContent = item.check;
+            tr.appendChild(tdName);
+
+            // На что обратить внимание (красный курсив)
+            const tdDetail = document.createElement('td');
+            tdDetail.className = 'col-detail';
+            tdDetail.textContent = item.detail;
+            tr.appendChild(tdDetail);
+
+            // Нормативный документ
+            const tdDoc = document.createElement('td');
+            tdDoc.className = 'col-doc';
+            tdDoc.textContent = item.doc;
+            tr.appendChild(tdDoc);
+
+            tbody.appendChild(tr);
+        });
+        updateCounter();
+    }
+
+    function toggleItem(index) {
+        checkedState[index] = !checkedState[index];
+        render();
+    }
+
+    function updateCounter() {
+        const done = checkedState.filter(v => v).length;
+        counterSpan.textContent = done;
+        totalSpan.textContent = items.length;
+    }
+
+    function resetAll() {
+        checkedState.fill(false);
+        render();
+    }
+
+    render();
+</script>
+</body>
+</html>
