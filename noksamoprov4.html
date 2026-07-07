@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Чек-лист НОК — Критерий 4</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #fafafa;
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 30px 15px;
+      margin: 0;
+    }
+    .wrapper {
+      max-width: 820px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 28px 28px 20px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+      border: 1px solid #eaeef4;
+    }
+
+    h1 {
+      color: #d32f2f;
+      font-size: 1.7rem;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+      border-left: 6px solid #d32f2f;
+      padding-left: 18px;
+      line-height: 1.2;
+    }
+    .subhead {
+      color: #3a3a3a;
+      font-size: 0.95rem;
+      margin-bottom: 22px;
+      padding-left: 24px;
+      font-weight: 400;
+      opacity: 0.8;
+      border-bottom: 1px solid #eef1f5;
+      padding-bottom: 12px;
+    }
+
+    #checklist-container {
+      background: #ffffff;
+      padding: 4px 0 6px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 8px 10px 8px 8px;
+      border-bottom: 1px solid #eef1f5;
+      cursor: pointer;
+      transition: background 0.1s ease;
+    }
+    .check-item:last-of-type {
+      border-bottom: none;
+    }
+    .check-item:hover {
+      background: #f6f9ff;
+    }
+
+    .check-item input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    .custom-check {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      margin-top: 2px;
+      border: 2px solid #b8c0d0;
+      border-radius: 6px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .custom-check svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transform: scale(0);
+      opacity: 0;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+    }
+
+    .check-item.checked .custom-check {
+      background: #2e7d32;
+      border-color: #2e7d32;
+      box-shadow: 0 3px 8px rgba(46, 125, 50, 0.25);
+    }
+    .check-item.checked .custom-check svg {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .check-item .label-text {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #1a1a1a;
+      font-weight: 600;
+      padding-top: 1px;
+      user-select: none;
+    }
+    .check-item .item-number {
+      display: inline-block;
+      min-width: 22px;
+      font-weight: 700;
+      color: #6b7482;
+      margin-right: 3px;
+    }
+
+    .actions-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 28px;
+      padding-top: 16px;
+      border-top: 1px solid #eef1f5;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 60px;
+      padding: 12px 28px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-reset {
+      background: #1e1e1e;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .btn-reset:hover {
+      background: #333333;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-pdf {
+      background: #d32f2f;
+      color: #ffffff;
+      box-shadow: 0 6px 14px rgba(211, 47, 47, 0.25);
+    }
+    .btn-pdf:hover {
+      background: #b71c1c;
+      box-shadow: 0 8px 18px rgba(211, 47, 47, 0.3);
+    }
+
+    .btn svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+    }
+
+    @media (max-width: 600px) {
+      .wrapper {
+        padding: 18px 14px;
+      }
+      h1 {
+        font-size: 1.35rem;
+        padding-left: 12px;
+      }
+      .check-item {
+        padding: 6px 6px 6px 4px;
+        gap: 10px;
+      }
+      .custom-check {
+        width: 20px;
+        height: 20px;
+      }
+      .custom-check svg {
+        width: 14px;
+        height: 14px;
+      }
+      .actions-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .btn-group {
+        flex-direction: column;
+        width: 100%;
+      }
+      .btn {
+        justify-content: center;
+        width: 100%;
+        padding: 12px 20px;
+      }
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0); opacity: 0; }
+      80% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .check-item.checked .custom-check svg {
+      animation: popIn 0.25s ease forwards;
+    }
+
+    .footer-note {
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: #999;
+      text-align: right;
+      border-top: 1px solid #f0f2f5;
+      padding-top: 12px;
+    }
+
+    /* ---------- СТИЛИ ДЛЯ ПЕЧАТИ / PDF ---------- */
+    @media print {
+      .actions-wrapper,
+      .footer-note {
+        display: none !important;
+      }
+
+      body {
+        background: #fff;
+        padding: 0.5in;
+        margin: 0;
+      }
+
+      .wrapper {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        border-radius: 0;
+        max-width: 100%;
+      }
+
+      .check-item {
+        break-inside: avoid;
+        border-bottom: 1px solid #ccc;
+        padding: 6px 4px;
+        cursor: default;
+        background: #fff !important;
+      }
+
+      .check-item:hover {
+        background: #fff !important;
+      }
+
+      .custom-check {
+        border-color: #999;
+        background: #fff;
+        box-shadow: none !important;
+      }
+
+      .check-item.checked .custom-check {
+        background: #2e7d32 !important;
+        border-color: #2e7d32 !important;
+        box-shadow: none !important;
+      }
+      .check-item.checked .custom-check svg {
+        transform: scale(1);
+        opacity: 1;
+        stroke: #fff;
+      }
+
+      h1 {
+        color: #000;
+        border-left-color: #000;
+      }
+      .subhead {
+        color: #333;
+        border-bottom-color: #ccc;
+      }
+      .check-item .label-text {
+        color: #000;
+      }
+      .check-item .item-number {
+        color: #555;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+  <h1>📋 Самопроверка перед НОК: чек‑лист по критерию 4</h1>
+  <div class="subhead">Доброжелательность, вежливость работников организации</div>
+
+  <div id="checklist-container">
+    <!-- Пункт 1 -->
+    <label class="check-item">
+      <input type="checkbox" />
+      <span class="custom-check">
+        <svg viewBox="0 0 24 24">
+          <polyline points="4 12 10 18 20 6" />
+        </svg>
+      </span>
+      <span class="label-text"><span class="item-number">1.</span> В зоне первичного приема сотрудники здороваются первыми, представляются или носят читаемый бейдж с именем.</span>
+    </label>
+
+    <!-- Пункт 2 -->
+    <label class="check-item">
+      <input type="checkbox" />
+      <span class="custom-check">
+        <svg viewBox="0 0 24 24">
+          <polyline points="4 12 10 18 20 6" />
+        </svg>
+      </span>
+      <span class="label-text"><span class="item-number">2.</span> Сотрудники, оказывающие услуги, умеют спокойно и уважительно ответить на повторный или «глупый» вопрос — вы проверили.</span>
+    </label>
+
+    <!-- Пункт 3 -->
+    <label class="check-item">
+      <input type="checkbox" />
+      <span class="custom-check">
+        <svg viewBox="0 0 24 24">
+          <polyline points="4 12 10 18 20 6" />
+        </svg>
+      </span>
+      <span class="label-text"><span class="item-number">3.</span> При контрольном звонке в учреждение трубку берут до 3-го гудка, звучит приветствие с названием организации и именем ответившего, тон ровный и заинтересованный.</span>
+    </label>
+
+    <!-- Пункт 4 -->
+    <label class="check-item">
+      <input type="checkbox" />
+      <span class="custom-check">
+        <svg viewBox="0 0 24 24">
+          <polyline points="4 12 10 18 20 6" />
+        </svg>
+      </span>
+      <span class="label-text"><span class="item-number">4.</span> Ответ на тестовое электронное письмо приходит в течение 1–2 рабочих дней, содержит обращение по имени (если указано) и корректную подпись без фамильярности.</span>
+    </label>
+
+    <!-- Пункт 5 -->
+    <label class="check-item">
+      <input type="checkbox" />
+      <span class="custom-check">
+        <svg viewBox="0 0 24 24">
+          <polyline points="4 12 10 18 20 6" />
+        </svg>
+      </span>
+      <span class="label-text"><span class="item-number">5.</span> В официальных аккаунтах в соцсетях и мессенджерах на сообщение посетителя дают содержательный ответ — проверили последние 3 диалога.</span>
+    </label>
+
+    <!-- Пункт 6 -->
+    <label class="check-item">
+      <input type="checkbox" />
+      <span class="custom-check">
+        <svg viewBox="0 0 24 24">
+          <polyline points="4 12 10 18 20 6" />
+        </svg>
+      </span>
+      <span class="label-text"><span class="item-number">6.</span> Имеется простой и понятный персоналу внутренний документ: «Как мы общаемся с посетителями» (допустимые/недопустимые фразы, порядок действий при жалобе).</span>
+    </label>
+
+    <!-- Пункт 7 -->
+    <label class="check-item">
+      <input type="checkbox" />
+      <span class="custom-check">
+        <svg viewBox="0 0 24 24">
+          <polyline points="4 12 10 18 20 6" />
+        </svg>
+      </span>
+      <span class="label-text"><span class="item-number">7.</span> За последние полгода проводился хотя бы один короткий инструктаж по вежливости, о чем есть запись в журнале планерок или лист ознакомления.</span>
+    </label>
+
+    <!-- Пункт 8 -->
+    <label class="check-item">
+      <input type="checkbox" />
+      <span class="custom-check">
+        <svg viewBox="0 0 24 24">
+          <polyline points="4 12 10 18 20 6" />
+        </svg>
+      </span>
+      <span class="label-text"><span class="item-number">8.</span> Все устные и письменные жалобы регистрируются, и на каждую дается ответ в срок до 10 дней — проверьте последнюю запись.</span>
+    </label>
+
+    <!-- Пункт 9 -->
+    <label class="check-item">
+      <input type="checkbox" />
+      <span class="custom-check">
+        <svg viewBox="0 0 24 24">
+          <polyline points="4 12 10 18 20 6" />
+        </svg>
+      </span>
+      <span class="label-text"><span class="item-number">9.</span> Руководитель или старший администратор раз в квартал наблюдает за сотрудниками первой линии в естественных условиях и фиксирует 2–3 точки роста.</span>
+    </label>
+  </div>
+
+  <div class="actions-wrapper">
+    <div class="btn-group">
+      <button class="btn btn-reset" id="resetBtn">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9m0 0v6m0-6h-6" />
+        </svg>
+        Сбросить всё
+      </button>
+    </div>
+    <button class="btn btn-pdf" id="printBtn">
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+        <path d="M12 15v4m-2-2h4"/>
+      </svg>
+      Сохранить PDF
+    </button>
+  </div>
+  <div class="footer-note">Нажмите на пункт, чтобы отметить ✓</div>
+</div>
+
+<script>
+  (function() {
+    // ----- Логика чекбоксов -----
+    const items = document.querySelectorAll('.check-item');
+    items.forEach(item => {
+      const checkbox = item.querySelector('input[type="checkbox"]');
+      checkbox.addEventListener('change', function() {
+        if (this.checked) {
+          item.classList.add('checked');
+        } else {
+          item.classList.remove('checked');
+        }
+      });
+      item.addEventListener('click', function(e) {
+        if (e.target.tagName === 'INPUT') return;
+        if (navigator.vibrate) navigator.vibrate(8);
+      });
+    });
+
+    // ----- Сброс всех галочек -----
+    document.getElementById('resetBtn').addEventListener('click', function() {
+      items.forEach(item => {
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        if (checkbox.checked) {
+          checkbox.checked = false;
+          item.classList.remove('checked');
+        }
+      });
+      if (navigator.vibrate) navigator.vibrate(20);
+    });
+
+    // ----- Печать / Сохранение PDF через window.print() -----
+    document.getElementById('printBtn').addEventListener('click', function() {
+      window.print();
+    });
+  })();
+</script>
+</body>
+</html>
