@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Норма или нарушение</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a2b5e 0%, #0f3c7a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            padding: 1.5rem;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: #fffef7;
+            border-radius: 2.5rem;
+            box-shadow: 0 30px 50px -20px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            padding: 2rem 2rem 1.5rem;
+        }
+
+        .situation-box {
+            background: #f0f4ff;
+            border-radius: 1.5rem;
+            padding: 1.8rem 2rem;
+            margin-bottom: 1.8rem;
+            border-left: 6px solid #0d6efd;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #001f3f;
+            min-height: 120px;
+        }
+
+        .buttons-row {
+            display: flex;
+            gap: 1.2rem;
+            justify-content: center;
+            margin: 1.5rem 0 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-choice {
+            padding: 0.8rem 2.8rem;
+            border: none;
+            border-radius: 60px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            min-width: 180px;
+        }
+
+        .btn-violation {
+            background: #dc143c;
+            color: white;
+            box-shadow: 0 4px 12px rgba(220, 20, 60, 0.3);
+        }
+        .btn-violation:hover {
+            background: #b01030;
+            transform: scale(0.97);
+        }
+
+        .btn-normal {
+            background: #1e7e34;
+            color: white;
+            box-shadow: 0 4px 12px rgba(30, 126, 52, 0.3);
+        }
+        .btn-normal:hover {
+            background: #15632a;
+            transform: scale(0.97);
+        }
+
+        .btn-choice:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .feedback-area {
+            background: #f8f9fa;
+            border-radius: 1.2rem;
+            padding: 1.2rem 1.8rem;
+            margin: 1.2rem 0 0.5rem;
+            border: 2px solid #dee2e6;
+            display: none;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #212529;
+        }
+
+        .verdict {
+            font-weight: 800;
+            font-size: 1.1rem;
+            margin-bottom: 0.4rem;
+        }
+        .verdict.true {
+            color: #1e7e34;
+        }
+        .verdict.false {
+            color: #dc143c;
+        }
+
+        .btn-next {
+            background: #0d6efd;
+            color: white;
+            border: none;
+            padding: 0.6rem 2rem;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 1rem;
+            display: none;
+        }
+        .btn-next:hover {
+            background: #0b5ed7;
+        }
+
+        .progress {
+            font-size: 0.9rem;
+            color: #3d5a80;
+            margin-top: 1.2rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .result-card {
+            background: #1e3a8a;
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 60px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 1.5rem 0 0.5rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        .result-card span {
+            color: #ffd966;
+        }
+
+        .restart-btn {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.8rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            margin: 1rem auto 0;
+            display: block;
+        }
+        .restart-btn:hover {
+            background: #0f2b66;
+            transform: scale(0.97);
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 1.5rem; }
+            .situation-box { padding: 1.2rem; font-size: 1rem; }
+            .btn-choice { min-width: 140px; padding: 0.6rem 1.5rem; font-size: 1rem; }
+            .buttons-row { gap: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div id="situationContainer">
+        <div class="situation-box" id="situationText"></div>
+        <div class="buttons-row" id="buttonsRow">
+            <button class="btn-choice btn-violation" id="btnViolation">🚨 Нарушение</button>
+            <button class="btn-choice btn-normal" id="btnNormal">✅ Норма</button>
+        </div>
+        <div class="feedback-area" id="feedbackArea">
+            <div class="verdict" id="verdictText"></div>
+            <div id="explanationText"></div>
+            <button class="btn-next" id="btnNext">Далее →</button>
+        </div>
+        <div class="progress" id="progressText"></div>
+    </div>
+    <div id="resultContainer" style="display: none;">
+        <div class="result-card" id="resultCard"></div>
+        <button class="restart-btn" id="restartBtn">⟳ Пройти заново</button>
+    </div>
+</div>
+
+<script>
+    const situations = [
+        {
+            text: 'В музее «Мудрость наших предков» ответственный за воинский учет назначен приказом директора. Этот приказ не согласован с военкоматом, но сотрудник выполняет все функции, ведет карточки.',
+            isViolation: true,
+            explanation: 'Приказ должен быть согласован с военным комиссариатом (п. 9 Положения № 719). Отсутствие согласования — нарушение, даже если сотрудник работает добросовестно.'
+        },
+        {
+            text: 'В региональном театре «Аполлон и Геракл» воинский учет ведут по карточкам формы Т-2. Сотрудников всего 12, все мужчины. Директор считает, что менять форму на № 10 не обязательно, раз все под контролем.',
+            isViolation: true,
+            explanation: 'Форма Т‑2 для воинского учета официально не применяется. Нужно вести карточки формы № 10 — это требование инструкции. Хотя все работники театра учтены, форма документа не та.'
+        },
+        {
+            text: 'ДК «Луговой» принял на работу военнообязанного сотрудника 3 марта. Уведомление в военкомат отправили 10 марта (5-й рабочий день, так как 8 марта — праздник).',
+            isViolation: false,
+            explanation: 'Срок уведомления — 5 рабочих дней со дня приема. С учетом праздничного дня отправка 10 марта укладывается в срок. Нарушения нет.'
+        },
+        {
+            text: 'В городской библиотеке г. Энска сверка данных с военкоматом проводится раз в квартал, акт сверки подписан и хранится. Последняя сверка была в конце прошлого квартала.',
+            isViolation: false,
+            explanation: 'Сверка должна проводиться регулярно. Квартальная периодичность допустима, акт есть — значит, требование выполнено.'
+        },
+        {
+            text: 'В карточках формы № 10 в ДШИ г. Энска обнаружены исправления в графе «Образование». Они внесены черной пастой, но не заверены подписью ответственного лица.',
+            isViolation: true,
+            explanation: 'Любые исправления в учетных документах должны быть оговорены и заверены подписью ответственного лица с указанием даты (п. 31 Инструкции № 700).'
+        },
+        {
+            text: 'В КЦ «Перелетная птица» ответственный за воинский учет сменился полгода назад, но план работы по воинскому учету остался старый, изменения в военкомат не подавали.',
+            isViolation: true,
+            explanation: 'При смене ответственного или других изменениях (наименование, адрес, структура) нужно скорректировать план работы и другие документы, подать их в военкомат.'
+        },
+        {
+            text: 'В ДК «Соседи» все документы воинского учёта хранятся в открытом шкафу в общем коридоре. Директор считает, что главное — чтобы документы были на месте, а доступ посторонних не критичен.',
+            isViolation: true,
+            explanation: 'Документы воинского учёта должны храниться в защищённом месте (железные шкафы, сейфы) без доступа посторонних (п. 21 Методических рекомендаций по ведению воинского учёта в организациях, утв. Генштабом 11.07.2017).'
+        }
+    ];
+
+    let currentIndex = 0;
+    let correctCount = 0;
+    let answered = false;
+
+    const situationText = document.getElementById('situationText');
+    const btnViolation = document.getElementById('btnViolation');
+    const btnNormal = document.getElementById('btnNormal');
+    const feedbackArea = document.getElementById('feedbackArea');
+    const explanationText = document.getElementById('explanationText');
+    const btnNext = document.getElementById('btnNext');
+    const progressText = document.getElementById('progressText');
+    const situationContainer = document.getElementById('situationContainer');
+    const resultContainer = document.getElementById('resultContainer');
+    const resultCard = document.getElementById('resultCard');
+    const restartBtn = document.getElementById('restartBtn');
+    const verdictText = document.getElementById('verdictText');
+
+    function renderSituation(index) {
+        const s = situations[index];
+        situationText.innerText = s.text;
+        progressText.innerText = `Ситуация ${index+1} из ${situations.length}`;
+        feedbackArea.style.display = 'none';
+        btnNext.style.display = 'none';
+        btnViolation.disabled = false;
+        btnNormal.disabled = false;
+        btnViolation.style.opacity = '1';
+        btnNormal.style.opacity = '1';
+        answered = false;
+    }
+
+    function handleAnswer(userSaysViolation) {
+        if (answered) return;
+        answered = true;
+        const s = situations[currentIndex];
+        const isCorrect = (userSaysViolation === s.isViolation);
+        if (isCorrect) correctCount++;
+
+        feedbackArea.style.display = 'block';
+        verdictText.className = 'verdict ' + (isCorrect ? 'true' : 'false');
+        verdictText.innerText = isCorrect ? '✅ Верно' : '❌ Неверно';
+        explanationText.innerText = s.explanation;
+
+        btnNext.style.display = 'block';
+        btnNext.innerText = currentIndex === situations.length - 1 ? 'Узнать результат' : 'Далее →';
+
+        btnViolation.disabled = true;
+        btnNormal.disabled = true;
+
+        if (s.isViolation) {
+            btnViolation.style.opacity = '1';
+            btnNormal.style.opacity = '0.4';
+        } else {
+            btnNormal.style.opacity = '1';
+            btnViolation.style.opacity = '0.4';
+        }
+
+        btnNext.onclick = function() {
+            if (currentIndex === situations.length - 1) {
+                showResult();
+            } else {
+                currentIndex++;
+                renderSituation(currentIndex);
+            }
+        };
+    }
+
+    function showResult() {
+        situationContainer.style.display = 'none';
+        resultContainer.style.display = 'block';
+        const total = situations.length;
+        resultCard.innerHTML = `Вы правильно определили <span>${correctCount}</span> из <span>${total}</span> ситуаций`;
+    }
+
+    function resetAll() {
+        currentIndex = 0;
+        correctCount = 0;
+        situationContainer.style.display = 'block';
+        resultContainer.style.display = 'none';
+        renderSituation(0);
+    }
+
+    btnViolation.addEventListener('click', () => handleAnswer(true));
+    btnNormal.addEventListener('click', () => handleAnswer(false));
+    restartBtn.addEventListener('click', resetAll);
+
+    renderSituation(0);
+</script>
+</body>
+</html>
