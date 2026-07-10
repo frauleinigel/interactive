@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Интерактив: возрастные группы</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app {
+            max-width: 1100px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 48px;
+            padding: 30px 25px 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+            border: 1px solid #f0f0f0;
+            position: relative;
+        }
+
+        .main-headline {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0d0d0d;
+            line-height: 1.4;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .main-headline .speaker-icon {
+            flex-shrink: 0;
+            font-size: 2.2rem;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+        }
+
+        .main-headline .headline-text {
+            flex: 1;
+        }
+
+        .main-headline .headline-text strong {
+            color: #0d0d0d;
+        }
+
+        .slider-wrapper {
+            background: #f8f8f8;
+            border-radius: 28px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            border: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            justify-content: space-between;
+            min-height: 100px;
+        }
+
+        .slider-btn {
+            background: #0d47a1;
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 1.6rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(13, 71, 161, 0.25);
+        }
+
+        .slider-btn:hover {
+            background: #1565c0;
+            transform: scale(1.05);
+        }
+
+        .slider-btn:disabled {
+            background: #b0bec5;
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .slider-card-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80px;
+            padding: 0 4px;
+        }
+
+        .slider-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 18px 24px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+            font-size: 1.2rem;
+            line-height: 1.5;
+            color: #0d0d0d;
+            border-left: 6px solid #0d47a1;
+            width: 100%;
+            max-width: 500px;
+            cursor: grab;
+            transition: transform 0.15s, box-shadow 0.15s;
+            user-select: none;
+        }
+
+        .slider-card:active {
+            cursor: grabbing;
+        }
+
+        .slider-card.dragging {
+            opacity: 0.4;
+            transform: scale(0.96);
+        }
+
+        .slider-card .card-text {
+            padding-right: 0;
+            color: #0d0d0d;
+        }
+
+        .slider-card .card-text .speaker-emoji {
+            margin-right: 8px;
+        }
+
+        .slider-empty {
+            color: #757575;
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+
+        .slider-card.wrong {
+            animation: shake 0.5s ease;
+            border-left-color: #d32f2f;
+            background: #ffebee;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-12px); }
+            40% { transform: translateX(12px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(6px); }
+        }
+
+        /* === Колонки — уже и центрированы === */
+        .columns {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .column {
+            flex: 0 0 260px;           /* фиксированная ширина 260px */
+            max-width: 260px;
+            background: #fafafa;
+            border-radius: 28px;
+            padding: 14px 12px 18px;
+            min-height: 160px;
+            border: 2px dashed #d0d0d0;
+            transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .column.drag-over {
+            background: #e3f2fd;
+            border-color: #0d47a1;
+            box-shadow: inset 0 0 0 3px rgba(13, 71, 161, 0.2);
+        }
+
+        .column-header {
+            font-size: 1rem;
+            font-weight: 700;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+            border-bottom: 3px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .column-header .age-label {
+            color: #0d47a1;
+        }
+
+        .column-header .age-tag {
+            background: #0d47a1;
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-weight: 500;
+        }
+
+        .column-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .card-placed {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 10px 14px;
+            border-left: 6px solid #0d47a1;
+            color: #0d0d0d;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        }
+
+        .card-placed .speaker-emoji {
+            margin-right: 6px;
+        }
+
+        .popup-hint {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 36px 40px 30px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.2);
+            border-left: 8px solid #0d47a1;
+            z-index: 10000;
+            display: none;
+            animation: popIn 0.3s ease;
+            text-align: center;
+        }
+
+        .popup-hint.active {
+            display: block;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .popup-hint .hint-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #0d47a1;
+            margin-bottom: 12px;
+        }
+
+        .popup-hint .hint-text {
+            font-size: 1.2rem;
+            line-height: 1.5;
+            color: #0d0d0d;
+        }
+
+        .popup-hint .hint-close {
+            margin-top: 20px;
+            background: #0d47a1;
+            border: none;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 10px 32px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .popup-hint .hint-close:hover {
+            background: #1565c0;
+        }
+
+        .reset-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 24px;
+        }
+
+        .reset-btn {
+            background: #0d47a1;
+            border: none;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 12px 40px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(13, 71, 161, 0.25);
+            letter-spacing: 0.3px;
+        }
+
+        .reset-btn:hover {
+            background: #1565c0;
+            transform: scale(1.02);
+        }
+
+        .reset-btn:active {
+            transform: scale(0.97);
+        }
+
+        .celebration {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #0d47a1;
+            margin-top: 14px;
+            padding: 14px;
+            background: #e3f2fd;
+            border-radius: 40px;
+            display: none;
+        }
+
+        .celebration.show {
+            display: block;
+        }
+
+        /* Адаптив для маленьких экранов */
+        @media (max-width: 850px) {
+            .column {
+                flex: 0 0 220px;
+                max-width: 220px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .columns {
+                flex-direction: column;
+                align-items: center;
+            }
+            .column {
+                flex: 0 0 100%;
+                max-width: 380px;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .app {
+                padding: 20px 14px;
+                border-radius: 32px;
+            }
+            .main-headline {
+                font-size: 1rem;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .slider-wrapper {
+                flex-direction: column;
+                gap: 10px;
+                padding: 16px;
+            }
+            .slider-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.4rem;
+            }
+            .slider-card {
+                font-size: 1rem;
+                padding: 14px 16px;
+            }
+            .popup-hint {
+                padding: 28px 20px 24px;
+            }
+            .popup-hint .hint-title {
+                font-size: 1.3rem;
+            }
+            .popup-hint .hint-text {
+                font-size: 1rem;
+            }
+            .card-placed {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app" role="main">
+        <div class="main-headline">
+            <span class="speaker-icon">👆</span>
+            <span class="headline-text">
+                <strong>Прочитайте высказывания детей разного возраста о том, чего они ждут от мероприятия. Перетащите каждую карточку с репликой в колонку с наиболее подходящей возрастной группой.</strong>
+            </span>
+        </div>
+
+        <div class="slider-wrapper" id="sliderWrapper">
+            <button class="slider-btn" id="prevBtn" aria-label="Предыдущая карточка">‹</button>
+            <div class="slider-card-container" id="sliderContainer"></div>
+            <button class="slider-btn" id="nextBtn" aria-label="Следующая карточка">›</button>
+        </div>
+
+        <!-- Колонки теперь уже и центрированы -->
+        <div class="columns" id="columnsContainer">
+            <div class="column" data-age="0-6" data-age-id="0">
+                <div class="column-header">
+                    <span class="age-label">🧸 0–6 лет</span>
+                    <span class="age-tag">дошкольники</span>
+                </div>
+                <div class="column-cards" id="col0"></div>
+            </div>
+            <div class="column" data-age="7-12" data-age-id="1">
+                <div class="column-header">
+                    <span class="age-label">📚 7–12 лет</span>
+                    <span class="age-tag">младшие школьники</span>
+                </div>
+                <div class="column-cards" id="col1"></div>
+            </div>
+            <div class="column" data-age="13-17" data-age-id="2">
+                <div class="column-header">
+                    <span class="age-label">🎧 13–17 лет</span>
+                    <span class="age-tag">подростки</span>
+                </div>
+                <div class="column-cards" id="col2"></div>
+            </div>
+        </div>
+
+        <div class="celebration" id="celebration">🎉 Поздравляем! Все карточки распределены верно!</div>
+
+        <div class="reset-wrapper">
+            <button class="reset-btn" id="resetBtn" aria-label="Сбросить игру">⟳ Начать заново</button>
+        </div>
+    </div>
+
+    <div class="popup-hint" id="popupHint">
+        <div class="hint-title">💡 Пояснение</div>
+        <div class="hint-text" id="popupHintText"></div>
+        <button class="hint-close" id="popupHintClose">Хорошо</button>
+    </div>
+
+    <script>
+        (function() {
+            const baseCards = [{
+                id: 0,
+                text: '«Я хочу просто бегать, прыгать и громко смеяться, а не сидеть на месте!»',
+                hint: 'Дошкольники живут в движении и коротких эмоциональных циклах. Длительная статика для них неестественна.',
+                ageId: 0
+            }, {
+                id: 1,
+                text: '«Хочу, чтобы всё вокруг было как в сказке — и можно было потрогать волшебные вещи руками!»',
+                hint: 'Мышление в этом возрасте наглядно-действенное и магическое. Успех утренников и мастер-классов строится на предметном «чуде».',
+                ageId: 0
+            }, {
+                id: 2,
+                text: '«Обожаю, когда можно нарядиться в костюм принцессы или супергероя и чтобы все меня видели!»',
+                hint: 'Перевоплощение и демонстрация себя — важный элемент праздника для дошкольников. Утренники с костюмами закрывают эту потребность.',
+                ageId: 0
+            }, {
+                id: 3,
+                text: '«Хочу, чтобы было соревнование и можно было доказать, что наша команда самая крутая!»',
+                hint: 'Ведущая потребность младших школьников — социальное признание и победа в честной командной борьбе. Интеллект-турниры и викторины работают на это.',
+                ageId: 1
+            }, {
+                id: 4,
+                text: '«Мне нравится, когда есть понятные правила и ясно, как выиграть — не люблю, когда всё непонятно и импровизация».',
+                hint: 'Конкретное мышление требует чётких рамок. Форматы с ясной системой баллов или заданий (интеллект-турнир, викторина) воспринимаются как справедливые.',
+                ageId: 1
+            }, {
+                id: 5,
+                text: '«Круто, когда мы все вместе делаем что-то громкое и синхронное — и на нас смотрят прохожие!»',
+                hint: 'Желание быть частью большого значимого «мы» реализуется во флешмобах. Для подростков такая массовка уже менее привлекательна.',
+                ageId: 1
+            }, {
+                id: 6,
+                text: '«Я хочу сам решать, что будет происходить, и влиять на ход игры — я уже взрослый!»',
+                hint: 'Подросткам необходимо право голоса и контроль. Деловые игры, творческие баталии, костюмированные вечеринки с самоорганизацией дают это.',
+                ageId: 2
+            }, {
+                id: 7,
+                text: '«На мероприятии обязательно должно быть пространство, где можно просто пообщаться с друзьями — без навязанных заданий и постоянных указаний».',
+                hint: 'Свободное неструктурированное общение — одна из главных ценностей подростковой компании. Любой формат для этой аудитории должен его предусматривать.',
+                ageId: 2
+            }, {
+                id: 8,
+                text: '«Мне важно, чтобы было не «по-детски»: стильная музыка, крутой ведущий, и чтобы не было ощущения, что ты на утреннике».',
+                hint: 'Подростки остро реагируют на «детскость». Дуэли под аплодисменты и костюмированные вечеринки с современным антуражем удовлетворяют запрос на взрослость.',
+                ageId: 2
+            }];
+
+            function shuffleArray(arr) {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+
+            let cardsData = shuffleArray([...baseCards]);
+
+            let placed = new Array(cardsData.length).fill(false);
+            let remainingIds = cardsData.map(d => d.id);
+            let currentIndex = 0;
+            let score = 0;
+            const totalCards = cardsData.length;
+
+            const sliderContainer = document.getElementById('sliderContainer');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const colContainers = [
+                document.getElementById('col0'),
+                document.getElementById('col1'),
+                document.getElementById('col2')
+            ];
+            const celebration = document.getElementById('celebration');
+            const resetBtn = document.getElementById('resetBtn');
+
+            const popupHint = document.getElementById('popupHint');
+            const popupHintText = document.getElementById('popupHintText');
+            const popupHintClose = document.getElementById('popupHintClose');
+
+            let currentCardElement = null;
+
+            function renderSlider() {
+                sliderContainer.innerHTML = '';
+
+                if (remainingIds.length === 0) {
+                    const msg = document.createElement('div');
+                    msg.className = 'slider-empty';
+                    msg.textContent = '🎉 Все карточки распределены!';
+                    sliderContainer.appendChild(msg);
+                    prevBtn.disabled = true;
+                    nextBtn.disabled = true;
+                    return;
+                }
+
+                if (currentIndex >= remainingIds.length) {
+                    currentIndex = remainingIds.length - 1;
+                }
+                if (currentIndex < 0) currentIndex = 0;
+
+                const cardId = remainingIds[currentIndex];
+                const data = cardsData.find(d => d.id === cardId);
+                if (!data) return;
+
+                const card = document.createElement('div');
+                card.className = 'slider-card';
+                card.draggable = true;
+                card.dataset.cardId = data.id;
+                card.dataset.ageId = data.ageId;
+
+                const textSpan = document.createElement('div');
+                textSpan.className = 'card-text';
+                textSpan.innerHTML = `<span class="speaker-emoji">🗣️</span> ${data.text}`;
+                card.appendChild(textSpan);
+
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragend', handleDragEnd);
+                card.addEventListener('touchstart', handleTouchStart, { passive: true });
+                card.addEventListener('touchmove', handleTouchMove, { passive: false });
+                card.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+                sliderContainer.appendChild(card);
+                currentCardElement = card;
+
+                prevBtn.disabled = (currentIndex === 0);
+                nextBtn.disabled = (currentIndex === remainingIds.length - 1);
+            }
+
+            function goPrev() {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    renderSlider();
+                }
+            }
+
+            function goNext() {
+                if (currentIndex < remainingIds.length - 1) {
+                    currentIndex++;
+                    renderSlider();
+                }
+            }
+
+            function showHintPopup(hintText) {
+                popupHintText.textContent = hintText;
+                popupHint.classList.add('active');
+            }
+
+            function closeHintPopup() {
+                popupHint.classList.remove('active');
+            }
+
+            popupHintClose.addEventListener('click', closeHintPopup);
+            popupHint.addEventListener('click', function(e) {
+                if (e.target === popupHint) closeHintPopup();
+            });
+
+            let draggedCardId = null;
+            let draggedElement = null;
+
+            function handleDragStart(e) {
+                const card = e.target.closest('.slider-card');
+                if (!card) { e.preventDefault(); return; }
+                const id = parseInt(card.dataset.cardId);
+                if (placed[id]) { e.preventDefault(); return; }
+                draggedElement = card;
+                draggedCardId = id;
+                e.dataTransfer.setData('text/plain', String(id));
+                card.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            }
+
+            function handleDragEnd(e) {
+                const card = e.target.closest('.slider-card');
+                if (card) card.classList.remove('dragging');
+                document.querySelectorAll('.column').forEach(col => col.classList.remove('drag-over'));
+            }
+
+            document.querySelectorAll('.column').forEach(col => {
+                col.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    col.classList.add('drag-over');
+                });
+                col.addEventListener('dragleave', () => {
+                    col.classList.remove('drag-over');
+                });
+                col.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    col.classList.remove('drag-over');
+                    const cardId = parseInt(e.dataTransfer.getData('text/plain'));
+                    if (isNaN(cardId)) return;
+                    const targetAgeId = parseInt(col.dataset.ageId);
+                    tryPlaceCard(cardId, targetAgeId, col);
+                });
+            });
+
+            let touchDragData = null;
+
+            function handleTouchStart(e) {
+                const card = e.target.closest('.slider-card');
+                if (!card) return;
+                const id = parseInt(card.dataset.cardId);
+                if (placed[id]) return;
+                const touch = e.touches[0];
+                touchDragData = {
+                    card: card,
+                    cardId: id,
+                    startX: touch.clientX,
+                    startY: touch.clientY,
+                    offsetX: touch.clientX - card.getBoundingClientRect().left,
+                    offsetY: touch.clientY - card.getBoundingClientRect().top,
+                    cloned: null,
+                    moved: false
+                };
+            }
+
+            function handleTouchMove(e) {
+                if (!touchDragData) return;
+                e.preventDefault();
+                const touch = e.touches[0];
+                if (!touchDragData.moved && (Math.abs(touch.clientX - touchDragData.startX) > 10 ||
+                        Math.abs(touch.clientY - touchDragData.startY) > 10)) {
+                    touchDragData.moved = true;
+                    const clone = touchDragData.card.cloneNode(true);
+                    clone.style.position = 'fixed';
+                    clone.style.width = touchDragData.card.offsetWidth + 'px';
+                    clone.style.pointerEvents = 'none';
+                    clone.style.opacity = '0.8';
+                    clone.style.zIndex = '9999';
+                    clone.style.boxShadow = '0 20px 40px rgba(0,0,0,0.15)';
+                    clone.style.transform = 'scale(1.02) rotate(1deg)';
+                    document.body.appendChild(clone);
+                    touchDragData.cloned = clone;
+                    touchDragData.card.classList.add('dragging');
+
+                    const rect = touchDragData.card.getBoundingClientRect();
+                    clone.style.left = (touch.clientX - touchDragData.offsetX) + 'px';
+                    clone.style.top = (touch.clientY - touchDragData.offsetY) + 'px';
+                }
+
+                if (touchDragData.cloned) {
+                    const left = touch.clientX - touchDragData.offsetX;
+                    const top = touch.clientY - touchDragData.offsetY;
+                    touchDragData.cloned.style.left = left + 'px';
+                    touchDragData.cloned.style.top = top + 'px';
+
+                    document.querySelectorAll('.column').forEach(col => {
+                        const rect = col.getBoundingClientRect();
+                        if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+                            touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+                            col.classList.add('drag-over');
+                        } else {
+                            col.classList.remove('drag-over');
+                        }
+                    });
+                }
+            }
+
+            function handleTouchEnd(e) {
+                if (!touchDragData) return;
+                const touch = e.changedTouches[0];
+                const card = touchDragData.card;
+                const cardId = touchDragData.cardId;
+
+                if (touchDragData.cloned) {
+                    touchDragData.cloned.remove();
+                }
+                card.classList.remove('dragging');
+
+                let targetCol = null;
+                document.querySelectorAll('.column').forEach(col => {
+                    col.classList.remove('drag-over');
+                    const rect = col.getBoundingClientRect();
+                    if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+                        touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+                        targetCol = col;
+                    }
+                });
+
+                if (targetCol && touchDragData.moved) {
+                    const ageId = parseInt(targetCol.dataset.ageId);
+                    tryPlaceCard(cardId, ageId, targetCol);
+                }
+
+                touchDragData = null;
+            }
+
+            function tryPlaceCard(cardId, targetAgeId, targetColumn) {
+                if (placed[cardId]) return;
+
+                const cardData = cardsData.find(d => d.id === cardId);
+                if (!cardData) return;
+
+                const correctAgeId = cardData.ageId;
+                const isCorrect = (targetAgeId === correctAgeId);
+
+                if (isCorrect) {
+                    placed[cardId] = true;
+                    score++;
+
+                    const colContainer = colContainers[targetAgeId];
+                    const placedCard = document.createElement('div');
+                    placedCard.className = 'card-placed';
+                    placedCard.innerHTML = `
+                        <span class="speaker-emoji">🗣️</span> ${cardData.text}
+                    `;
+                    colContainer.appendChild(placedCard);
+
+                    showHintPopup(cardData.hint);
+
+                    const idx = remainingIds.indexOf(cardId);
+                    if (idx !== -1) {
+                        remainingIds.splice(idx, 1);
+                    }
+
+                    if (remainingIds.length === 0) {
+                        renderSlider();
+                        celebration.classList.add('show');
+                        return;
+                    }
+
+                    if (currentIndex >= remainingIds.length) {
+                        currentIndex = remainingIds.length - 1;
+                    }
+                    if (currentIndex < 0) currentIndex = 0;
+
+                    renderSlider();
+
+                    if (score === totalCards) {
+                        celebration.classList.add('show');
+                    }
+                } else {
+                    const card = document.querySelector('.slider-card');
+                    if (card) {
+                        card.classList.add('wrong');
+                        setTimeout(() => {
+                            card.classList.remove('wrong');
+                        }, 600);
+                    }
+                }
+            }
+
+            function initGame() {
+                cardsData = shuffleArray([...baseCards]);
+                placed = new Array(cardsData.length).fill(false);
+                remainingIds = cardsData.map(d => d.id);
+                currentIndex = 0;
+                score = 0;
+
+                colContainers.forEach(col => col.innerHTML = '');
+                celebration.classList.remove('show');
+                closeHintPopup();
+
+                renderSlider();
+                prevBtn.disabled = false;
+                nextBtn.disabled = false;
+            }
+
+            prevBtn.addEventListener('click', goPrev);
+            nextBtn.addEventListener('click', goNext);
+            resetBtn.addEventListener('click', initGame);
+
+            initGame();
+
+            document.addEventListener('dragstart', (e) => {
+                if (e.target.closest('.column-cards')) {
+                    e.preventDefault();
+                }
+            });
+
+        })();
+    </script>
+
+</body>
+</html>

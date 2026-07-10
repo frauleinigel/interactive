@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Антикейс: костюмированная вечеринка</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #1a1a2e;
+        }
+
+        .app {
+            max-width: 1100px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 48px;
+            padding: 30px 25px 40px;
+            border: 1px solid #e8e8f0;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06);
+            position: relative;
+        }
+
+        .start-screen {
+            display: block;
+        }
+
+        .start-screen.hidden {
+            display: none;
+        }
+
+        .start-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #d32f2f;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .start-title .badge {
+            background: #d32f2f;
+            color: #ffffff;
+            font-size: 0.9rem;
+            padding: 4px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+        }
+
+        .start-sub {
+            font-size: 0.95rem;
+            color: #555570;
+            margin-bottom: 24px;
+        }
+
+        .case-description {
+            background: #f5f5fa;
+            border-radius: 24px;
+            padding: 20px 24px;
+            border-left: 4px solid #d32f2f;
+            margin-bottom: 28px;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #1a1a2e;
+        }
+
+        .case-description strong {
+            color: #d32f2f;
+        }
+
+        .case-description .highlight {
+            color: #d32f2f;
+            font-weight: 600;
+        }
+
+        .zones-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-top: 10px;
+        }
+
+        .zone-icon {
+            background: #f5f5fa;
+            border-radius: 20px;
+            padding: 18px 10px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.25s;
+            border: 2px solid #e8e8f0;
+            user-select: none;
+        }
+
+        .zone-icon:hover {
+            background: #edebf5;
+            border-color: #d32f2f;
+            transform: translateY(-3px);
+        }
+
+        .zone-icon .emoji {
+            font-size: 2.4rem;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .zone-icon .label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #3a3a52;
+        }
+
+        .zone-icon .status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-top: 8px;
+            background: #d0d0d8;
+            transition: 0.3s;
+        }
+
+        .zone-icon .status-dot.visited {
+            background: #d32f2f;
+        }
+        .zone-icon .status-dot.correct {
+            background: #2e7d32;
+        }
+        .zone-icon .status-dot.wrong {
+            background: #78909c;
+        }
+
+        .zone-icon.visited {
+            border-color: #d32f2f;
+        }
+
+        .investigation-panel {
+            display: none;
+            background: #f5f5fa;
+            border-radius: 28px;
+            padding: 24px 28px;
+            margin-top: 24px;
+            border: 1px solid #e8e8f0;
+            animation: fadeSlide 0.3s ease;
+        }
+
+        .investigation-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .panel-header .zone-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #d32f2f;
+        }
+
+        .panel-header .zone-close {
+            background: none;
+            border: none;
+            color: #8888a0;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+            line-height: 1;
+        }
+
+        .panel-header .zone-close:hover {
+            color: #d32f2f;
+            transform: rotate(90deg);
+        }
+
+        .panel-description {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #1a1a2e;
+            padding: 14px 18px;
+            background: #ffffff;
+            border-radius: 16px;
+            border-left: 3px solid #d0d0d8;
+            margin-bottom: 18px;
+        }
+
+        .panel-question {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 14px;
+        }
+
+        .panel-buttons {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .panel-buttons button {
+            padding: 10px 32px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .panel-buttons .btn-yes {
+            background: #d32f2f;
+            color: #ffffff;
+        }
+
+        .panel-buttons .btn-yes:hover {
+            background: #b71c1c;
+            transform: scale(1.03);
+        }
+
+        .panel-buttons .btn-no {
+            background: #e0e0e8;
+            color: #1a1a2e;
+        }
+
+        .panel-buttons .btn-no:hover {
+            background: #d0d0d8;
+            transform: scale(1.03);
+        }
+
+        .panel-buttons button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .panel-feedback {
+            margin-top: 16px;
+            padding: 16px 20px;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            display: none;
+        }
+
+        .panel-feedback.show {
+            display: block;
+        }
+
+        .panel-feedback.correct {
+            background: #e8f5e9;
+            border-left: 4px solid #2e7d32;
+            color: #1a2e1a;
+        }
+
+        .panel-feedback.wrong {
+            background: #f5f5f5;
+            border-left: 4px solid #78909c;
+            color: #2a2a3a;
+        }
+
+        .panel-feedback .fb-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .panel-feedback.correct .fb-title { color: #2e7d32; }
+        .panel-feedback.wrong .fb-title { color: #546e7a; }
+
+        .summary-screen {
+            display: none;
+            margin-top: 20px;
+            padding: 24px 28px;
+            background: #f5f5fa;
+            border-radius: 28px;
+            border: 1px solid #e8e8f0;
+            animation: fadeSlide 0.4s ease;
+        }
+
+        .summary-screen.active {
+            display: block;
+        }
+
+        .summary-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #d32f2f;
+            margin-bottom: 8px;
+        }
+
+        .summary-score {
+            font-size: 1.2rem;
+            color: #1a1a2e;
+            margin-bottom: 16px;
+        }
+
+        .summary-score strong {
+            color: #d32f2f;
+        }
+
+        .summary-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 14px;
+            border-radius: 12px;
+            background: #ffffff;
+        }
+
+        .summary-item .s-icon {
+            font-size: 1.2rem;
+        }
+
+        .summary-item .s-label {
+            flex: 1;
+            color: #1a1a2e;
+        }
+
+        .summary-item .s-result {
+            font-weight: 600;
+        }
+
+        .summary-item .s-result.correct { color: #2e7d32; }
+        .summary-item .s-result.wrong { color: #78909c; }
+
+        .summary-message {
+            font-size: 1.1rem;
+            padding: 14px 18px;
+            border-radius: 16px;
+            background: #fff3e0;
+            border-left: 4px solid #d32f2f;
+            color: #1a1a2e;
+            margin-bottom: 18px;
+        }
+
+        .summary-restart {
+            background: #d32f2f;
+            border: none;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 12px 40px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .summary-restart:hover {
+            background: #b71c1c;
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 850px) {
+            .zones-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 650px) {
+            .app {
+                padding: 20px 14px;
+                border-radius: 32px;
+            }
+            .start-title {
+                font-size: 1.5rem;
+            }
+            .zones-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            .zone-icon {
+                padding: 14px 8px 12px;
+            }
+            .zone-icon .emoji {
+                font-size: 2rem;
+            }
+            .investigation-panel {
+                padding: 18px 16px;
+            }
+            .panel-buttons button {
+                padding: 8px 24px;
+                font-size: 0.9rem;
+            }
+            .summary-screen {
+                padding: 18px 16px;
+            }
+            .summary-title {
+                font-size: 1.3rem;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .zones-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app" role="main">
+
+    <!-- ===== СТАРТОВЫЙ ЭКРАН ===== -->
+    <div class="start-screen" id="startScreen">
+        <div class="start-title">
+            🕵️ Антикейс: Почему провалилась костюмированная вечеринка?
+            <span class="badge">расследование</span>
+        </div>
+        <div class="start-sub">Кликните на каждую зону, чтобы найти ошибки организаторов</div>
+
+        <div class="case-description">
+            <strong>Костюмированная вечеринка «Герои аниме» для подростков 13–16 лет.</strong><br>
+            <span class="highlight">Ожидание:</span> 50 участников, полный зал, активность в соцсетях.<br>
+            <span class="highlight">Реальность:</span> пришло 12 человек, через 30 минут шестеро ушли.<br>
+            <span class="highlight">Итог:</span> три жалобы от родителей, негативный пост в городском сообществе.<br>
+            <span class="highlight">Бюджет:</span> 35 000 руб.
+        </div>
+
+        <div class="zones-grid" id="zonesGrid">
+            <div class="zone-icon" data-zone="0">
+                <span class="emoji">🏢</span>
+                <span class="label">Помещение</span>
+                <span class="status-dot" id="dot0"></span>
+            </div>
+            <div class="zone-icon" data-zone="1">
+                <span class="emoji">👤</span>
+                <span class="label">Сотрудники</span>
+                <span class="status-dot" id="dot1"></span>
+            </div>
+            <div class="zone-icon" data-zone="2">
+                <span class="emoji">🎵</span>
+                <span class="label">Инструментарий</span>
+                <span class="status-dot" id="dot2"></span>
+            </div>
+            <div class="zone-icon" data-zone="3">
+                <span class="emoji">📅</span>
+                <span class="label">Сроки</span>
+                <span class="status-dot" id="dot3"></span>
+            </div>
+            <div class="zone-icon" data-zone="4">
+                <span class="emoji">💰</span>
+                <span class="label">Расходы</span>
+                <span class="status-dot" id="dot4"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ПАНЕЛЬ РАССЛЕДОВАНИЯ ===== -->
+    <div class="investigation-panel" id="investigationPanel">
+        <div class="panel-header">
+            <span class="zone-name" id="panelZoneName">Помещение</span>
+            <button class="zone-close" id="panelClose">✕</button>
+        </div>
+        <div class="panel-description" id="panelDescription"></div>
+        <div class="panel-question">Это было ошибкой?</div>
+        <div class="panel-buttons">
+            <button class="btn-yes" id="btnYes">Да</button>
+            <button class="btn-no" id="btnNo">Нет</button>
+        </div>
+        <div class="panel-feedback" id="panelFeedback">
+            <div class="fb-title" id="fbTitle"></div>
+            <div id="fbText"></div>
+        </div>
+    </div>
+
+    <!-- ===== СВОДКА ===== -->
+    <div class="summary-screen" id="summaryScreen">
+        <div class="summary-title">📊 Результаты расследования</div>
+        <div class="summary-score" id="summaryScore">Вы нашли <strong>0</strong> из 5 ошибок</div>
+        <div class="summary-list" id="summaryList"></div>
+        <div class="summary-message" id="summaryMessage"></div>
+        <button class="summary-restart" id="summaryRestart">⟳ Начать заново</button>
+    </div>
+
+</div>
+
+<script>
+    (function() {
+        // Данные по зонам
+        const zonesData = [{
+            id: 0,
+            name: 'Помещение',
+            emoji: '🏢',
+            description: 'Зал был общий, без разделения на зоны — негде было свободно общаться и фотографироваться. Подростки стояли вдоль стен и чувствовали себя неловко.',
+            correctAnswer: true,
+            feedbackCorrect: {
+                title: '✅ Верно!',
+                text: 'Костюмированная вечеринка требует уютных уголков для общения и мест для фото. Открытое пространство без уединения убивает интерес подростков.'
+            },
+            feedbackWrong: {
+                title: '❌ Неверно.',
+                text: 'Планировка помещения — ключевой ресурс. Подросткам нужна возможность свободно перемещаться между зонами: общение, фотографии, тихий уголок. Общий зал без деления создаёт ощущение формального мероприятия, от которого хочется уйти.'
+            }
+        }, {
+            id: 1,
+            name: 'Сотрудники',
+            emoji: '👤',
+            description: 'Ведущим поставили методиста, который никогда не работал с подростками. Он говорил менторским тоном, называл всех «дети», пытался командовать и делать замечания за громкий смех.',
+            correctAnswer: true,
+            feedbackCorrect: {
+                title: '✅ Верно!',
+                text: 'Подросткам нужен модератор на равных, а не учитель. Тон и манера ведущего могут разрушить любое мероприятие.'
+            },
+            feedbackWrong: {
+                title: '❌ Неверно.',
+                text: 'Ресурс «сотрудники» — соответствие ведущего аудитории, а не наличие человека в штате. Методист с менторским тоном разрушает доверие, гости уходят.'
+            }
+        }, {
+            id: 2,
+            name: 'Инструментарий',
+            emoji: '🎵',
+            description: 'Музыка играла с телефона через маленькую портативную колонку. Мест для фотографий не было — только стена с логотипом центра.',
+            correctAnswer: true,
+            feedbackCorrect: {
+                title: '✅ Верно!',
+                text: 'Качественный звук и фотозоны — базовая необходимость для костюмированной вечеринки. Без них подростки не могут создать контент для своих соцсетей и теряют интерес.'
+            },
+            feedbackWrong: {
+                title: '❌ Неверно.',
+                text: 'Инструментарий оценивают по качеству и соответствию ожиданиям аудитории. Слабый звук и отсутствие фотозон лишают подростков желания оставаться и делиться впечатлениями.'
+            }
+        }, {
+            id: 3,
+            name: 'Сроки подготовки',
+            emoji: '📅',
+            description: 'Тему аниме выбрали за неделю до мероприятия, никого не опрашивая. Оказалось, что конкретный тайтл уже вышел из моды, а большинство подростков в этом центре увлекаются совсем другой вселенной.',
+            correctAnswer: true,
+            feedbackCorrect: {
+                title: '✅ Верно!',
+                text: 'Срок подготовки должен включать валидацию темы у аудитории. Даже короткий опрос в соцсетях спас бы бюджет и репутацию.'
+            },
+            feedbackWrong: {
+                title: '❌ Неверно.',
+                text: 'Ресурс «сроки» включает проверку идеи у аудитории. Без обратной связи тема может не попасть в интересы, и зал останется пустым.'
+            }
+        }, {
+            id: 4,
+            name: 'Расходы',
+            emoji: '💰',
+            description: '20 000 рублей потратили на дорогой реквизит (аниме-постеры и фигурки для декора), а на диджея денег не осталось — обошлись штатным сотрудником с колонкой.',
+            correctAnswer: true,
+            feedbackCorrect: {
+                title: '✅ Верно!',
+                text: 'Приоритеты в расходах расставлены неверно. Атмосферу создают музыка и ведущий, а не постеры на стенах. Подростки не заметили дорогой декор, но сразу заметили плохой звук.'
+            },
+            feedbackWrong: {
+                title: '❌ Неверно.',
+                text: 'Расходы — всегда выбор приоритетов. Для костюмированной вечеринки ключевые траты — звук и ведущий. Деньги, вложенные в декор вместо атмосферы, потрачены впустую.'
+            }
+        }];
+
+        // Состояние
+        const state = {
+            visited: [false, false, false, false, false],
+            answered: [false, false, false, false, false],
+            results: [null, null, null, null, null],
+            currentZone: null,
+            allVisited: false
+        };
+
+        // DOM
+        const startScreen = document.getElementById('startScreen');
+        const panel = document.getElementById('investigationPanel');
+        const panelZoneName = document.getElementById('panelZoneName');
+        const panelDescription = document.getElementById('panelDescription');
+        const panelFeedback = document.getElementById('panelFeedback');
+        const fbTitle = document.getElementById('fbTitle');
+        const fbText = document.getElementById('fbText');
+        const btnYes = document.getElementById('btnYes');
+        const btnNo = document.getElementById('btnNo');
+        const panelClose = document.getElementById('panelClose');
+        const summaryScreen = document.getElementById('summaryScreen');
+        const summaryScore = document.getElementById('summaryScore');
+        const summaryList = document.getElementById('summaryList');
+        const summaryMessage = document.getElementById('summaryMessage');
+        const summaryRestart = document.getElementById('summaryRestart');
+
+        const dots = [
+            document.getElementById('dot0'),
+            document.getElementById('dot1'),
+            document.getElementById('dot2'),
+            document.getElementById('dot3'),
+            document.getElementById('dot4')
+        ];
+
+        const zoneIcons = document.querySelectorAll('.zone-icon');
+
+        function updateDots() {
+            for (let i = 0; i < 5; i++) {
+                const dot = dots[i];
+                dot.className = 'status-dot';
+                if (state.visited[i]) {
+                    dot.classList.add('visited');
+                    if (state.answered[i]) {
+                        dot.classList.remove('visited');
+                        if (state.results[i] === true) {
+                            dot.classList.add('correct');
+                        } else if (state.results[i] === false) {
+                            dot.classList.add('wrong');
+                        }
+                    }
+                }
+                const icon = zoneIcons[i];
+                icon.classList.toggle('visited', state.visited[i]);
+            }
+        }
+
+        function openPanel(zoneId) {
+            if (state.allVisited) return;
+
+            const data = zonesData[zoneId];
+            state.currentZone = zoneId;
+            state.visited[zoneId] = true;
+
+            panelZoneName.textContent = data.emoji + ' ' + data.name;
+            panelDescription.textContent = data.description;
+            panelFeedback.className = 'panel-feedback';
+            panelFeedback.style.display = 'none';
+            btnYes.disabled = false;
+            btnNo.disabled = false;
+            panel.classList.add('active');
+
+            if (state.answered[zoneId]) {
+                showStoredFeedback(zoneId);
+                btnYes.disabled = true;
+                btnNo.disabled = true;
+            }
+
+            updateDots();
+        }
+
+        function showStoredFeedback(zoneId) {
+            const data = zonesData[zoneId];
+            const isCorrect = state.results[zoneId];
+            const fb = isCorrect ? data.feedbackCorrect : data.feedbackWrong;
+            panelFeedback.className = 'panel-feedback show ' + (isCorrect ? 'correct' : 'wrong');
+            panelFeedback.style.display = 'block';
+            fbTitle.textContent = fb.title;
+            fbText.textContent = fb.text;
+        }
+
+        function answer(answer) {
+            const zoneId = state.currentZone;
+            if (zoneId === null || state.answered[zoneId]) return;
+
+            const data = zonesData[zoneId];
+            const isCorrect = (answer === data.correctAnswer);
+            state.answered[zoneId] = true;
+            state.results[zoneId] = isCorrect;
+
+            const fb = isCorrect ? data.feedbackCorrect : data.feedbackWrong;
+            panelFeedback.className = 'panel-feedback show ' + (isCorrect ? 'correct' : 'wrong');
+            panelFeedback.style.display = 'block';
+            fbTitle.textContent = fb.title;
+            fbText.textContent = fb.text;
+
+            btnYes.disabled = true;
+            btnNo.disabled = true;
+
+            updateDots();
+            checkAllVisited();
+        }
+
+        function checkAllVisited() {
+            const allVisited = state.visited.every(v => v === true);
+            if (allVisited && !state.allVisited) {
+                state.allVisited = true;
+                setTimeout(showSummary, 600);
+            }
+        }
+
+        function showSummary() {
+            panel.classList.remove('active');
+
+            let correctCount = 0;
+            for (let i = 0; i < 5; i++) {
+                if (state.results[i] === true) correctCount++;
+            }
+
+            summaryScore.innerHTML = `Вы нашли <strong>${correctCount}</strong> из 5 ошибок`;
+
+            summaryList.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const data = zonesData[i];
+                const item = document.createElement('div');
+                item.className = 'summary-item';
+                const isCorrect = state.results[i];
+                let statusText = isCorrect === true ? '✅ найдена' : isCorrect === false ? '❌ пропущена' : '⏳ не проверена';
+                let statusClass = isCorrect === true ? 'correct' : isCorrect === false ? 'wrong' : '';
+                item.innerHTML = `
+                    <span class="s-icon">${data.emoji}</span>
+                    <span class="s-label">${data.name}</span>
+                    <span class="s-result ${statusClass}">${statusText}</span>
+                `;
+                summaryList.appendChild(item);
+            }
+
+            let msg = '';
+            if (correctCount === 5) {
+                msg = '🎉 Отличное расследование! Вы видите ресурсы системно. Все ошибки найдены!';
+            } else if (correctCount >= 3) {
+                msg = '👍 Хороший результат! Вы нашли большинство ошибок. Вернитесь к пропущенным зонам или идите дальше.';
+            } else {
+                msg = '🧐 Вы нашли только часть ошибок. Рекомендуем вернуться к непроверенным зонам и пересмотреть их.';
+            }
+            summaryMessage.textContent = msg;
+
+            summaryScreen.classList.add('active');
+        }
+
+        function closePanel() {
+            panel.classList.remove('active');
+        }
+
+        // ===== Функция полного сброса =====
+        function resetAll() {
+            // Сброс состояния
+            state.visited = [false, false, false, false, false];
+            state.answered = [false, false, false, false, false];
+            state.results = [null, null, null, null, null];
+            state.currentZone = null;
+            state.allVisited = false;
+
+            // Закрыть панель и сводку
+            panel.classList.remove('active');
+            summaryScreen.classList.remove('active');
+
+            // Сброс кнопок и фидбека
+            btnYes.disabled = false;
+            btnNo.disabled = false;
+            panelFeedback.className = 'panel-feedback';
+            panelFeedback.style.display = 'none';
+
+            // Обновить точки и иконки
+            updateDots();
+
+            // Показать стартовый экран (он всегда виден, но на всякий случай)
+            startScreen.style.display = 'block';
+        }
+
+        // --- Обработчики ---
+        zoneIcons.forEach((icon, index) => {
+            icon.addEventListener('click', function() {
+                if (state.allVisited) return;
+                openPanel(index);
+            });
+        });
+
+        btnYes.addEventListener('click', function() { answer(true); });
+        btnNo.addEventListener('click', function() { answer(false); });
+
+        panelClose.addEventListener('click', closePanel);
+
+        // Кнопка "Начать заново" в сводке
+        summaryRestart.addEventListener('click', resetAll);
+
+        // --- Старт ---
+        updateDots();
+    })();
+</script>
+
+</body>
+</html>
