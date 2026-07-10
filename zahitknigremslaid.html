@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Слайдер с 4 окнами</title>
+    <style>
+        /* ===== Общие стили ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #1a1a2e;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+
+        .slider-container {
+            position: relative;
+            width: 80%;
+            max-width: 1000px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+            background: #0f0f1a;
+        }
+
+        .slider-wrapper {
+            display: flex;
+            transition: transform 0.5s ease;
+            will-change: transform;
+            height: 550px; /* фиксированная высота, можно менять */
+        }
+
+        .slide {
+            min-width: 100%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a2e;
+        }
+
+        /* Для картинок */
+        .slide img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #1a1a2e;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        /* ===== Интерактивный слайд ===== */
+        .interactive-slide {
+            background: linear-gradient(145deg, #f0f2f5 0%, #d9e0e8 100%);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .interactive-slide #app {
+            width: 100%;
+            max-width: 540px;
+            padding: 32px 28px 40px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border-radius: 48px;
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .interactive-slide #app p {
+            font-size: 30px;
+            font-weight: 700;
+            color: #0b1e33;
+            margin-bottom: 30px;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.5);
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            position: relative;
+            min-width: 140px;
+            padding: 18px 38px;
+            font-size: 24px;
+            font-weight: 700;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            color: #fff;
+            letter-spacing: 0.5px;
+            transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 8px 0 0 rgba(0, 0, 0, 0.2), 0 10px 20px -6px rgba(0, 0, 0, 0.3);
+            transform: translateY(0);
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        .btn-yes {
+            background: linear-gradient(145deg, #2ecc71, #1ea85a);
+            box-shadow: 0 8px 0 0 #0f7a3e, 0 10px 20px -6px rgba(0, 0, 0, 0.3);
+        }
+        .btn-yes:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 0 0 #0f7a3e, 0 18px 30px -8px rgba(0, 0, 0, 0.35);
+            background: linear-gradient(145deg, #3adb7a, #24b862);
+        }
+        .btn-yes:active {
+            transform: translateY(6px) scale(0.96);
+            box-shadow: 0 2px 0 0 #0f7a3e, 0 6px 12px -4px rgba(0, 0, 0, 0.3);
+            transition-duration: 0.06s;
+        }
+
+        .btn-no {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            box-shadow: 0 8px 0 0 #922b21, 0 10px 20px -6px rgba(0, 0, 0, 0.3);
+        }
+        .btn-no:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 0 0 #922b21, 0 18px 30px -8px rgba(0, 0, 0, 0.35);
+            background: linear-gradient(145deg, #f05a4a, #d14434);
+        }
+        .btn-no:active {
+            transform: translateY(6px) scale(0.96);
+            box-shadow: 0 2px 0 0 #922b21, 0 6px 12px -4px rgba(0, 0, 0, 0.3);
+            transition-duration: 0.06s;
+        }
+
+        #message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 90%;
+            max-width: 400px;
+            padding: 28px 20px;
+            background: rgba(10, 20, 40, 0.92);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 30px 50px -15px rgba(0, 0, 0, 0.6);
+            color: #f0f9ff;
+            font-size: 26px;
+            font-weight: 600;
+            line-height: 1.4;
+            text-align: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 20;
+        }
+
+        #message.visible {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* ===== Кнопки навигации ===== */
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(6px);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            color: #fff;
+            font-size: 30px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+            border-color: rgba(255, 255, 255, 0.7);
+            transform: translateY(-50%) scale(1.08);
+        }
+
+        .btn-prev {
+            left: 18px;
+        }
+        .btn-next {
+            right: 18px;
+        }
+
+        /* ===== Точки ===== */
+        .dots-container {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 14px;
+            z-index: 10;
+        }
+
+        .dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .dot.active {
+            background: #fff;
+            border-color: #fff;
+            transform: scale(1.25);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+        }
+
+        .dot:hover {
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        /* ===== Адаптив ===== */
+        @media (max-width: 768px) {
+            .slider-container {
+                width: 95%;
+            }
+            .slider-wrapper {
+                height: 400px;
+            }
+            .slider-btn {
+                width: 42px;
+                height: 42px;
+                font-size: 24px;
+            }
+            .btn-prev {
+                left: 10px;
+            }
+            .btn-next {
+                right: 10px;
+            }
+            .dot {
+                width: 12px;
+                height: 12px;
+            }
+            .dots-container {
+                gap: 10px;
+                bottom: 16px;
+            }
+            .interactive-slide #app p {
+                font-size: 24px;
+            }
+            .btn {
+                min-width: 110px;
+                padding: 14px 28px;
+                font-size: 20px;
+            }
+            #message {
+                font-size: 20px;
+                padding: 20px 16px;
+                width: 92%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .slider-wrapper {
+                height: 300px;
+            }
+            .slider-btn {
+                width: 34px;
+                height: 34px;
+                font-size: 18px;
+            }
+            .dot {
+                width: 10px;
+                height: 10px;
+            }
+            .interactive-slide #app {
+                padding: 20px 16px 30px;
+            }
+            .interactive-slide #app p {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+            .btn {
+                min-width: 90px;
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="slider-container">
+
+    <div class="slider-wrapper" id="sliderWrapper">
+
+        <!-- Слайд 1: третья картинка (теперь первая) -->
+        <div class="slide">
+            <img src="https://e.profkiosk.ru/service_tbn2/cglbs6rwokqt.jpg" alt="Картинка 1">
+        </div>
+
+        <!-- Слайд 2: Ирина (была третьей) -->
+        <div class="slide">
+            <img src="https://e.profkiosk.ru/service_tbn2/uxeclpojreup.jpg" alt="Ирина">
+        </div>
+
+        <!-- Слайд 3: Игорь / София и Саид (был вторым) -->
+        <div class="slide">
+            <img src="https://e.profkiosk.ru/service_tbn2/yfyocsvsck2a.jpg" alt="Игорь / София и Саид">
+        </div>
+
+        <!-- Слайд 4: Интерактив -->
+        <div class="slide interactive-slide">
+            <div id="app">
+                <p>Знакомые ситуации?</p>
+                <div class="button-group">
+                    <button class="btn btn-yes" id="yesBtn">Да</button>
+                    <button class="btn btn-no" id="noBtn">Нет</button>
+                </div>
+                <div id="message"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <button class="slider-btn btn-prev" id="prevBtn">‹</button>
+    <button class="slider-btn btn-next" id="nextBtn">›</button>
+
+    <div class="dots-container" id="dotsContainer">
+        <span class="dot active" data-index="0"></span>
+        <span class="dot" data-index="1"></span>
+        <span class="dot" data-index="2"></span>
+        <span class="dot" data-index="3"></span>
+    </div>
+
+</div>
+
+<script>
+    (function() {
+        const wrapper = document.getElementById('sliderWrapper');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const dots = document.querySelectorAll('.dot');
+        const total = 4;
+        let current = 0;
+
+        function goTo(index) {
+            if (index < 0) index = total - 1;
+            if (index >= total) index = 0;
+            current = index;
+            wrapper.style.transform = `translateX(-${current * 100}%)`;
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === current);
+            });
+        }
+
+        prevBtn.addEventListener('click', () => goTo(current - 1));
+        nextBtn.addEventListener('click', () => goTo(current + 1));
+
+        dots.forEach(dot => {
+            dot.addEventListener('click', function() {
+                const idx = parseInt(this.getAttribute('data-index'), 10);
+                if (idx !== current) goTo(idx);
+            });
+        });
+
+        goTo(0);
+
+        // ===== Интерактив (кнопки Да / Нет) =====
+        // Чтобы не конфликтовать с общим, инициализируем внутри.
+        const messageEl = document.getElementById('message');
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        let timeoutId = null;
+
+        function showMessage(text) {
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+            }
+            messageEl.textContent = text;
+            messageEl.classList.add('visible');
+            timeoutId = setTimeout(() => {
+                messageEl.classList.remove('visible');
+                timeoutId = null;
+            }, 3000);
+        }
+
+        yesBtn.addEventListener('click', function() {
+            showMessage('Конечно, это классика!');
+        });
+
+        noBtn.addEventListener('click', function() {
+            showMessage('Значит, крупно повезло! Но это вопрос времени.');
+        });
+    })();
+</script>
+
+</body>
+</html>
