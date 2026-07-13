@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Документы для приостановления — интерактивное упражнение</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 30px 20px;
+        }
+        .container {
+            max-width: 750px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 25px 30px 35px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        h2 {
+            font-size: 1.7rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e6edf5;
+            padding-bottom: 12px;
+            color: #000000;
+            font-weight: 700;
+        }
+        .zones {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin: 20px 0 30px;
+        }
+        .zone {
+            border: 2px dashed #000000;
+            border-radius: 12px;
+            padding: 16px;
+            background: #fafafa;
+            min-height: 200px;
+        }
+        .zone-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #000000;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        .card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .card {
+            padding: 14px 18px;
+            background: #ffffff;
+            border: 1px solid #000000;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #000000;
+            cursor: grab;
+            user-select: none;
+            transition: background 0.15s, opacity 0.15s, transform 0.15s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+        }
+        .card:active {
+            cursor: grabbing;
+        }
+        .card.dragging {
+            opacity: 0.4;
+        }
+        .card.correct {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+        .card.wrong {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+        .card.missing {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+        .card.disabled {
+            opacity: 0.6;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-15px); }
+            40% { transform: translateX(15px); }
+            60% { transform: translateX(-10px); }
+            80% { transform: translateX(10px); }
+            100% { transform: translateX(0); }
+        }
+        .card.shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* Классическая корзина с ручкой */
+        .bin-zone {
+            position: relative;
+            background: #f5f2eb;
+            border: 3px solid #8b7a66;
+            border-radius: 12px 12px 20px 20px;
+            padding: 20px 16px 30px;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background 0.2s, border-color 0.2s;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+        }
+        .bin-zone::before {
+            content: '';
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 24px;
+            border: 4px solid #8b7a66;
+            border-bottom: none;
+            border-radius: 40px 40px 0 0;
+            background: transparent;
+            box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
+        }
+        .bin-zone::after {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 20px;
+            right: 20px;
+            bottom: 6px;
+            background: repeating-linear-gradient(
+                90deg,
+                rgba(139, 122, 102, 0.1) 0px,
+                rgba(139, 122, 102, 0.1) 2px,
+                transparent 2px,
+                transparent 8px
+            );
+            border-radius: 8px;
+            pointer-events: none;
+        }
+        .bin-zone .bin-icon {
+            font-size: 3.2rem;
+            line-height: 1;
+            margin-bottom: 4px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            position: relative;
+            z-index: 1;
+        }
+        .bin-zone .bin-label {
+            font-weight: 700;
+            color: #4a3f35;
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+            position: relative;
+            z-index: 1;
+        }
+        .bin-zone .bin-hint {
+            font-weight: 400;
+            color: #6b5f50;
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 1;
+        }
+        .bin-zone .card-list {
+            width: 100%;
+            margin-top: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .bin-zone.dragover {
+            background: #e8e0d5;
+            border-color: #5a4d3e;
+            box-shadow: 0 0 0 4px rgba(90, 77, 62, 0.2);
+        }
+        .bin-zone.dragover::before {
+            border-color: #5a4d3e;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin: 10px 0 20px;
+        }
+        .btn {
+            padding: 12px 34px;
+            background: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #000000;
+            cursor: pointer;
+            transition: all 0.15s;
+            letter-spacing: 0.3px;
+        }
+        .btn:hover {
+            background: #000000;
+            color: #ffffff;
+        }
+        .btn-check {
+            background: #000000;
+            color: #ffffff;
+            border-color: #000000;
+        }
+        .btn-check:hover {
+            background: #1f3a5e;
+        }
+        .btn-reset {
+            background: #ffffff;
+            border-color: #7a8ba5;
+            color: #1f2e4a;
+        }
+        .btn-reset:hover {
+            background: #eef3fa;
+        }
+
+        .result-box {
+            margin: 20px 0 10px;
+            padding: 18px 22px;
+            border-radius: 12px;
+            background: #f8faff;
+            border-left: 6px solid #000000;
+            font-weight: 700;
+            color: #000000;
+            display: none;
+        }
+        .result-box.show {
+            display: block;
+        }
+        .result-box .success {
+            color: #155724;
+        }
+        .result-box .error {
+            color: #721c24;
+        }
+
+        @media (max-width: 650px) {
+            .container { padding: 15px 12px; }
+            .card { font-size: 0.85rem; padding: 10px 14px; }
+            .bin-zone::before { width: 60px; height: 18px; top: -18px; border-width: 3px; }
+            .bin-zone .bin-icon { font-size: 2.6rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h2>📂 Перенесите в корзину все документы, которые могут служить основанием для приостановления трудового договора</h2>
+
+    <div class="zones" id="zonesContainer">
+        <!-- Список документов -->
+        <div class="zone" id="sourceZone">
+            <div class="zone-title">📋 Документы</div>
+            <div class="card-list" id="sourceList">
+                <!-- Карточки создаются динамически -->
+            </div>
+        </div>
+
+        <!-- Корзина -->
+        <div class="bin-zone" id="binZone">
+            <div class="bin-icon">📥</div>
+            <div class="bin-label">Корзина</div>
+            <div class="bin-hint">Перетащите сюда нужные документы</div>
+            <div class="card-list" id="binList">
+                <!-- Сюда перемещаются карточки -->
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn btn-check" id="checkBtn">✅ Проверить</button>
+        <button class="btn btn-reset" id="resetBtn">⟲ Сбросить</button>
+    </div>
+
+    <div class="result-box" id="resultBox">
+        <div id="resultMessage"></div>
+    </div>
+
+</div>
+
+<script>
+    (function() {
+        const documents = [
+            { id: 'doc1', text: 'Копия повестки о призыве по мобилизации', correct: true },
+            { id: 'doc2', text: 'Копия повестки о призыве в войска Росгвардии по мобилизации', correct: true },
+            { id: 'doc3', text: 'Уведомление о заключении контракта о прохождении военной службы в период мобилизации', correct: true },
+            { id: 'doc4', text: 'Уведомление о заключении контракта о добровольном содействии ВС РФ', correct: true },
+            { id: 'doc5', text: 'Копия повестки «для отправки к месту прохождения военной службы»', correct: false },
+            { id: 'doc6', text: 'Заявление об увольнении по собственному желанию', correct: false }
+        ];
+
+        const sourceList = document.getElementById('sourceList');
+        const binList = document.getElementById('binList');
+        const sourceZone = document.getElementById('sourceZone');
+        const binZone = document.getElementById('binZone');
+        const checkBtn = document.getElementById('checkBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const resultBox = document.getElementById('resultBox');
+        const resultMessage = document.getElementById('resultMessage');
+
+        let cards = [];
+
+        function playErrorSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.type = 'square';
+                oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.3);
+            } catch (e) {}
+        }
+
+        function buildCards() {
+            cards = documents.map(doc => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.textContent = doc.text;
+                card.dataset.id = doc.id;
+                card.dataset.correct = doc.correct ? 'true' : 'false';
+                card.draggable = true;
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragend', handleDragEnd);
+                return card;
+            });
+            cards.forEach(c => sourceList.appendChild(c));
+        }
+
+        function clearHighlight() {
+            document.querySelectorAll('.card').forEach(c => {
+                c.classList.remove('correct', 'wrong', 'missing', 'disabled', 'shake');
+            });
+        }
+
+        function resetAll() {
+            sourceList.innerHTML = '';
+            binList.innerHTML = '';
+            cards.forEach(c => {
+                c.classList.remove('correct', 'wrong', 'missing', 'disabled', 'shake');
+                c.draggable = true;
+                sourceList.appendChild(c);
+            });
+            resultBox.classList.remove('show');
+            clearHighlight();
+        }
+
+        let draggedCard = null;
+
+        function handleDragStart(e) {
+            const card = e.target.closest('.card');
+            if (!card) return;
+            if (card.classList.contains('disabled')) {
+                e.preventDefault();
+                return;
+            }
+            draggedCard = card;
+            card.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', card.dataset.id);
+        }
+
+        function handleDragEnd(e) {
+            const card = e.target.closest('.card');
+            if (card) {
+                card.classList.remove('dragging');
+            }
+            sourceZone.classList.remove('dragover');
+            binZone.classList.remove('dragover');
+            draggedCard = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const zone = e.currentTarget;
+            if (zone.id === 'sourceZone') {
+                sourceZone.classList.add('dragover');
+            } else if (zone.id === 'binZone') {
+                binZone.classList.add('dragover');
+            }
+        }
+
+        function handleDragLeave(e) {
+            const zone = e.currentTarget;
+            if (zone.id === 'sourceZone') {
+                sourceZone.classList.remove('dragover');
+            } else if (zone.id === 'binZone') {
+                binZone.classList.remove('dragover');
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const zone = e.currentTarget;
+            sourceZone.classList.remove('dragover');
+            binZone.classList.remove('dragover');
+
+            const id = e.dataTransfer.getData('text/plain');
+            if (!id) return;
+
+            const card = cards.find(c => c.dataset.id === id);
+            if (!card) return;
+            if (card.classList.contains('disabled')) return;
+
+            let targetList = null;
+            if (zone.id === 'sourceZone') {
+                targetList = sourceList;
+            } else if (zone.id === 'binZone') {
+                targetList = binList;
+            } else {
+                return;
+            }
+
+            if (card.parentNode === targetList) return;
+
+            if (targetList === binList && card.dataset.correct === 'false') {
+                playErrorSound();
+                card.classList.remove('shake');
+                void card.offsetWidth;
+                card.classList.add('shake');
+                return;
+            }
+
+            if (card.parentNode) {
+                card.parentNode.removeChild(card);
+            }
+            targetList.appendChild(card);
+
+            resultBox.classList.remove('show');
+            clearHighlight();
+        }
+
+        [sourceZone, binZone].forEach(zone => {
+            zone.addEventListener('dragover', handleDragOver);
+            zone.addEventListener('dragleave', handleDragLeave);
+            zone.addEventListener('drop', handleDrop);
+            zone.addEventListener('dragenter', (e) => e.preventDefault());
+        });
+
+        function checkAnswers() {
+            clearHighlight();
+
+            let allCorrect = true;
+            let errors = [];
+
+            cards.forEach(card => {
+                const isCorrect = card.dataset.correct === 'true';
+                const inBin = binList.contains(card);
+
+                if (isCorrect && !inBin) {
+                    allCorrect = false;
+                    card.classList.add('missing');
+                    errors.push(`"${card.textContent}" — правильный документ, но он не перенесён в корзину.`);
+                } else if (!isCorrect && inBin) {
+                    allCorrect = false;
+                    card.classList.add('wrong');
+                    errors.push(`"${card.textContent}" — не является основанием для приостановления, но он в корзине.`);
+                } else if (isCorrect && inBin) {
+                    card.classList.add('correct');
+                }
+
+                card.draggable = false;
+                card.classList.add('disabled');
+            });
+
+            let msg = '';
+            if (allCorrect) {
+                msg = '<span class="success">✅ <strong>Отлично!</strong> Все документы распределены верно.</span>';
+            } else {
+                msg = '<span class="error">❌ <strong>Есть ошибки.</strong> Проверьте распределение документов.</span>';
+            }
+
+            resultMessage.innerHTML = msg;
+            resultBox.classList.add('show');
+        }
+
+        checkBtn.addEventListener('click', checkAnswers);
+
+        resetBtn.addEventListener('click', function() {
+            resetAll();
+            cards.forEach(c => {
+                c.draggable = true;
+                c.classList.remove('disabled');
+            });
+        });
+
+        buildCards();
+        cards.forEach(c => c.draggable = true);
+    })();
+</script>
+</body>
+</html>

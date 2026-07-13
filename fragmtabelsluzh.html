@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заполните табель — интерактивное упражнение</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 30px 20px;
+        }
+        .container {
+            max-width: 850px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 25px 30px 35px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        h2, h3, p, li, td, th, label {
+            color: #000000; /* черный шрифт для всего */
+            font-weight: 700;
+        }
+        h2 {
+            font-size: 1.7rem;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #e6edf5;
+            padding-bottom: 10px;
+            color: #000000;
+        }
+        h3 {
+            font-size: 1.2rem;
+            margin: 25px 0 10px;
+            color: #000000;
+        }
+        .task-text {
+            font-weight: 700;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #8B0000; /* темно-красный */
+        }
+        .task-text + .task-text {
+            margin-top: 0.2rem; /* небольшой пробел между предложениями */
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 6px 20px;
+            background: #f8faff;
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin: 15px 0 25px;
+            border: 1px solid #dbe3ef;
+        }
+        .info-grid .date {
+            font-weight: 700;
+            color: #000000;
+        }
+        .info-grid .event {
+            font-weight: 700;
+            color: #000000;
+        }
+
+        /* Таблица табеля */
+        .tabel-wrap {
+            overflow-x: auto;
+            margin: 20px 0 30px;
+        }
+        .tabel {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            font-weight: 700;
+            color: #000000;
+        }
+        .tabel th {
+            background: #f0f4fb;
+            font-weight: 700;
+            padding: 10px 6px;
+            border: 1px solid #000000;
+            font-size: 0.95rem;
+            color: #000000;
+        }
+        .tabel td {
+            border: 1px solid #000000;
+            padding: 10px 6px;
+            vertical-align: middle;
+            font-weight: 700;
+            min-width: 60px;
+            color: #000000;
+        }
+        .tabel .day-cell {
+            background: #fafcfe;
+        }
+        .drop-cell {
+            background: #fff5e6; /* светло-бежевый */
+            min-height: 50px;
+            min-width: 60px;
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+        .drop-cell.dragover {
+            background: #d9e6f7;
+        }
+        .drop-cell.filled {
+            background: #fff5e6;
+        }
+        .drop-cell .code-text {
+            font-weight: 700;
+            color: #000000;
+            font-size: 1.1rem;
+        }
+        .drop-cell.correct {
+            background: #d4edda;
+        }
+        .drop-cell.wrong {
+            background: #f8d7da;
+        }
+
+        /* Карточки кодов */
+        .codes-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px 20px;
+            justify-content: center;
+            margin: 25px 0 20px;
+            padding: 20px 15px;
+            background: #f9fcff;
+            border-radius: 14px;
+            border: 1px solid #dbe3ef;
+        }
+        .code-card {
+            display: inline-block;
+            padding: 10px 22px;
+            background: #ffffff;
+            border: 1px solid #000000;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: #000000;
+            cursor: grab;
+            user-select: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .code-card:active {
+            cursor: grabbing;
+            transform: scale(0.97);
+        }
+        .code-card.dragging {
+            opacity: 0.4;
+        }
+        .code-card .card-sub {
+            font-weight: 400;
+            font-size: 0.7rem;
+            display: block;
+            color: #2c3e5e;
+            margin-top: 2px;
+        }
+
+        /* Кнопки */
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin: 10px 0 25px;
+        }
+        .btn {
+            padding: 12px 34px;
+            background: #ffffff;
+            border: 2px solid #0a1e3c;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #0a1e3c;
+            cursor: pointer;
+            transition: all 0.15s;
+            letter-spacing: 0.3px;
+        }
+        .btn:hover {
+            background: #0a1e3c;
+            color: #ffffff;
+        }
+        .btn-check {
+            background: #0a1e3c;
+            color: #ffffff;
+            border-color: #0a1e3c;
+        }
+        .btn-check:hover {
+            background: #1f3a5e;
+        }
+        .btn-reset {
+            background: #ffffff;
+            border-color: #7a8ba5;
+            color: #1f2e4a;
+        }
+        .btn-reset:hover {
+            background: #eef3fa;
+        }
+
+        /* Результат проверки */
+        .result-box {
+            margin: 22px 0 10px;
+            padding: 18px 22px;
+            border-radius: 12px;
+            background: #f8faff;
+            border-left: 6px solid #0a1e3c;
+            font-weight: 700;
+            color: #000000;
+            display: none;
+        }
+        .result-box.show {
+            display: block;
+        }
+        .result-box .correct-msg {
+            color: #155724;
+        }
+        .result-box .wrong-msg {
+            color: #721c24;
+        }
+        .result-box .explanation {
+            margin-top: 12px;
+            font-weight: 400;
+            line-height: 1.6;
+            background: #ffffff;
+            padding: 12px 18px;
+            border-radius: 8px;
+            border: 1px solid #dbe3ef;
+            font-weight: 700;
+        }
+        .result-box .explanation strong {
+            color: #000000;
+        }
+
+        /* Адаптив */
+        @media (max-width: 650px) {
+            .container { padding: 15px 12px; }
+            .code-card { padding: 8px 14px; font-size: 1rem; }
+            .tabel th, .tabel td { padding: 6px 3px; font-size: 0.9rem; min-width: 40px; }
+            .btn { padding: 10px 20px; font-size: 0.9rem; }
+            .info-grid { grid-template-columns: 1fr; gap: 3px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h2>📋 Заполните фрагмент табеля</h2>
+    <p class="task-text">
+        Перед вами фрагмент табеля учёта рабочего времени за апрель. Сотрудник отсутствовал по разным причинам.
+    </p>
+    <p class="task-text">
+        Перетащите коды из общего списка в нужные ячейки табеля для каждого дня.
+    </p>
+
+    <!-- Информация о днях -->
+    <div class="info-grid">
+        <span class="date"><strong>1 апреля (Пн)</strong></span>
+        <span class="event">Проходил медосвидетельствование по повестке</span>
+        <span class="date"><strong>2 апреля (Вт)</strong></span>
+        <span class="event">Рабочий день</span>
+        <span class="date"><strong>3 апреля (Ср)</strong></span>
+        <span class="event">Участвовал в заседании призывной комиссии</span>
+        <span class="date"><strong>4 апреля (Чт)</strong></span>
+        <span class="event">Был на больничном (закрытый лист нетрудоспособности)</span>
+        <span class="date"><strong>5 апреля (Пт)</strong></span>
+        <span class="event">Получил повестку «для отправки», в этот же день уволен</span>
+    </div>
+
+    <!-- Таблица табеля -->
+    <div class="tabel-wrap">
+        <table class="tabel" id="tabelTable">
+            <thead>
+                <tr>
+                    <th>Число</th>
+                    <th>1</th>
+                    <th>2</th>
+                    <th>3</th>
+                    <th>4</th>
+                    <th>5</th>
+                </tr>
+                <tr>
+                    <th>День недели</th>
+                    <th>Пн</th>
+                    <th>Вт</th>
+                    <th>Ср</th>
+                    <th>Чт</th>
+                    <th>Пт</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="background:#f0f4fb; font-weight:700; color:#000;">Код</td>
+                    <td class="drop-cell" id="cell1" data-day="1"></td>
+                    <td class="drop-cell" id="cell2" data-day="2"></td>
+                    <td class="drop-cell" id="cell3" data-day="3"></td>
+                    <td class="drop-cell" id="cell4" data-day="4"></td>
+                    <td class="drop-cell" id="cell5" data-day="5"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Доступные коды -->
+    <div class="codes-pool" id="codesPool">
+        <div class="code-card" draggable="true" data-code="Я"><span>Я</span><span class="card-sub">явка</span></div>
+        <div class="code-card" draggable="true" data-code="Г/23"><span>Г / 23</span><span class="card-sub">гос. обязанности</span></div>
+        <div class="code-card" draggable="true" data-code="Б"><span>Б</span><span class="card-sub">больничный</span></div>
+        <div class="code-card" draggable="true" data-code="ОТ"><span>ОТ</span><span class="card-sub">отпуск</span></div>
+        <div class="code-card" draggable="true" data-code="ПП"><span>ПП</span><span class="card-sub">неявка</span></div>
+    </div>
+
+    <!-- Кнопки -->
+    <div class="btn-group">
+        <button class="btn btn-check" id="checkBtn">✅ Проверить</button>
+        <button class="btn btn-reset" id="resetBtn">⟲ Сбросить</button>
+    </div>
+
+    <!-- Результат -->
+    <div class="result-box" id="resultBox">
+        <div id="resultMessage"></div>
+        <div class="explanation" id="explanationBox"></div>
+    </div>
+
+</div>
+
+<script>
+    (function() {
+        // Правильные ответы по дням 1..5
+        const correctAnswers = ['Г/23', 'Я', 'Г/23', 'Б', 'Г/23'];
+
+        // Получаем ячейки
+        const cells = [
+            document.getElementById('cell1'),
+            document.getElementById('cell2'),
+            document.getElementById('cell3'),
+            document.getElementById('cell4'),
+            document.getElementById('cell5')
+        ];
+        const pool = document.getElementById('codesPool');
+        const checkBtn = document.getElementById('checkBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const resultBox = document.getElementById('resultBox');
+        const resultMessage = document.getElementById('resultMessage');
+        const explanationBox = document.getElementById('explanationBox');
+
+        // Храним перетаскиваемую карточку для визуального отображения
+        let draggedCard = null;
+
+        // --- Drag & Drop для карточек ---
+        function handleDragStart(e) {
+            const card = e.target.closest('.code-card');
+            if (!card) return;
+            draggedCard = card;
+            card.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', card.dataset.code);
+        }
+
+        function handleDragEnd(e) {
+            const card = e.target.closest('.code-card');
+            if (card) {
+                card.classList.remove('dragging');
+            }
+            cells.forEach(c => c.classList.remove('dragover'));
+            draggedCard = null;
+        }
+
+        // События для ячеек
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const cell = e.target.closest('.drop-cell');
+            if (cell) {
+                cells.forEach(c => c.classList.remove('dragover'));
+                cell.classList.add('dragover');
+            }
+        }
+
+        function handleDragLeave(e) {
+            const cell = e.target.closest('.drop-cell');
+            if (cell) {
+                cell.classList.remove('dragover');
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const cell = e.target.closest('.drop-cell');
+            if (!cell) return;
+            cell.classList.remove('dragover');
+
+            const code = e.dataTransfer.getData('text/plain');
+            if (!code) return;
+
+            // Просто вставляем код в ячейку, карточка остаётся видимой
+            cell.innerHTML = `<span class="code-text">${code}</span>`;
+            cell.classList.add('filled');
+            cell.classList.remove('correct', 'wrong');
+            // Скрываем результат, так как после изменений нужна новая проверка
+            resultBox.classList.remove('show');
+        }
+
+        // Назначаем обработчики на карточки (динамически, чтобы работало)
+        function attachCardEvents() {
+            document.querySelectorAll('.code-card').forEach(card => {
+                card.removeEventListener('dragstart', handleDragStart);
+                card.removeEventListener('dragend', handleDragEnd);
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragend', handleDragEnd);
+            });
+        }
+        attachCardEvents();
+
+        // Обработчики для ячеек
+        cells.forEach(cell => {
+            cell.addEventListener('dragover', handleDragOver);
+            cell.addEventListener('dragleave', handleDragLeave);
+            cell.addEventListener('drop', handleDrop);
+        });
+
+        // Запрещаем дроп в пул, чтобы случайно не сбросить
+        pool.addEventListener('dragover', (e) => e.preventDefault());
+        pool.addEventListener('drop', (e) => e.preventDefault());
+
+        // --- Проверка ---
+        function checkAnswers() {
+            let allCorrect = true;
+            let details = [];
+
+            cells.forEach((cell, index) => {
+                const code = cell.textContent.trim();
+                const expected = correctAnswers[index];
+                const day = index + 1;
+                let dayName = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт'][index];
+                let isCorrect = (code === expected);
+                if (!isCorrect) allCorrect = false;
+
+                // Подсветка ячейки
+                cell.classList.remove('correct', 'wrong');
+                if (isCorrect) {
+                    cell.classList.add('correct');
+                } else {
+                    cell.classList.add('wrong');
+                }
+
+                details.push({
+                    day: day,
+                    dayName: dayName,
+                    code: code || '—',
+                    expected: expected,
+                    correct: isCorrect
+                });
+            });
+
+            // Сообщение
+            let msg = '';
+            if (allCorrect) {
+                msg = '✅ <strong>Всё верно!</strong> Вы правильно заполнили табель.';
+            } else {
+                msg = '❌ <strong>Есть ошибки.</strong> Проверьте ячейки, выделенные красным.';
+            }
+            resultMessage.innerHTML = msg;
+
+            // Пояснение с расшифровкой
+            let expl = '<strong>📘 Расшифровка:</strong><br>';
+            details.forEach(d => {
+                let status = d.correct ? '✅' : '❌';
+                expl += `<strong>${d.day} апреля (${d.dayName})</strong> — `;
+                expl += `код <strong>«${d.expected}»</strong>`;
+                if (d.code !== d.expected && d.code !== '—') {
+                    expl += ` (у вас «${d.code}»)`;
+                } else if (d.code === '—') {
+                    expl += ` (ячейка пуста)`;
+                }
+                let reason = '';
+                if (d.day === 1) reason = 'проходил медосвидетельствование по повестке (государственная обязанность)';
+                else if (d.day === 2) reason = 'рабочий день';
+                else if (d.day === 3) reason = 'участвовал в заседании призывной комиссии (государственная обязанность)';
+                else if (d.day === 4) reason = 'был на больничном (не путать с государственной обязанностью)';
+                else if (d.day === 5) reason = 'отсутствовал по повестке «для отправки» (государственная обязанность)';
+                expl += ` — ${reason}.<br>`;
+            });
+            explanationBox.innerHTML = expl;
+
+            resultBox.classList.add('show');
+        }
+
+        checkBtn.addEventListener('click', checkAnswers);
+
+        // --- Сброс ---
+        function resetAll() {
+            cells.forEach(cell => {
+                cell.innerHTML = '';
+                cell.classList.remove('filled', 'correct', 'wrong', 'dragover');
+            });
+            resultBox.classList.remove('show');
+            // Убираем подсветку
+            cells.forEach(c => c.classList.remove('dragover'));
+        }
+
+        resetBtn.addEventListener('click', resetAll);
+
+        // При инициализации скрываем результат
+        resultBox.classList.remove('show');
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Календарь — срок сдачи ЕФС-1</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 30px 20px;
+        }
+        .container {
+            max-width: 650px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 25px 30px 35px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .task-text {
+            font-weight: 700;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #000000;
+            margin-bottom: 8px;
+        }
+        .task-text + .task-text {
+            margin-top: 0;
+        }
+        .task-text .highlight {
+            color: #8B0000;
+        }
+
+        .calendar-caption {
+            font-weight: 700;
+            font-size: 1.3rem;
+            text-align: center;
+            margin-bottom: 10px;
+            color: #000000;
+        }
+
+        .calendar {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0 25px;
+            font-weight: 700;
+            color: #000000;
+        }
+        .calendar th {
+            background: #d4edda;
+            padding: 12px 6px;
+            border: 1px solid #000000;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+        .calendar td {
+            border: 1px solid #000000;
+            padding: 12px 6px;
+            text-align: center;
+            vertical-align: middle;
+            font-weight: 700;
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+            background: #fafcfe;
+            min-width: 40px;
+        }
+        .calendar td:hover {
+            background: #d9e6f7;
+            transform: scale(1.02);
+        }
+        .calendar td:active {
+            transform: scale(0.96);
+        }
+        .calendar td .day-number {
+            display: block;
+            font-weight: 700;
+        }
+        .calendar td.empty {
+            background: transparent;
+            cursor: default;
+            border: 1px solid #000000;
+        }
+        .calendar td.empty:hover {
+            background: transparent;
+            transform: none;
+        }
+        .calendar td.correct-highlight {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+        .calendar td.wrong-highlight {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+        .calendar td.disabled-click {
+            cursor: default;
+        }
+        .calendar td.disabled-click:hover {
+            background: inherit;
+            transform: none;
+        }
+
+        .result-box {
+            margin: 20px 0 10px;
+            padding: 18px 22px;
+            border-radius: 12px;
+            background: #f8faff;
+            border-left: 6px solid #000000;
+            font-weight: 700;
+            color: #000000;
+            display: none;
+        }
+        .result-box.show {
+            display: block;
+        }
+        .result-box .success {
+            color: #155724;
+        }
+        .result-box .error {
+            color: #721c24;
+        }
+        .result-box .explanation {
+            margin-top: 12px;
+            font-weight: 400;
+            line-height: 1.6;
+            background: #ffffff;
+            padding: 12px 18px;
+            border-radius: 8px;
+            border: 1px solid #dbe3ef;
+            font-weight: 700;
+            color: #000000;
+        }
+
+        .btn-reset {
+            padding: 12px 34px;
+            background: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #000000;
+            cursor: pointer;
+            transition: all 0.15s;
+            letter-spacing: 0.3px;
+            margin-top: 10px;
+        }
+        .btn-reset:hover {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 15px 12px; }
+            .calendar td { padding: 8px 4px; font-size: 1.2rem; }
+            .calendar th { padding: 8px 4px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <p class="task-text">
+        Сотрудник призван на службу по мобилизации 7 декабря 2026 года. Приказ о приостановлении трудового договора издан в этот же день.
+    </p>
+    <p class="task-text">
+        <span class="highlight"><strong>Кликните на календаре по последнему допустимому дню для сдачи отчёта ЕФС-1.</strong></span>
+    </p>
+
+    <div class="calendar-caption">Декабрь 2026</div>
+
+    <table class="calendar" id="calendar">
+        <thead>
+            <tr>
+                <th>Пн</th><th>Вт</th><th>Ср</th><th>Чт</th><th>Пт</th><th>Сб</th><th>Вс</th>
+            </tr>
+        </thead>
+        <tbody id="calendarBody">
+            <!-- заполняется JS -->
+        </tbody>
+    </table>
+
+    <div class="result-box" id="resultBox">
+        <div id="resultMessage"></div>
+        <div class="explanation" id="explanationBox" style="display:none;"></div>
+    </div>
+
+    <button class="btn-reset" id="resetBtn">⟲ Сбросить</button>
+
+</div>
+
+<script>
+    (function() {
+        const correctDay = 8;
+        const correctMonth = 11;
+        const correctYear = 2026;
+
+        const calendarBody = document.getElementById('calendarBody');
+        const resultBox = document.getElementById('resultBox');
+        const resultMessage = document.getElementById('resultMessage');
+        const explanationBox = document.getElementById('explanationBox');
+        const resetBtn = document.getElementById('resetBtn');
+
+        const firstDayOfMonth = 1; // вторник
+        const daysInMonth = 31;
+
+        let clicked = false;
+
+        function buildCalendar() {
+            calendarBody.innerHTML = '';
+            let row = document.createElement('tr');
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                const td = document.createElement('td');
+                td.className = 'empty';
+                td.textContent = '';
+                row.appendChild(td);
+            }
+            for (let day = 1; day <= daysInMonth; day++) {
+                const td = document.createElement('td');
+                td.dataset.day = day;
+                td.dataset.month = 11;
+                td.dataset.year = 2026;
+                td.innerHTML = `<span class="day-number">${day}</span>`;
+
+                td.addEventListener('click', function(e) {
+                    if (clicked) return;
+                    const clickedDay = parseInt(this.dataset.day);
+                    const clickedMonth = parseInt(this.dataset.month);
+                    const clickedYear = parseInt(this.dataset.year);
+
+                    const isCorrect = (clickedDay === correctDay && clickedMonth === correctMonth && clickedYear === correctYear);
+
+                    this.classList.add(isCorrect ? 'correct-highlight' : 'wrong-highlight');
+                    this.classList.add('disabled-click');
+
+                    resultBox.classList.add('show');
+                    if (isCorrect) {
+                        resultMessage.innerHTML = '<span class="success">✅ <strong>Верно!</strong> Вы выбрали правильную дату.</span>';
+                        explanationBox.style.display = 'block';
+                        explanationBox.innerHTML = '<strong>📘 Пояснение:</strong><br>Приказ издан 7 декабря (понедельник). Срок подачи отчёта ЕФС-1 — не позднее следующего рабочего дня, то есть 8 декабря (вторник). Это и есть последний допустимый день.';
+                    } else {
+                        resultMessage.innerHTML = '<span class="error">❌ <strong>Неверно.</strong></span>';
+                        explanationBox.style.display = 'none';
+                        explanationBox.innerHTML = '';
+                    }
+
+                    clicked = true;
+                });
+
+                row.appendChild(td);
+                const dateObj = new Date(2026, 11, day);
+                const dow = dateObj.getDay();
+                if (dow === 0 && day !== daysInMonth) {
+                    calendarBody.appendChild(row);
+                    row = document.createElement('tr');
+                }
+            }
+            if (row.children.length > 0) {
+                calendarBody.appendChild(row);
+            }
+        }
+
+        function resetAll() {
+            const cells = calendarBody.querySelectorAll('td');
+            cells.forEach(td => {
+                td.classList.remove('correct-highlight', 'wrong-highlight', 'disabled-click');
+            });
+            resultBox.classList.remove('show');
+            explanationBox.style.display = 'none';
+            explanationBox.innerHTML = '';
+            clicked = false;
+        }
+
+        resetBtn.addEventListener('click', resetAll);
+
+        buildCalendar();
+    })();
+</script>
+</body>
+</html>

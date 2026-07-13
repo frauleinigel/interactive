@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Помогите бухгалтеру — интерактивное упражнение</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 30px 20px;
+        }
+        .container {
+            max-width: 850px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 25px 30px 35px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        h2 {
+            font-size: 1.7rem;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #e6edf5;
+            padding-bottom: 10px;
+            color: #000000;
+            font-weight: 700;
+        }
+        .task-text {
+            font-weight: 700;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #8B0000;
+            margin-bottom: 15px;
+        }
+
+        /* Блок с исходными данными — светло-зелёный фон */
+        .info-box {
+            margin: 15px 0 25px;
+            padding: 16px 20px;
+            background: #e6f7e6;
+            border: 1px solid #b8d9b8;
+            border-radius: 10px;
+        }
+        .info-box p {
+            margin: 6px 0;
+            font-weight: 700;
+            color: #000000;
+        }
+        .info-box .highlight {
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            font-weight: 700;
+        }
+
+        .fields-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px 30px;
+            justify-content: center;
+            margin: 20px 0 30px;
+        }
+        .field-item {
+            flex: 1 1 180px;
+            min-width: 140px;
+            text-align: center;
+            background: #fff5e6;
+            border: 1px solid #000000;
+            border-radius: 10px;
+            padding: 12px 6px;
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+        .field-item .field-label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #000000;
+            margin-bottom: 8px;
+        }
+        .field-item .drop-zone {
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #000000;
+            border-radius: 6px;
+            background: #fff5e6;
+            transition: background 0.15s;
+        }
+        .field-item .drop-zone.dragover {
+            background: #d9e6f7;
+        }
+        .field-item .drop-zone.filled {
+            background: #fff5e6;
+        }
+        .field-item .drop-zone.correct {
+            background: #d4edda;
+        }
+        .field-item .drop-zone.wrong {
+            background: #f8d7da;
+        }
+        .field-item .drop-zone .code-text {
+            font-weight: 700;
+            color: #000000;
+        }
+
+        .codes-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px 18px;
+            justify-content: center;
+            margin: 20px 0 25px;
+            padding: 20px 15px;
+            background: #f9fcff;
+            border-radius: 14px;
+            border: 1px solid #dbe3ef;
+        }
+        .code-card {
+            display: inline-block;
+            padding: 10px 22px;
+            background: #ffffff;
+            border: 1px solid #000000;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: #000000;
+            cursor: grab;
+            user-select: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .code-card:active {
+            cursor: grabbing;
+            transform: scale(0.97);
+        }
+        .code-card.dragging {
+            opacity: 0.4;
+        }
+        .code-card .card-sub {
+            font-weight: 400;
+            font-size: 0.7rem;
+            display: block;
+            color: #2c3e5e;
+            margin-top: 2px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin: 10px 0 25px;
+        }
+        .btn {
+            padding: 12px 34px;
+            background: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #000000;
+            cursor: pointer;
+            transition: all 0.15s;
+            letter-spacing: 0.3px;
+        }
+        .btn:hover {
+            background: #000000;
+            color: #ffffff;
+        }
+        .btn-check {
+            background: #000000;
+            color: #ffffff;
+            border-color: #000000;
+        }
+        .btn-check:hover {
+            background: #1f3a5e;
+        }
+        .btn-reset {
+            background: #ffffff;
+            border-color: #7a8ba5;
+            color: #1f2e4a;
+        }
+        .btn-reset:hover {
+            background: #eef3fa;
+        }
+
+        .result-box {
+            margin: 22px 0 10px;
+            padding: 18px 22px;
+            border-radius: 12px;
+            background: #f8faff;
+            border-left: 6px solid #000000;
+            font-weight: 700;
+            color: #000000;
+            display: none;
+        }
+        .result-box.show {
+            display: block;
+        }
+        .result-box .explanation {
+            margin-top: 12px;
+            font-weight: 400;
+            line-height: 1.6;
+            background: #ffffff;
+            padding: 12px 18px;
+            border-radius: 8px;
+            border: 1px solid #dbe3ef;
+            font-weight: 700;
+            color: #000000;
+        }
+        .result-box .explanation strong {
+            color: #000000;
+        }
+
+        @media (max-width: 650px) {
+            .container { padding: 15px 12px; }
+            .code-card { padding: 8px 14px; font-size: 1rem; }
+            .field-item { flex: 1 1 120px; min-width: 100px; }
+            .btn { padding: 10px 20px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h2>🧮 Помогите бухгалтеру исправить ошибку</h2>
+
+    <p class="task-text">
+        Бухгалтер учреждения культуры неверно рассчитал выходное пособие сотруднику, который отправляется на срочную службу. Перетащите карточки с нужными числами в поля.
+    </p>
+
+    <!-- Блок с исходными данными — удалена лишняя строка -->
+    <div class="info-box">
+        <p><strong>Исходные данные:</strong></p>
+        <p>Среднедневной заработок сотрудника — <span class="highlight">3 000 руб.</span></p>
+        <p>Количество рабочих дней в двухнедельном периоде — <span class="highlight">10 дней</span></p>
+        <p style="color:#8B0000; margin-top:8px;"><strong>Неверный расчёт бухгалтера:</strong> 3 000 × 30 = 90 000 руб.</p>
+    </div>
+
+    <div class="fields-wrap" id="fieldsWrap">
+        <div class="field-item" data-field="salary">
+            <span class="field-label">Среднедневной заработок</span>
+            <div class="drop-zone" id="fieldSalary">⬜</div>
+        </div>
+        <div class="field-item" data-field="days">
+            <span class="field-label">Количество рабочих дней</span>
+            <div class="drop-zone" id="fieldDays">⬜</div>
+        </div>
+        <div class="field-item" data-field="result">
+            <span class="field-label">Выходное пособие (результат)</span>
+            <div class="drop-zone" id="fieldResult">⬜</div>
+        </div>
+    </div>
+
+    <!-- Карточки отсортированы по возрастанию -->
+    <div class="codes-pool" id="codesPool">
+        <div class="code-card" draggable="true" data-value="5"><span>5</span></div>
+        <div class="code-card" draggable="true" data-value="10"><span>10</span></div>
+        <div class="code-card" draggable="true" data-value="20"><span>20</span></div>
+        <div class="code-card" draggable="true" data-value="30"><span>30</span></div>
+        <div class="code-card" draggable="true" data-value="1500"><span>1 500</span></div>
+        <div class="code-card" draggable="true" data-value="3000"><span>3 000</span></div>
+        <div class="code-card" draggable="true" data-value="6000"><span>6 000</span></div>
+        <div class="code-card" draggable="true" data-value="15000"><span>15 000</span></div>
+        <div class="code-card" draggable="true" data-value="30000"><span>30 000</span></div>
+        <div class="code-card" draggable="true" data-value="60000"><span>60 000</span></div>
+        <div class="code-card" draggable="true" data-value="90000"><span>90 000</span></div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn btn-check" id="checkBtn">✅ Проверить</button>
+        <button class="btn btn-reset" id="resetBtn">⟲ Сбросить</button>
+    </div>
+
+    <div class="result-box" id="resultBox">
+        <div id="resultMessage"></div>
+        <div class="explanation" id="explanationBox"></div>
+    </div>
+
+</div>
+
+<script>
+    (function() {
+        const correctValues = ['3000', '10', '30000'];
+        const fieldSalary = document.getElementById('fieldSalary');
+        const fieldDays = document.getElementById('fieldDays');
+        const fieldResult = document.getElementById('fieldResult');
+        const fields = [fieldSalary, fieldDays, fieldResult];
+        const pool = document.getElementById('codesPool');
+        const checkBtn = document.getElementById('checkBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const resultBox = document.getElementById('resultBox');
+        const resultMessage = document.getElementById('resultMessage');
+        const explanationBox = document.getElementById('explanationBox');
+
+        function handleDragStart(e) {
+            const card = e.target.closest('.code-card');
+            if (!card) return;
+            card.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', card.dataset.value);
+        }
+        function handleDragEnd(e) {
+            const card = e.target.closest('.code-card');
+            if (card) card.classList.remove('dragging');
+            fields.forEach(f => f.classList.remove('dragover'));
+        }
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const zone = e.target.closest('.drop-zone');
+            if (zone) {
+                fields.forEach(f => f.classList.remove('dragover'));
+                zone.classList.add('dragover');
+            }
+        }
+        function handleDragLeave(e) {
+            const zone = e.target.closest('.drop-zone');
+            if (zone) zone.classList.remove('dragover');
+        }
+        function handleDrop(e) {
+            e.preventDefault();
+            const zone = e.target.closest('.drop-zone');
+            if (!zone) return;
+            zone.classList.remove('dragover');
+            const value = e.dataTransfer.getData('text/plain');
+            if (!value) return;
+            zone.innerHTML = `<span class="code-text">${value}</span>`;
+            zone.classList.add('filled');
+            zone.classList.remove('correct', 'wrong');
+            resultBox.classList.remove('show');
+        }
+
+        function attachCardEvents() {
+            document.querySelectorAll('.code-card').forEach(card => {
+                card.removeEventListener('dragstart', handleDragStart);
+                card.removeEventListener('dragend', handleDragEnd);
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragend', handleDragEnd);
+            });
+        }
+        attachCardEvents();
+
+        fields.forEach(field => {
+            field.addEventListener('dragover', handleDragOver);
+            field.addEventListener('dragleave', handleDragLeave);
+            field.addEventListener('drop', handleDrop);
+        });
+        pool.addEventListener('dragover', (e) => e.preventDefault());
+        pool.addEventListener('drop', (e) => e.preventDefault());
+
+        function checkAnswers() {
+            let allCorrect = true;
+            let details = [];
+            fields.forEach((zone, index) => {
+                const actual = zone.textContent.trim();
+                const expected = correctValues[index];
+                const isCorrect = (actual === expected);
+                if (!isCorrect) allCorrect = false;
+                zone.classList.remove('correct', 'wrong');
+                if (isCorrect) zone.classList.add('correct');
+                else zone.classList.add('wrong');
+                let label = ['Среднедневной заработок', 'Количество рабочих дней', 'Выходное пособие'][index];
+                details.push({ label, actual: actual || '—', expected, correct: isCorrect });
+            });
+            resultMessage.innerHTML = allCorrect
+                ? '✅ <strong>Отлично!</strong> Вы помогли бухгалтеру исправить ошибку.'
+                : '❌ <strong>Есть ошибки.</strong> Проверьте поля, выделенные красным.';
+            let expl = '<strong>📘 Расшифровка:</strong><br>';
+            details.forEach(d => {
+                let status = d.correct ? '✅' : '❌';
+                expl += `<strong>${d.label}</strong> — должно быть <strong>«${d.expected}»</strong>`;
+                if (d.actual !== d.expected && d.actual !== '—') expl += ` (у вас «${d.actual}»)`;
+                else if (d.actual === '—') expl += ` (поле пусто)`;
+                expl += '<br>';
+            });
+            expl += '<br><strong>Почему так:</strong> Выходное пособие при увольнении по призыву на срочную службу составляет две недели среднего заработка. В двухнедельном периоде 10 рабочих дней (при пятидневной неделе). Поэтому: 3 000 × 10 = 30 000 руб. Бухгалтер ошибся, взяв 30 календарных дней.';
+            explanationBox.innerHTML = expl;
+            resultBox.classList.add('show');
+        }
+
+        checkBtn.addEventListener('click', checkAnswers);
+
+        function resetAll() {
+            fields.forEach(zone => {
+                zone.innerHTML = '⬜';
+                zone.classList.remove('filled', 'correct', 'wrong', 'dragover');
+            });
+            resultBox.classList.remove('show');
+        }
+        resetBtn.addEventListener('click', resetAll);
+        resultBox.classList.remove('show');
+    })();
+</script>
+</body>
+</html>
