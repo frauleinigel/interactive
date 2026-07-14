@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажёр: Аудиальные форматы</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            background: #f2f4f8;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        h1 {
+            font-size: 26px;
+            margin-top: 0;
+            margin-bottom: 6px;
+        }
+        .sub {
+            color: #333;
+            margin-bottom: 24px;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        .place-label {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            min-width: 100px;
+        }
+        .tab-btn.active {
+            border-color: #0066cc;
+            background: #e6f0ff;
+        }
+        .tab-btn.done {
+            border-color: #28a745;
+            background: #e6f7e6;
+        }
+        .tab-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .slot {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            border-left: 5px solid #ccc;
+            transition: 0.2s;
+        }
+        .slot.done {
+            border-left-color: #28a745;
+            background: #f0faf0;
+        }
+        .slot .row-label {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .slot .row-label span {
+            font-weight: 500;
+            font-size: 14px;
+            color: #333;
+        }
+        .slot select {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            margin-right: 4px;
+        }
+        .slot select:disabled {
+            background: #e9ecef;
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+        .slot button {
+            padding: 6px 18px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .slot button:hover {
+            background: #0052a3;
+        }
+        .slot button:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+        .result-box {
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: #e6f7e6;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        .result-box strong {
+            display: block;
+            font-size: 16px;
+        }
+        .result-box .desc {
+            color: #333;
+            margin-top: 4px;
+        }
+        .next-btn {
+            display: none;
+            padding: 14px 28px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+        .next-btn:hover {
+            background: #1f7a33;
+        }
+        .summary {
+            display: none;
+        }
+        #errorToast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #cc0000;
+            color: white;
+            padding: 24px 48px;
+            border-radius: 16px;
+            font-size: 32px;
+            font-weight: bold;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            z-index: 9999;
+            display: none;
+            pointer-events: none;
+            text-align: center;
+            letter-spacing: 1px;
+            border: 2px solid #ff9999;
+        }
+    </style>
+</head>
+<body>
+
+<div id="errorToast">Ошибка</div>
+
+<div class="container" id="app">
+    <h1>🎧 Аудиальные форматы</h1>
+    <div class="sub">
+        По аналогии с предыдущим тренажером в каждой вкладке "как участвуем" составьте логичные связки: "что слушаем" + "что делаем". Получите готовые форматы.
+        <br><br>
+        <strong>Важно:</strong> варианты "что слушаем" и "что делаем" должны сочетаться друг с другом.
+    </div>
+
+    <div class="place-label">👥 Как участвуем:</div>
+    <div class="tabs" id="tabsContainer"></div>
+
+    <div id="slotsContainer"></div>
+
+    <button class="next-btn" id="nextBtn">➡️ Перейти к следующей вкладке</button>
+    <div class="summary" id="summary"></div>
+</div>
+
+<script>
+    // Список правильных пар (что слушаем → что делаем)
+    const correctPairs = [
+        { listen: 'Цитаты персонажей', do: 'Продолжаем фразу' },
+        { listen: 'Саундтреки из кино', do: 'Допеваем строчку' },
+        { listen: 'Отзывы критиков', do: 'Опровергаем с аргументацией' }
+    ];
+
+    // Результаты для каждой правильной пары и способа участия
+    const resultsData = {
+        'Цитаты персонажей|Продолжаем фразу': {
+            'Индивидуально': { title: 'Викторина «Марафон киноцитат»', desc: 'Участник один проходит серию вопросов на продолжение цитат.' },
+            'Друг с другом': { title: 'Дуэль «Реплики советских персонажей»', desc: 'Двое по очереди бросают друг другу цитаты. Балл тому, кто точнее продолжит.' },
+            'Командами': { title: 'Соревнование «Знатоки советских комедий»', desc: 'Команды соревнуются, кто назовет больше точных продолжений.' }
+        },
+        'Саундтреки из кино|Допеваем строчку': {
+            'Индивидуально': { title: 'Викторина «Музыка советских комедий»', desc: 'Участник определяет фильм по отрывку саундтрека.' },
+            'Друг с другом': { title: 'Дуэль «Песни СССР»', desc: 'Два игрока соревнуются, кто быстрее угадает киномелодию.' },
+            'Командами': { title: 'Соревнование «Битва музыкальных умов»', desc: 'Команды отгадывают пропущенные слова из песен, которые звучали в фильмах СССР.' }
+        },
+        'Отзывы критиков|Опровергаем с аргументацией': {
+            'Индивидуально': { title: 'Викторина «Критический разбор»', desc: 'Участник анализирует рецензию и находит слабые места.' },
+            'Друг с другом': { title: 'Дуэль «Спор с критиком»', desc: 'Два участника приводят контраргументы против рецензии, соревнуются в убедительности.' },
+            'Командами': { title: 'Соревнование «Суд кинокритика»', desc: 'Команды выносят вердикт критику, соревнуясь в аргументации.' }
+        }
+    };
+
+    // Варианты для выпадающих списков
+    const listenOptions = ['Цитаты персонажей', 'Саундтреки из кино', 'Отзывы критиков'];
+    const doOptions = ['Продолжаем фразу', 'Допеваем строчку', 'Опровергаем с аргументацией'];
+    const participations = ['Индивидуально', 'Друг с другом', 'Командами'];
+
+    // Состояние: для каждой вкладки (участия) храним массив из 3 индексов пар (или -1)
+    let selectedPairs = participations.map(() => [-1, -1, -1]);
+    let currentTab = 0;
+
+    const tabsContainer = document.getElementById('tabsContainer');
+    const slotsContainer = document.getElementById('slotsContainer');
+    const nextBtn = document.getElementById('nextBtn');
+    const errorToast = document.getElementById('errorToast');
+
+    function showError() {
+        errorToast.style.display = 'block';
+        errorToast.style.opacity = 1;
+        setTimeout(() => {
+            errorToast.style.opacity = 0;
+            setTimeout(() => {
+                errorToast.style.display = 'none';
+            }, 300);
+        }, 2000);
+    }
+
+    function render() {
+        let tabsHtml = '';
+        participations.forEach((part, idx) => {
+            const allDone = selectedPairs[idx].every(v => v !== -1);
+            const isActive = idx === currentTab;
+            let btnClass = 'tab-btn';
+            if (isActive) btnClass += ' active';
+            if (allDone) btnClass += ' done';
+            const label = allDone ? '✅ ' + part : part;
+            tabsHtml += `<button class="${btnClass}" data-index="${idx}">${label}</button>`;
+        });
+        tabsContainer.innerHTML = tabsHtml;
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const idx = parseInt(this.dataset.index);
+                if (idx === currentTab) return;
+                currentTab = idx;
+                render();
+            });
+        });
+
+        const participation = participations[currentTab];
+        const slotsState = selectedPairs[currentTab];
+
+        let slotsHtml = '';
+        for (let i = 0; i < 3; i++) {
+            const isCollected = slotsState[i] !== -1;
+            const slotClass = isCollected ? 'slot done' : 'slot';
+            slotsHtml += `<div class="${slotClass}">`;
+            slotsHtml += `<div class="row-label">`;
+            slotsHtml += `<span>${i+1}. Что слушаем:</span>`;
+            slotsHtml += `<select id="listenSelect_${i}" ${isCollected ? 'disabled' : ''}>`;
+            if (isCollected) {
+                const pairIdx = slotsState[i];
+                slotsHtml += `<option value="${correctPairs[pairIdx].listen}" selected>${correctPairs[pairIdx].listen}</option>`;
+            } else {
+                slotsHtml += `<option value="" selected>— выбрать —</option>`;
+                listenOptions.forEach(opt => {
+                    slotsHtml += `<option value="${opt}">${opt}</option>`;
+                });
+            }
+            slotsHtml += `</select>`;
+            slotsHtml += `<span>Что делаем:</span>`;
+            slotsHtml += `<select id="doSelect_${i}" ${isCollected ? 'disabled' : ''}>`;
+            if (isCollected) {
+                const pairIdx = slotsState[i];
+                slotsHtml += `<option value="${correctPairs[pairIdx].do}" selected>${correctPairs[pairIdx].do}</option>`;
+            } else {
+                slotsHtml += `<option value="" selected>— выбрать —</option>`;
+                doOptions.forEach(opt => {
+                    slotsHtml += `<option value="${opt}">${opt}</option>`;
+                });
+            }
+            slotsHtml += `</select>`;
+            if (!isCollected) {
+                slotsHtml += `<button id="checkBtn_${i}">Проверить</button>`;
+            }
+            slotsHtml += `</div>`;
+            if (isCollected) {
+                const pairIdx = slotsState[i];
+                const key = correctPairs[pairIdx].listen + '|' + correctPairs[pairIdx].do;
+                const result = resultsData[key][participation];
+                slotsHtml += `<div class="result-box"><strong>${result.title}</strong><div class="desc">${result.desc}</div></div>`;
+            }
+            slotsHtml += `</div>`;
+        }
+        slotsContainer.innerHTML = slotsHtml;
+
+        for (let i = 0; i < 3; i++) {
+            if (slotsState[i] === -1) {
+                const btn = document.getElementById(`checkBtn_${i}`);
+                if (btn) {
+                    btn.addEventListener('click', function() {
+                        const listenSelect = document.getElementById(`listenSelect_${i}`);
+                        const doSelect = document.getElementById(`doSelect_${i}`);
+                        if (!listenSelect || !doSelect) return;
+                        const selectedListen = listenSelect.value;
+                        const selectedDo = doSelect.value;
+                        if (selectedListen === "" || selectedDo === "") {
+                            showError();
+                            return;
+                        }
+                        let pairIndex = -1;
+                        for (let j = 0; j < correctPairs.length; j++) {
+                            if (correctPairs[j].listen === selectedListen && correctPairs[j].do === selectedDo) {
+                                pairIndex = j;
+                                break;
+                            }
+                        }
+                        if (pairIndex === -1) {
+                            showError();
+                            return;
+                        }
+                        if (slotsState.includes(pairIndex)) {
+                            showError();
+                            return;
+                        }
+                        selectedPairs[currentTab][i] = pairIndex;
+                        render();
+                    });
+                }
+            }
+        }
+
+        const allDone = selectedPairs[currentTab].every(v => v !== -1);
+        if (allDone && currentTab < participations.length - 1) {
+            nextBtn.style.display = 'inline-block';
+            nextBtn.textContent = `➡️ Перейти к ${participations[currentTab+1]}`;
+        } else if (allDone && currentTab === participations.length - 1) {
+            nextBtn.style.display = 'none';
+        } else {
+            nextBtn.style.display = 'none';
+        }
+    }
+
+    function goToNext() {
+        if (currentTab < participations.length - 1) {
+            currentTab++;
+            render();
+        }
+    }
+
+    nextBtn.addEventListener('click', goToNext);
+    render();
+</script>
+</body>
+</html>

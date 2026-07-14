@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажёр: Визуальные форматы</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            background: #f2f4f8;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        h1 {
+            font-size: 26px;
+            margin-top: 0;
+            margin-bottom: 6px;
+        }
+        .sub {
+            color: #333;
+            margin-bottom: 24px;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        .place-label {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            min-width: 100px;
+        }
+        .tab-btn.active {
+            border-color: #0066cc;
+            background: #e6f0ff;
+        }
+        .tab-btn.done {
+            border-color: #28a745;
+            background: #e6f7e6;
+        }
+        .tab-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .slot {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            border-left: 5px solid #ccc;
+            transition: 0.2s;
+        }
+        .slot.done {
+            border-left-color: #28a745;
+            background: #f0faf0;
+        }
+        .slot .row-label {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .slot .row-label span {
+            font-weight: 500;
+            font-size: 14px;
+            color: #333;
+        }
+        .slot select {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            margin-right: 4px;
+        }
+        .slot select:disabled {
+            background: #e9ecef;
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+        .slot button {
+            padding: 6px 18px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .slot button:hover {
+            background: #0052a3;
+        }
+        .slot button:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+        .result-box {
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: #e6f7e6;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        .result-box strong {
+            display: block;
+            font-size: 16px;
+        }
+        .result-box .desc {
+            color: #333;
+            margin-top: 4px;
+        }
+        .next-btn {
+            display: none;
+            padding: 14px 28px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+        .next-btn:hover {
+            background: #1f7a33;
+        }
+        .summary {
+            display: none;
+        }
+        #errorToast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #cc0000;
+            color: white;
+            padding: 24px 48px;
+            border-radius: 16px;
+            font-size: 32px;
+            font-weight: bold;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            z-index: 9999;
+            display: none;
+            pointer-events: none;
+            text-align: center;
+            letter-spacing: 1px;
+            border: 2px solid #ff9999;
+        }
+    </style>
+</head>
+<body>
+
+<div id="errorToast">Ошибка</div>
+
+<div class="container" id="app">
+    <h1>🖼️ Визуальные форматы</h1>
+    <div class="sub">
+        В каждой вкладке "действие" составьте логичную связку: "локация + предмет". Получите готовые форматы.
+        <br><br>
+        <strong>Важно:</strong> варианты "локация" и "предмет" должны сочетаться друг с другом.
+    </div>
+
+    <div class="place-label">🎬 Действие:</div>
+    <div class="tabs" id="tabsContainer"></div>
+
+    <div id="slotsContainer"></div>
+
+    <button class="next-btn" id="nextBtn">➡️ Перейти к следующему действию</button>
+    <div class="summary" id="summary"></div>
+</div>
+
+<script>
+    // Правильные пары локация + предмет
+    const correctPairs = [
+        { location: 'Царские палаты', object: 'Трон, корона, скипетр', film: 'Иван Васильевич меняет профессию' },
+        { location: 'Кавказский двор', object: 'Ковры, кувшины, папаха', film: 'Кавказская пленница' },
+        { location: 'Стройка', object: 'Каска, лопата, гипс', film: 'Операция «Ы»' }
+    ];
+
+    // Результаты для каждой пары и действия
+    const resultsData = {
+        'Царские палаты|Трон, корона, скипетр': {
+            'Фотографироваться': { title: 'Фотозона в царских палатах', desc: 'Вы подобрали активность по фильму «Иван Васильевич меняет профессию»!' },
+            'Смотреть на ряженого персонажа': { title: 'Живая сцена «Иван Грозный в палатах»', desc: 'Вы подобрали активность по фильму «Иван Васильевич меняет профессию»!' },
+            'Рассматривать экспонаты': { title: 'Выставка реквизита «Царские регалии»', desc: 'Вы подобрали активность по фильму «Иван Васильевич меняет профессию»!' }
+        },
+        'Кавказский двор|Ковры, кувшины, папаха': {
+            'Фотографироваться': { title: 'Фотозона в кавказском дворе', desc: 'Вы подобрали активность по фильму «Кавказская пленница»!' },
+            'Смотреть на ряженого персонажа': { title: 'Живая сцена «Горец у двора»', desc: 'Вы подобрали активность по фильму «Кавказская пленница»!' },
+            'Рассматривать экспонаты': { title: 'Выставка предметов кавказского быта', desc: 'Вы подобрали активность по фильму «Кавказская пленница»!' }
+        },
+        'Стройка|Каска, лопата, гипс': {
+            'Фотографироваться': { title: 'Фотозона на стройке с каской', desc: 'Вы подобрали активность по фильму «Операция „Ы“»!' },
+            'Смотреть на ряженого персонажа': { title: 'Живая сцена «Встреча с прорабом»', desc: 'Вы подобрали активность по фильму «Операция „Ы“»!' },
+            'Рассматривать экспонаты': { title: 'Выставка реквизита «Стройка»', desc: 'Вы подобрали активность по фильму «Операция „Ы“»!' }
+        }
+    };
+
+    // Варианты для выпадающих списков
+    const locationOptions = ['Царские палаты', 'Кавказский двор', 'Стройка'];
+    const objectOptions = ['Трон, корона, скипетр', 'Ковры, кувшины, папаха', 'Каска, лопата, гипс'];
+    const actions = ['Фотографироваться', 'Смотреть на ряженого персонажа', 'Рассматривать экспонаты'];
+
+    // Состояние: для каждой вкладки (действия) храним массив из 3 индексов пар (или -1)
+    let selectedPairs = actions.map(() => [-1, -1, -1]);
+    let currentTab = 0;
+
+    const tabsContainer = document.getElementById('tabsContainer');
+    const slotsContainer = document.getElementById('slotsContainer');
+    const nextBtn = document.getElementById('nextBtn');
+    const errorToast = document.getElementById('errorToast');
+
+    function showError() {
+        errorToast.style.display = 'block';
+        errorToast.style.opacity = 1;
+        setTimeout(() => {
+            errorToast.style.opacity = 0;
+            setTimeout(() => {
+                errorToast.style.display = 'none';
+            }, 300);
+        }, 2000);
+    }
+
+    function render() {
+        // Вкладки
+        let tabsHtml = '';
+        actions.forEach((action, idx) => {
+            const allDone = selectedPairs[idx].every(v => v !== -1);
+            const isActive = idx === currentTab;
+            let btnClass = 'tab-btn';
+            if (isActive) btnClass += ' active';
+            if (allDone) btnClass += ' done';
+            const label = allDone ? '✅ ' + action : action;
+            tabsHtml += `<button class="${btnClass}" data-index="${idx}">${label}</button>`;
+        });
+        tabsContainer.innerHTML = tabsHtml;
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const idx = parseInt(this.dataset.index);
+                if (idx === currentTab) return;
+                currentTab = idx;
+                render();
+            });
+        });
+
+        const action = actions[currentTab];
+        const slotsState = selectedPairs[currentTab];
+
+        let slotsHtml = '';
+        for (let i = 0; i < 3; i++) {
+            const isCollected = slotsState[i] !== -1;
+            const slotClass = isCollected ? 'slot done' : 'slot';
+            slotsHtml += `<div class="${slotClass}">`;
+            slotsHtml += `<div class="row-label">`;
+            slotsHtml += `<span>${i+1}. Локация:</span>`;
+            slotsHtml += `<select id="locationSelect_${i}" ${isCollected ? 'disabled' : ''}>`;
+            if (isCollected) {
+                const pairIdx = slotsState[i];
+                slotsHtml += `<option value="${correctPairs[pairIdx].location}" selected>${correctPairs[pairIdx].location}</option>`;
+            } else {
+                slotsHtml += `<option value="" selected>— выбрать —</option>`;
+                locationOptions.forEach(opt => {
+                    slotsHtml += `<option value="${opt}">${opt}</option>`;
+                });
+            }
+            slotsHtml += `</select>`;
+            slotsHtml += `<span>Предмет:</span>`;
+            slotsHtml += `<select id="objectSelect_${i}" ${isCollected ? 'disabled' : ''}>`;
+            if (isCollected) {
+                const pairIdx = slotsState[i];
+                slotsHtml += `<option value="${correctPairs[pairIdx].object}" selected>${correctPairs[pairIdx].object}</option>`;
+            } else {
+                slotsHtml += `<option value="" selected>— выбрать —</option>`;
+                objectOptions.forEach(opt => {
+                    slotsHtml += `<option value="${opt}">${opt}</option>`;
+                });
+            }
+            slotsHtml += `</select>`;
+            if (!isCollected) {
+                slotsHtml += `<button id="checkBtn_${i}">Проверить</button>`;
+            }
+            slotsHtml += `</div>`;
+            if (isCollected) {
+                const pairIdx = slotsState[i];
+                const key = correctPairs[pairIdx].location + '|' + correctPairs[pairIdx].object;
+                const result = resultsData[key][action];
+                slotsHtml += `<div class="result-box"><strong>${result.title}</strong><div class="desc">${result.desc}</div></div>`;
+            }
+            slotsHtml += `</div>`;
+        }
+        slotsContainer.innerHTML = slotsHtml;
+
+        // Обработчики для кнопок "Проверить"
+        for (let i = 0; i < 3; i++) {
+            if (slotsState[i] === -1) {
+                const btn = document.getElementById(`checkBtn_${i}`);
+                if (btn) {
+                    btn.addEventListener('click', function() {
+                        const locationSelect = document.getElementById(`locationSelect_${i}`);
+                        const objectSelect = document.getElementById(`objectSelect_${i}`);
+                        if (!locationSelect || !objectSelect) return;
+                        const selectedLocation = locationSelect.value;
+                        const selectedObject = objectSelect.value;
+                        if (selectedLocation === "" || selectedObject === "") {
+                            showError();
+                            return;
+                        }
+                        let pairIndex = -1;
+                        for (let j = 0; j < correctPairs.length; j++) {
+                            if (correctPairs[j].location === selectedLocation && correctPairs[j].object === selectedObject) {
+                                pairIndex = j;
+                                break;
+                            }
+                        }
+                        if (pairIndex === -1) {
+                            showError();
+                            return;
+                        }
+                        if (slotsState.includes(pairIndex)) {
+                            showError();
+                            return;
+                        }
+                        selectedPairs[currentTab][i] = pairIndex;
+                        render();
+                    });
+                }
+            }
+        }
+
+        const allDone = selectedPairs[currentTab].every(v => v !== -1);
+        if (allDone && currentTab < actions.length - 1) {
+            nextBtn.style.display = 'inline-block';
+            nextBtn.textContent = `➡️ Перейти к ${actions[currentTab+1]}`;
+        } else if (allDone && currentTab === actions.length - 1) {
+            nextBtn.style.display = 'none';
+        } else {
+            nextBtn.style.display = 'none';
+        }
+    }
+
+    function goToNext() {
+        if (currentTab < actions.length - 1) {
+            currentTab++;
+            render();
+        }
+    }
+
+    nextBtn.addEventListener('click', goToNext);
+    render();
+</script>
+</body>
+</html>

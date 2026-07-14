@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажёр: Отбор фильмов</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            background: #f2f4f8;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        h1 {
+            font-size: 26px;
+            margin-top: 0;
+            margin-bottom: 6px;
+        }
+        .sub {
+            color: #333;
+            margin-bottom: 24px;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        .folders {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .folder {
+            flex: 1;
+            min-width: 200px;
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 16px;
+            border: 2px dashed #ccc;
+            min-height: 200px;
+            transition: background 0.2s;
+        }
+        .folder.drag-over {
+            background: #e6f0ff;
+            border-color: #0066cc;
+        }
+        .folder h3 {
+            margin-top: 0;
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+        }
+        .folder .card-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            min-height: 60px;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 8px 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            cursor: grab;
+            user-select: none;
+            border: 1px solid #ddd;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .card:active {
+            cursor: grabbing;
+            transform: scale(0.95);
+        }
+        .card.dragging {
+            opacity: 0.4;
+        }
+        .card.correct {
+            border-color: #28a745;
+            background: #e6f7e6;
+        }
+        .card.wrong {
+            border-color: #cc0000;
+            background: #fce4e4;
+        }
+        .pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            padding: 16px;
+            background: #f0f2f5;
+            border-radius: 12px;
+            min-height: 70px;
+            margin-bottom: 24px;
+        }
+        .pool .card {
+            background: white;
+        }
+        .btn {
+            padding: 12px 28px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: inline-block;
+        }
+        .btn:hover {
+            background: #0052a3;
+        }
+        .btn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+        .btn-check {
+            background: #28a745;
+        }
+        .btn-check:hover {
+            background: #1f7a33;
+        }
+        .btn-reset {
+            background: #6c757d;
+            margin-left: 12px;
+        }
+        .btn-reset:hover {
+            background: #5a6268;
+        }
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.2s;
+            background: none;
+            border: none;
+            line-height: 1;
+        }
+        .modal-close:hover {
+            color: #333;
+        }
+        .modal h2 {
+            margin-top: 0;
+            text-align: center;
+        }
+        .modal .film-group {
+            margin-bottom: 20px;
+        }
+        .modal .film-group h3 {
+            margin-bottom: 8px;
+            color: #0066cc;
+        }
+        .modal .film-item {
+            padding: 4px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 15px;
+        }
+        .modal .film-item:last-child {
+            border-bottom: none;
+        }
+        .modal .result-summary {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .result-summary .icon-good {
+            color: #28a745;
+            font-size: 28px;
+        }
+        .result-summary .icon-warning {
+            color: #e67e22;
+            font-size: 28px;
+        }
+        .result-summary .text {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app">
+    <h1>🎬 Отбор фильмов для программы</h1>
+    <div class="sub">
+        Перетащите каждый фильм в одну из папок: «Берём в программу» или «Отложим в резерв».
+    </div>
+
+    <div class="folders" id="foldersContainer">
+        <div class="folder" data-folder="take" id="folderTake">
+            <h3>📁 Берём в программу</h3>
+            <div class="card-list" id="takeList"></div>
+        </div>
+        <div class="folder" data-folder="reject" id="folderReject">
+            <h3>📁 Отложим в резерв</h3>
+            <div class="card-list" id="rejectList"></div>
+        </div>
+    </div>
+
+    <div class="pool" id="poolContainer">
+        <!-- Карточки будут здесь -->
+    </div>
+
+    <div style="text-align: center; margin: 16px 0;">
+        <button class="btn btn-check" id="checkBtn" disabled>Проверить</button>
+        <button class="btn btn-reset" id="resetBtn">Начать заново</button>
+    </div>
+
+    <!-- Модальное окно -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <h2>📋 Расшифровка</h2>
+            <div class="film-group">
+                <h3>✅ Берём в программу</h3>
+                <div class="film-item">Карнавальная ночь (1956) — высокая узнаваемость и сильные визуальные якоря, крылатые фразы и музыкальные хиты.</div>
+                <div class="film-item">Чародеи (1982) — высокая узнаваемость и сильные визуальные якоря, есть крылатые фразы и музыкальный хит.</div>
+                <div class="film-item">Мимино (1977) — высокая узнаваемость, вошедший в народ персонаж, крылатые фразы, музыкальный хит.</div>
+                <div class="film-item">Афоня (1975) — высокая узнаваемость, вошедший в народ персонаж, крылатые фразы, музыкальные хиты.</div>
+            </div>
+            <div class="film-group">
+                <h3>📁 Отложим в резерв</h3>
+                <div class="film-item">«Гараж» (1979) — средняя узнаваемость, слабые визуальные якоря, есть крылатые фразы, нет музыкальных хитов.</div>
+                <div class="film-item">«Осенний марафон» (1979) — средняя узнаваемость, слабые визуальные якоря, есть крылатые фразы, нет музыкальных хитов и ярких образов.</div>
+                <div class="film-item">«Шла собака по роялю» (1978) — низкая узнаваемость, нет ярких визуальных якорей, крылатых фраз и музыкальных хитов.</div>
+                <div class="film-item">«Тридцать три» (1965) — низкая узнаваемость, нет сильных визуальных якорей, крылатых фраз и музыкальных хитов.</div>
+            </div>
+            <div class="result-summary" id="modalResult">
+                <!-- Сюда будет вставлен итог с иконкой -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Данные фильмов
+    const films = [
+        { id: 0, name: 'Карнавальная ночь', year: 1956, correct: 'take' },
+        { id: 1, name: 'Чародеи', year: 1982, correct: 'take' },
+        { id: 2, name: 'Мимино', year: 1977, correct: 'take' },
+        { id: 3, name: 'Афоня', year: 1975, correct: 'take' },
+        { id: 4, name: 'Гараж', year: 1979, correct: 'reject' },
+        { id: 5, name: 'Осенний марафон', year: 1979, correct: 'reject' },
+        { id: 6, name: 'Шла собака по роялю', year: 1978, correct: 'reject' },
+        { id: 7, name: 'Тридцать три', year: 1965, correct: 'reject' }
+    ];
+
+    let currentPlacement = films.map(() => null);
+    let dragData = null;
+
+    const takeList = document.getElementById('takeList');
+    const rejectList = document.getElementById('rejectList');
+    const poolContainer = document.getElementById('poolContainer');
+    const checkBtn = document.getElementById('checkBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const modal = document.getElementById('modal');
+    const modalClose = document.getElementById('modalClose');
+    const modalResult = document.getElementById('modalResult');
+
+    function render() {
+        takeList.innerHTML = '';
+        rejectList.innerHTML = '';
+        poolContainer.innerHTML = '';
+
+        films.forEach((film, index) => {
+            const card = createCard(film, index);
+            const folder = currentPlacement[index];
+            if (folder === 'take') {
+                takeList.appendChild(card);
+            } else if (folder === 'reject') {
+                rejectList.appendChild(card);
+            } else {
+                poolContainer.appendChild(card);
+            }
+        });
+
+        const allPlaced = currentPlacement.every(f => f !== null);
+        checkBtn.disabled = !allPlaced;
+    }
+
+    function createCard(film, index) {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.draggable = true;
+        div.textContent = `${film.name} (${film.year})`;
+        div.dataset.index = index;
+
+        div.addEventListener('dragstart', handleDragStart);
+        div.addEventListener('dragend', handleDragEnd);
+
+        return div;
+    }
+
+    function handleDragStart(e) {
+        const index = parseInt(this.dataset.index);
+        dragData = index;
+        this.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', index);
+        setTimeout(() => {
+            this.style.opacity = '0.4';
+        }, 0);
+    }
+
+    function handleDragEnd(e) {
+        this.classList.remove('dragging');
+        this.style.opacity = '1';
+        document.querySelectorAll('.folder').forEach(f => f.classList.remove('drag-over'));
+    }
+
+    const folders = document.querySelectorAll('.folder');
+    folders.forEach(folder => {
+        folder.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            folder.classList.add('drag-over');
+        });
+        folder.addEventListener('dragleave', () => {
+            folder.classList.remove('drag-over');
+        });
+        folder.addEventListener('drop', (e) => {
+            e.preventDefault();
+            folder.classList.remove('drag-over');
+            const index = parseInt(e.dataTransfer.getData('text/plain'));
+            if (isNaN(index)) return;
+            const targetFolder = folder.dataset.folder;
+            if (currentPlacement[index] === targetFolder) return;
+            currentPlacement[index] = targetFolder;
+            render();
+        });
+    });
+
+    poolContainer.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    });
+    poolContainer.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const index = parseInt(e.dataTransfer.getData('text/plain'));
+        if (isNaN(index)) return;
+        if (currentPlacement[index] !== null) {
+            currentPlacement[index] = null;
+            render();
+        }
+    });
+
+    function checkAnswers() {
+        const allPlaced = currentPlacement.every(f => f !== null);
+        if (!allPlaced) return;
+
+        let correct = 0;
+        films.forEach((film, index) => {
+            if (currentPlacement[index] === film.correct) correct++;
+        });
+
+        let icon, text;
+        if (correct === films.length) {
+            icon = '<span class="icon-good">✅</span>';
+            text = 'Отлично! Все фильмы распределены верно.';
+        } else {
+            icon = '<span class="icon-warning">⚠️</span>';
+            text = `Вы распределили правильно ${correct} из ${films.length} фильмов. Проверьте ошибки.`;
+        }
+        modalResult.innerHTML = `${icon} <span class="text">${text}</span>`;
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+    }
+
+    function resetAll() {
+        currentPlacement = films.map(() => null);
+        render();
+        closeModal();
+        document.querySelectorAll('.card').forEach(c => {
+            c.classList.remove('correct', 'wrong');
+        });
+        checkBtn.disabled = true;
+    }
+
+    checkBtn.addEventListener('click', checkAnswers);
+    resetBtn.addEventListener('click', resetAll);
+    modalClose.addEventListener('click', closeModal);
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    render();
+</script>
+</body>
+</html>
