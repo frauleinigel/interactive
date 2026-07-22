@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+    <title>Мастерская закладки · Триколор</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #ffffff;
+            font-family: 'Georgia', 'Times New Roman', Times, serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1.5rem;
+        }
+        .tutorial {
+            max-width: 550px;
+            width: 100%;
+            background: #ffffff;
+            border: 2px solid #0039A6;
+            border-radius: 24px;
+            padding: 2rem 1.8rem;
+            box-shadow: 0 10px 25px rgba(0,53,128,0.08);
+        }
+        .tutorial h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #D52B1E;
+            margin-bottom: 0.3rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+        .tutorial h1 img {
+            height: 3rem;
+            width: auto;
+            vertical-align: middle;
+        }
+        .subhead {
+            text-align: left;
+            color: #000000;
+            font-weight: bold;
+            font-style: normal;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+            border-bottom: 2px dashed #0039A6;
+            padding-bottom: 1rem;
+        }
+        .step-box {
+            background: #F9FAFC;
+            border-left: 6px solid #D52B1E;
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            color: #1a1a1a;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .step-emoji {
+            font-size: 2rem;
+            line-height: 1;
+            animation: float 2.5s ease-in-out infinite;
+        }
+        .step-emoji img {
+            width: 2.5rem;
+            height: 2.5rem;
+            object-fit: contain;
+            vertical-align: middle;
+        }
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-6px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+        .step-text {
+            line-height: 1.6;
+            flex: 1;
+        }
+        .step-num {
+            font-weight: 700;
+            color: #D52B1E;
+            margin-right: 0.4rem;
+        }
+        .typed-text {
+            display: inline;
+        }
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .btn {
+            background: transparent;
+            border: 2px solid #0039A6;
+            color: #0039A6;
+            padding: 0.6rem 1.4rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.2s;
+            flex: 1;
+            text-align: center;
+            min-width: 100px;
+        }
+        .btn:disabled {
+            opacity: 0.35;
+            cursor: default;
+            border-color: #9aa9c0;
+            color: #9aa9c0;
+        }
+        .btn:not(:disabled):hover {
+            background: #0039A6;
+            color: white;
+        }
+        .indicator {
+            font-size: 0.95rem;
+            color: #D52B1E;
+            font-weight: 600;
+            background: #F4F8FD;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+        }
+        .footer-note {
+            margin-top: 1.5rem;
+            font-size: 0.75rem;
+            color: #4a4a4a;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="tutorial">
+    <h1>
+        <img src="https://img.icons8.com/?size=100&id=71733&format=png&color=000000" alt="иконка книги">
+        Как смастерить закладку в подарок
+    </h1>
+    <div class="subhead">следуйте инструкции</div>
+
+    <div class="step-box" id="stepBox">
+        <div class="step-emoji" id="emoji"></div>
+        <div class="step-text" id="stepText"></div>
+    </div>
+
+    <div class="nav-row">
+        <button class="btn" id="prevBtn" disabled>← Назад</button>
+        <span class="indicator" id="stepIndicator">Шаг 1 из 5</span>
+        <button class="btn" id="nextBtn">Далее →</button>
+    </div>
+    <div class="footer-note">Сделано в Школе менеджера культуры · Актион</div>
+</div>
+
+<script>
+    (function() {
+        const steps = [
+            {
+                type: 'emoji',
+                content: '✂️',
+                text: 'Вырежьте из плотного светлого картона прямоугольник размером 5×15 см. Нарисуйте на нем логотип учреждения и напишите его название.'
+            },
+            {
+                type: 'image',
+                src: 'https://img.icons8.com/?size=100&id=IbbEcEbE5IGV&format=png&color=000000',
+                alt: 'Линейка',
+                text: 'Сделайте две горизонтальные параллельные прорези в верхней и нижней частях закладки. Они должны соответствовать ширине ленты.'
+            },
+            {
+                type: 'image',
+                src: 'https://img.icons8.com/?size=48&id=6nXW8HiNpga7&format=png',
+                alt: 'Флаг России',
+                text: 'Приложите ленту длиной около 20 см к задней стороне закладки. Проденьте оба ее конца в прорези наружу.'
+            },
+            {
+                type: 'image',
+                src: 'https://img.icons8.com/?size=100&id=cuzSKOXDRwzs&format=png&color=000000',
+                alt: 'Клей',
+                text: 'Зафиксируйте каплей клея концы ленты.'
+            },
+            {
+                type: 'image',
+                src: 'https://img.icons8.com/?size=100&id=OKHbQURImIKB&format=png&color=000000',
+                alt: 'Зажигалка',
+                text: 'Подравняйте края и обработайте зажигалкой, чтобы нити не пушились.'
+            }
+        ];
+
+        let current = 0;
+        let typewriterTimeout = null;
+        let currentTypingSpan = null;
+
+        const emojiEl = document.getElementById('emoji');
+        const stepTextContainer = document.getElementById('stepText');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const indicator = document.getElementById('stepIndicator');
+
+        function stopTypewriter() {
+            if (typewriterTimeout) {
+                clearTimeout(typewriterTimeout);
+                typewriterTimeout = null;
+            }
+            currentTypingSpan = null;
+        }
+
+        function typeText(element, fullText, onComplete) {
+            let index = 0;
+            element.textContent = '';
+            function addNextChar() {
+                if (index < fullText.length) {
+                    element.textContent += fullText.charAt(index);
+                    index++;
+                    typewriterTimeout = setTimeout(addNextChar, 35);
+                } else {
+                    typewriterTimeout = null;
+                    if (onComplete) onComplete();
+                }
+            }
+            addNextChar();
+        }
+
+        function updateStepTextWithTyping(stepText) {
+            stepTextContainer.innerHTML = '';
+            const numberSpan = document.createElement('span');
+            numberSpan.className = 'step-num';
+            numberSpan.textContent = `${current + 1}/5 `;
+            const textSpan = document.createElement('span');
+            textSpan.className = 'typed-text';
+            stepTextContainer.appendChild(numberSpan);
+            stepTextContainer.appendChild(textSpan);
+            stopTypewriter();
+            currentTypingSpan = textSpan;
+            typeText(textSpan, stepText, () => {
+                currentTypingSpan = null;
+            });
+        }
+
+        function update() {
+            const step = steps[current];
+            emojiEl.innerHTML = '';
+            if (step.type === 'emoji') {
+                emojiEl.textContent = step.content;
+            } else if (step.type === 'image') {
+                const img = document.createElement('img');
+                img.src = step.src;
+                img.alt = step.alt;
+                emojiEl.appendChild(img);
+            }
+            updateStepTextWithTyping(step.text);
+            indicator.textContent = `Шаг ${current + 1} из 5`;
+            prevBtn.disabled = current === 0;
+            nextBtn.disabled = current === steps.length - 1;
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (current > 0) {
+                current--;
+                update();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (current < steps.length - 1) {
+                current++;
+                update();
+            }
+        });
+
+        update();
+    })();
+</script>
+</body>
+</html>

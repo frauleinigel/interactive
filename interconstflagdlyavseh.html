@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0" />
+    <title>Интерактивный конструктор форматов · Триколор</title>
+    <style>
+        /* ---------- Сброс ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            font-family: 'Georgia', 'Times New Roman', Times, serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+
+        /* ---------- Карточка конструктора ---------- */
+        .constructor {
+            max-width: 720px;
+            width: 100%;
+            background: #ffffff;
+            border: 2px solid #0039A6;
+            border-radius: 32px;
+            padding: 2rem 1.8rem;
+            box-shadow: 0 12px 30px rgba(0, 53, 128, 0.08);
+            transition: all 0.2s ease;
+        }
+
+        /* ---------- Анимированный флаг ---------- */
+        .flag {
+            width: 100%;
+            height: 64px;
+            display: flex;
+            flex-direction: column;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1.8rem;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+            background: #ffffff;
+        }
+
+        .stripe {
+            flex: 1;
+            background-size: 180% 100%;
+            animation: wave 5s ease-in-out infinite alternate;
+        }
+
+        .white {
+            background: linear-gradient(90deg, #ffffff, #f4f6fc, #ffffff);
+            animation-delay: 0s;
+        }
+
+        .blue {
+            background: linear-gradient(90deg, #0039A6, #2a5fc0, #0039A6);
+            animation-delay: 0.6s;
+        }
+
+        .red {
+            background: linear-gradient(90deg, #D52B1E, #e8574a, #D52B1E);
+            animation-delay: 1.2s;
+        }
+
+        @keyframes wave {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        /* ---------- Заголовки ---------- */
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            background: linear-gradient(90deg, #D52B1E 0%, #0039A6 40%, #D52B1E 70%, #0039A6 100%);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            animation: titleShine 5s ease-in-out infinite alternate;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+        }
+
+        @keyframes titleShine {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .subhead {
+            text-align: center;
+            color: #0039A6;
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px dashed #0039A6;
+            padding-bottom: 1rem;
+            font-style: italic;
+        }
+
+        /* ---------- Шаги ---------- */
+        .step-block {
+            margin-top: 1.8rem;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .step-block.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .step-title {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #D52B1E;
+            margin-bottom: 0.9rem;
+            display: flex;
+            align-items: baseline;
+            gap: 0.4rem;
+        }
+
+        .step-title span {
+            background: #0039A6;
+            color: white;
+            border-radius: 20px;
+            padding: 0.2rem 0.9rem;
+            font-size: 0.9rem;
+            margin-right: 0.2rem;
+        }
+
+        /* ---------- Карточки выбора ---------- */
+        .option-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.9rem;
+            margin: 1rem 0 0.5rem;
+        }
+
+        .option-card {
+            flex: 1 1 180px;
+            background: #ffffff;
+            border: 2px solid #0039A6;
+            border-radius: 20px;
+            padding: 1rem 0.9rem;
+            cursor: pointer;
+            transition: 0.15s ease;
+            color: #0039A6;
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+        }
+
+        .option-card:hover {
+            background: #F2F6FC;
+            border-color: #D52B1E;
+            color: #D52B1E;
+        }
+
+        .option-card.selected {
+            background: #0039A6;
+            border-color: #0039A6;
+            color: #ffffff;
+            box-shadow: 0 8px 16px rgba(0, 57, 166, 0.15);
+        }
+
+        .option-card.selected .desc {
+            color: #f0f4ff;
+        }
+
+        .option-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        .desc {
+            font-size: 0.85rem;
+            color: #2c2c2c;
+            line-height: 1.3;
+        }
+
+        /* ---------- Кнопка сброса ---------- */
+        .btn-reset {
+            background: transparent;
+            border: 2px solid #D52B1E;
+            color: #D52B1E;
+            padding: 0.7rem 1.8rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-top: 2rem;
+            transition: 0.2s;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-reset:hover {
+            background: #D52B1E;
+            color: white;
+        }
+
+        /* ---------- Блок результата ---------- */
+        .result-block {
+            margin-top: 2rem;
+            border-top: 2px solid #0039A6;
+            padding-top: 1.8rem;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .result-block.active {
+            display: block;
+        }
+
+        .formula {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #D52B1E;
+            margin-bottom: 1rem;
+            background: #F4F8FD;
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            display: inline-block;
+        }
+
+        .format-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0039A6;
+            margin: 0.5rem 0 0.8rem;
+            line-height: 1.2;
+        }
+
+        .format-desc {
+            color: #1a1a1a;
+            font-size: 1rem;
+            line-height: 1.6;
+            background: #ffffff;
+            border-left: 4px solid #D52B1E;
+            padding-left: 1.2rem;
+            font-style: normal;
+        }
+
+        .footer-note {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: #4a4a4a;
+            text-align: center;
+            border-top: 1px solid #0039A620;
+            padding-top: 1rem;
+        }
+
+        /* ---------- Адаптив ---------- */
+        @media (max-width: 500px) {
+            .constructor {
+                padding: 1.5rem 1rem;
+            }
+            .option-card {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="constructor" id="constructorApp">
+
+        <!-- Анимированный флаг -->
+        <div class="flag">
+            <div class="stripe white"></div>
+            <div class="stripe blue"></div>
+            <div class="stripe red"></div>
+        </div>
+
+        <h1>Интерактивный конструктор форматов</h1>
+        <div class="subhead">ко Дню Государственного флага РФ</div>
+
+        <!-- Шаг 1: Масштаб -->
+        <div id="step1" class="step-block active">
+            <div class="step-title"><span>1</span> Укажите масштаб учреждения культуры</div>
+            <div class="option-grid" data-step="scale">
+                <div class="option-card" data-value="city">
+                    <div class="option-title">Городское / Центральное</div>
+                    <div class="desc">Зонированное пространство, мультимедиа и высокий поток транзитных посетителей.</div>
+                </div>
+                <div class="option-card" data-value="village">
+                    <div class="option-title">Сельское / Филиал</div>
+                    <div class="desc">Камерная атмосфера, маленький штат и тесный контакт с местным сообществом.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Шаг 2: Аудитория -->
+        <div id="step2" class="step-block">
+            <div class="step-title"><span>2</span> Установите целевую аудиторию</div>
+            <div class="option-grid" data-step="audience">
+                <div class="option-card" data-value="children">
+                    <div class="option-title">Дети</div>
+                    <div class="desc">6–12 лет</div>
+                </div>
+                <div class="option-card" data-value="youth">
+                    <div class="option-title">Молодежь</div>
+                    <div class="desc">14–22 года</div>
+                </div>
+                <div class="option-card" data-value="adults">
+                    <div class="option-title">Взрослые и семьи</div>
+                    <div class="desc">Одиночки и компании</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Шаг 3: Ресурс (исправлен) -->
+        <div id="step3" class="step-block">
+            <div class="step-title"><span>3</span> Определите доступный ресурс</div>
+            <div class="option-grid" data-step="resource">
+                <div class="option-card" data-value="digital">
+                    <div class="option-title">Цифра и нейросети</div>
+                    <div class="desc">Есть стабильный интернет, техника и готовность использовать ИИ-сервисы.</div>
+                </div>
+                <div class="option-card" data-value="craft">
+                    <div class="option-title">Материалы и канцелярия</div>
+                    <div class="desc">Главный инструмент — бумажные расходники, канцтовары и талант сотрудников к рукоделию.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Шаг 4: Цель -->
+        <div id="step4" class="step-block">
+            <div class="step-title"><span>4</span> Поставьте цель</div>
+            <div class="option-grid" data-step="goal">
+                <div class="option-card" data-value="mass">
+                    <div class="option-title">Массовый охват</div>
+                    <div class="desc">Зафиксировать максимум посещений за короткое время.</div>
+                </div>
+                <div class="option-card" data-value="deep">
+                    <div class="option-title">Глубокий контакт</div>
+                    <div class="desc">Возрастающее вовлечение, работа на качество и содержательные отзывы.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Результат -->
+        <div id="resultBlock" class="result-block">
+            <div class="formula" id="formulaText"></div>
+            <div class="format-title" id="formatName"></div>
+            <div class="format-desc" id="formatDescription"></div>
+            <button class="btn-reset" id="resetBtn">Вернуться к началу</button>
+        </div>
+
+        <div class="footer-note">Сделано в Школе менеджера культуры · Актион</div>
+    </div>
+
+    <script>
+        (function() {
+
+            // ----------------------------------------------------------------
+            //  БАЗА ФОРМАТОВ — ОБНОВЛЕННАЯ (универсальная, без привязки к библиотекам)
+            // ----------------------------------------------------------------
+            const formats = {
+                "city-children-digital-mass": {
+                    title: "Мультимедийный квест «Верни цвета флагу»",
+                    desc: "На планшете запущена видеоистория: мультяшный персонаж просит спасти флаг, с которого злой вихрь сдул краски. Ребенок выполняет простые действия — собирает белые облака, наполняет синие реки и зажигает красные сердца. После финала получает QR-код на скачивание тематического стикерпака. Организатор заранее собирает его в бесплатном боте или генерирует через нейросеть."
+                },
+                "city-children-digital-deep": {
+                    title: "Нейро-мультстудия «Сказка о трех цветах»",
+                    desc: "Дети придумывают короткие истории о дружбе Белого, Синего и Красного персонажей, а нейросеть генерирует по их сценариям ролики. Готовые мультфильмы просматривают на большом экране."
+                },
+                "city-children-craft-mass": {
+                    title: "Цветная мозаика «Страна руками детей»",
+                    desc: "На большом листе ватмана — контур карты России, вписанный в пронумерованное клетчатое поле с подсказкой по цветам. Верхние ряды клеток — белые, средние — синие, нижние — красные. Ребенок выбирает свободную клетку и находит на полке предмет нужного цвета. Показав его волонтеру, получает стикер и приклеивает его на клетку. Постепенно собирается огромный триколор с картой России внутри."
+                },
+                "city-children-craft-deep": {
+                    title: "Литературный квест «Символы в сказках»",
+                    desc: "Тематическое занятие в зале. Дети ищут в текстах классических сказок упоминания белого, синего и красного цветов, затем объясняют их значение. В финале каждый ребенок придумывает короткое предложение о себе, используя один из трех цветов. Например: «Я белый, потому что я дружу со всеми», «Я синий, потому что мечтаю о море», «Я красный, потому что защищаю брата». Это замыкает переход от литературы к рефлексии."
+                },
+                "village-children-digital-mass": {
+                    title: "Аудиозагадки «Голоса Родины»",
+                    desc: "Ведущий включает на смартфоне короткие аудиофрагменты (гимн, шум леса, звон колоколов, крик чаек) и передает звучание через колонку. Задача участников — узнать символы и схематично нарисовать один из них на плакате, где изображен флаг России."
+                },
+                "village-children-digital-deep": {
+                    title: "Мульт-лекторий «История флага»",
+                    desc: "Камерный просмотр познавательного мультфильма о флаге с последующим обсуждением и созданием цифровой поздравительной открытки для родителей."
+                },
+                "village-children-craft-mass": {
+                    title: "Тихая галерея «Доброе слово»",
+                    desc: "На веревке с прищепками висят пустые карточки из одностороннего цветного картона: белые, синие, красные. Ребенок выбирает карточку того цвета, который ему сегодня ближе, пишет на ней доброе пожелание незнакомцу и вешает обратно. Затем снимает с веревки любую карточку наугад, написанную кем-то до него, и забирает ее себе."
+                },
+                "village-children-craft-deep": {
+                    title: "Арт-уголок «Подарок для России»",
+                    desc: "Ребенок получает белый лист с начертанием дома, который олицетворяет Россию. Задача — дорисовать то, что он хочет подарить родине, используя только синий и красный цвета. Рядом с рисунком ребенок пишет одно простое действие, которое он сделает для своего дома-России уже завтра: «полью цветы», «прочитаю младшему брату сказку»."
+                },
+                "city-youth-digital-mass": {
+                    title: "Марафон видео «Книжный триколор»",
+                    desc: "В учреждении оформлен стеллаж, где книги расставлены по цветам обложек — белая, синяя и красная полки визуально образуют флаг. Участник записывает короткий вертикальный ролик на фоне этого стеллажа: может пройти вдоль полок, показать книгу под настроение или просто эффектно появиться в кадре. Готовое видео он публикует в соцсетях с хештегом организации. В благодарность получает тематическую открытку."
+                },
+                "city-youth-digital-deep": {
+                    title: "Цифровой пленэр «Триколор в твоем районе»",
+                    desc: "Участники приходят со своими фотографиями знакомых мест (двор, остановка, сквер) и добавляют триколор в кадры через нейросеть. Получаются постеры, где государственный символ встроен в повседневность. В конце — обсуждение: как меняется восприятие флага, когда он вписывается в городскую среду. Готовые работы можно распечатать и оставить в учреждении как выставку."
+                },
+                "city-youth-craft-mass": {
+                    title: "Стикер-арт «Голосуй цветом»",
+                    desc: "В холле на мольберте — большой лист с контуром флага, поделенный на множество клеток. Ведущий задает участнику три вопроса о личном восприятии цветов: «Какой цвет флага для тебя — цвет действия?», «Какой цвет — цвет мечты?», «Какой — цвет защиты?» Участник берет стикер того цвета, который ему ближе для каждого ответа, и приклеивает в соответствующую полосу флага. К концу дня из множества личных выборов формируется полный триколор, а молодежь поощряют приглашением на бесплатное мероприятие."
+                },
+                "city-youth-craft-deep": {
+                    title: "Дискуссионный клуб «Три цвета — три смысла»",
+                    desc: "Каждый участник выбирает ленточку одного из трех цветов и присоединяется к группе по жизненным приоритетам: белый — важны мир, покой и добрососедство, синий — интересна история, традиции и связь поколений, красный — хочется обсуждать развитие, трансформацию и перемены. Дискуссия строится как обмен личными взглядами: почему для меня важен именно этот смысл триколора, как я вижу его в повседневной жизни, что он значит для моей семьи или города. В финале группы озвучивают главные мысли, а ведущий помогает увидеть, как три разных взгляда складываются в общую картину подобно цветам флага."
+                },
+                "village-youth-digital-mass": {
+                    title: "Цифровой квест «Факты о флаге»",
+                    desc: "На входе и стеллажах размещены пять QR-кодов. По ним — короткие видеофакты, излагаемые нейросетевым персонажем. Участнику нужно посмотреть все и назвать зашифрованное в роликах слово ведущего."
+                },
+                "village-youth-digital-deep": {
+                    title: "Видеокапсула «Послание в будущее»",
+                    desc: "В учреждении на столике с флагом установлен смартфон на штативе. Участник включает запись видео и передает короткое пожелание тому, кто будет жить в этом же населенном пункте через 10 лет. По окончании дня ролики монтируются в один и становятся цифровым продуктом, который работает на имидж организации, подтверждает ее вовлеченность в жизнь сообщества и может быть приложен к отчету о выполнении госзадания."
+                },
+                "village-youth-craft-mass": {
+                    title: "Мастерская открыток «Три желания»",
+                    desc: "Посетителям выдаются бланки открыток. Лицевая сторона разделена на три горизонтальные полосы. Участнику нужно раскрасить полосы красками и вписать в каждую по одному желанию: в белую — что он хотел бы сохранить навсегда, в синюю — чему новому хотел бы научиться, в красную — что изменить к лучшему. На готовой открытке ведущий ставит подпись с отметкой «Будет исполнено!»."
+                },
+                "village-youth-craft-deep": {
+                    title: "Выставка цитат «Земляки о родине»",
+                    desc: "Участники получают по краеведческому сборнику и ищут в нем высказывания местных авторов или исторических лиц о доме и родной земле. Найденную цитату аккуратно переносят на карточки нужного цвета (белый — о мире, синий — о мудрости, красный — о мужестве) и крепят на стенд в порядке триколора."
+                },
+                "city-adults-digital-mass": {
+                    title: "Видеовикторина «Россия в кино»",
+                    desc: "На мониторе в холле показывают кадры из популярных фильмов, где запечатлен российский триколор. Нужно без обсуждений вспомнить названия кинолент, героев и сюжеты, а правильные ответы писать в комментариях к публикации в канале учреждения. За правильные ответы — баллы. Лидеры получают грамоты и/или медали."
+                },
+                "city-adults-digital-deep": {
+                    title: "ИИ-мастерская «Цифровой герб семьи»",
+                    desc: "Участники на планшетах описывают ценности своей семьи: что для них мир, мудрость, сила. Нейросеть генерирует семейный герб в цветах триколора. Готовые гербы печатают, а затем обсуждают во время чаепития: в какие символы трансформировались текстовые описания, как с ними переплетается патриотизм и что герб транслирует о самой семье."
+                },
+                "city-adults-craft-mass": {
+                    title: "Сладкая игра «Цвета триколора»",
+                    desc: "Участнику предлагается ваза с конфетами в белых, синих и красных обертках. Он закрывает глаза и вынимает одну конфету наугад. Затем берет с подготовленного стеллажа одну из карточек, наружная сторона которой совпадает по цвету с оберткой конфеты. На карточке написано творческое задание, связанное с повторным посещением учреждения культуры."
+                },
+                "city-adults-craft-deep": {
+                    title: "Музыкальный ринг «Цвета триколора»",
+                    desc: "По результатам жеребьевки гости делятся на три команды по цветам флага — Белые, Синие и Красные. За 10 минут им нужно без интернета вспомнить русскоязычные песни, где упоминается их цвет. Все находки записываются на общий лист, а затем команды по очереди напевают отрывки. Побеждают те, чей музыкальный арсенал оказывается больше."
+                },
+                "village-adults-digital-mass": {
+                    title: "Аудиозагадки «Триколор природы»",
+                    desc: "На входе в учреждение через колонку звучат три загадки, заранее сгенерированные нейросетью: о березе (белый цвет флага), о реке (синий) и о рябине (красный). Посетитель слушает и угадывает природный образ."
+                },
+                "village-adults-digital-deep": {
+                    title: "Поэтическая мозаика «Триколор в рифмах»",
+                    desc: "Участники совместно формулируют три актуальные вопроса о мировом согласии, мудрости и мужестве. Нейросеть превращает их в единое стихотворение о триколоре, соблюдая ритм и рифму. Готовый текст торжественно зачитывается вслух, а затем ИИ накладывает на него музыку."
+                },
+                "village-adults-craft-mass": {
+                    title: "Игра-минутка «Предсказание триколора»",
+                    desc: "На выставочной полке книги расставлены в три цветовые зоны — с белыми, синими и красными корешками (можно заранее сделать цветные обложки). Посетитель выбирает любую, открывает на случайной странице и читает первую попавшуюся на глаза фразу. Если она вызывает улыбку или приятное чувство — гость получает приглашение на грядущее мероприятие в учреждении. Если нет — может попробовать еще раз."
+                },
+                "village-adults-craft-deep": {
+                    title: "Творческая рефлексия «Голоса благодарности»",
+                    desc: "Ведущий зачитывает три биографии известных земляков, чьи профессии можно соотнести с цветами флага: белый — человек мирного труда (учитель, врач), синий — человек мысли (ученый, писатель), красный — человек поступка (воин, строитель). Участники говорят, за что хотят сказать «Спасибо» упомянутым людям. Затем каждый участник пишет письмо благодарности любому знакомому человеку и вешает его на отдельный стенд с символикой российского флага."
+                }
+            };
+
+
+            // ----------------------------------------------------------------
+            //  СОСТОЯНИЕ И ЛОГИКА
+            // ----------------------------------------------------------------
+            const state = {
+                scale: null,
+                audience: null,
+                resource: null,
+                goal: null
+            };
+
+            const steps = ['scale', 'audience', 'resource', 'goal'];
+            const stepIds = ['step1', 'step2', 'step3', 'step4'];
+            const resultBlock = document.getElementById('resultBlock');
+            const formulaEl = document.getElementById('formulaText');
+            const formatNameEl = document.getElementById('formatName');
+            const formatDescEl = document.getElementById('formatDescription');
+
+            function showCurrentStep() {
+                stepIds.forEach(id => document.getElementById(id).classList.remove('active'));
+                const nextStepIndex = steps.findIndex(step => state[step] === null);
+                if (nextStepIndex !== -1) {
+                    document.getElementById(stepIds[nextStepIndex]).classList.add('active');
+                    resultBlock.classList.remove('active');
+                } else {
+                    showResult();
+                }
+            }
+
+            function buildKey() {
+                return `${state.scale}-${state.audience}-${state.resource}-${state.goal}`;
+            }
+
+            function getFormulaText() {
+                const map = {
+                    scale: { city: 'Городское / Центральное', village: 'Сельское / Филиал' },
+                    audience: { children: 'Дети', youth: 'Молодежь', adults: 'Взрослые и семьи' },
+                    resource: { digital: 'Цифра и нейросети', craft: 'Материалы и канцелярия' },
+                    goal: { mass: 'Массовый охват', deep: 'Глубокий контакт' }
+                };
+                return `${map.scale[state.scale]} + ${map.audience[state.audience]} + ${map.resource[state.resource]} + ${map.goal[state.goal]}`;
+            }
+
+            function showResult() {
+                const key = buildKey();
+                const format = formats[key];
+                if (!format) {
+                    formatNameEl.textContent = 'Формат не найден';
+                    formatDescEl.textContent = 'Проверьте комбинацию параметров.';
+                    formulaEl.textContent = '';
+                } else {
+                    formulaEl.textContent = getFormulaText();
+                    formatNameEl.textContent = format.title;
+                    formatDescEl.textContent = format.desc;
+                }
+                resultBlock.classList.add('active');
+                stepIds.forEach(id => document.getElementById(id).classList.remove('active'));
+            }
+
+            function handleCardClick(step, value) {
+                const stepIndex = steps.indexOf(step);
+                if (state[step] !== null) {
+                    for (let i = stepIndex; i < steps.length; i++) {
+                        state[steps[i]] = null;
+                    }
+                    document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+                }
+                state[step] = value;
+                const stepDiv = document.getElementById(stepIds[stepIndex]);
+                if (stepDiv) {
+                    stepDiv.querySelectorAll('.option-card').forEach(card => {
+                        if (card.getAttribute('data-value') === value) {
+                            card.classList.add('selected');
+                        } else {
+                            card.classList.remove('selected');
+                        }
+                    });
+                }
+                showCurrentStep();
+            }
+
+            document.querySelectorAll('.option-grid').forEach(grid => {
+                const stepAttr = grid.getAttribute('data-step');
+                grid.addEventListener('click', (e) => {
+                    const card = e.target.closest('.option-card');
+                    if (!card) return;
+                    const value = card.getAttribute('data-value');
+                    if (value) handleCardClick(stepAttr, value);
+                });
+            });
+
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                steps.forEach(s => state[s] = null);
+                document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+                resultBlock.classList.remove('active');
+                showCurrentStep();
+            });
+
+            showCurrentStep();
+
+        })();
+    </script>
+
+</body>
+</html>
