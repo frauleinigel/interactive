@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест: выбор книги</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            max-width: 760px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            background: #f7f9fc;
+            color: #1a2634;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 2rem 2.2rem;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+        }
+        .query-box {
+            background: #eef3f9;
+            border-left: 4px solid #2a6b9c;
+            padding: 1rem 1.6rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        .query-box p {
+            margin: 0;
+            font-style: italic;
+            color: #1c2f44;
+        }
+        .query-box strong {
+            font-style: normal;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+        .option {
+            background: #f2f6fc;
+            border-radius: 14px;
+            padding: 0.9rem 1.4rem;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .option:hover {
+            background: #e6eef8;
+        }
+        .option.selected {
+            border-color: #1f6e9e;
+            background: #e2ebf6;
+        }
+        .option input[type="radio"] {
+            accent-color: #1f6e9e;
+            width: 1.1rem;
+            height: 1.1rem;
+            flex-shrink: 0;
+        }
+        .option input[type="radio"]:disabled {
+            accent-color: #9aaec2;
+            cursor: not-allowed;
+        }
+        .option.disabled-option {
+            opacity: 0.7;
+            cursor: default;
+        }
+        .option.disabled-option:hover {
+            background: #f2f6fc;
+        }
+        .option label {
+            font-weight: 500;
+            cursor: pointer;
+            flex: 1;
+        }
+        .option.disabled-option label {
+            cursor: default;
+        }
+        .option .meta {
+            display: block;
+            font-weight: 400;
+            font-size: 0.9rem;
+            color: #43566e;
+        }
+        .response {
+            margin-top: 1.8rem;
+            padding: 1.2rem 1.8rem;
+            border-radius: 16px;
+            background: #f8faff;
+            border: 1px solid #dce5ef;
+            display: none;
+        }
+        .response.visible {
+            display: block;
+        }
+        .response .badge {
+            display: inline-block;
+            padding: 0.15rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 0.4rem;
+        }
+        .badge.good {
+            background: #d9f0e3;
+            color: #196b3e;
+        }
+        .badge.wrong {
+            background: #fce4e4;
+            color: #a12b2b;
+        }
+        .badge.ok {
+            background: #dce8f5;
+            color: #1c5580;
+        }
+        .response p {
+            margin: 0.4rem 0;
+        }
+        .response .reason {
+            margin-top: 0.6rem;
+            color: #1f344b;
+        }
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1.2rem;
+        }
+        .reset-btn {
+            background: #e8edf4;
+            border: none;
+            padding: 0.5rem 1.4rem;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #1f3a5a;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .reset-btn:hover {
+            background: #d5dee9;
+        }
+        @media (max-width: 480px) {
+            .card { padding: 1.5rem; }
+            .option { padding: 0.7rem 1rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+
+    <!-- Запрос читателя -->
+    <div class="query-box">
+        <p><strong>Запрос читателя:</strong> «Мне нужно что-то про влияние технологий на общество, но без программирования и цифр. Что-то публицистическое, на уровне хорошего лонгрида, желательно с примерами из жизни».</p>
+    </div>
+
+    <p style="font-weight: 500; margin: 0 0 0.3rem 0; color: #1f3a58;">Выберите книгу, которую предложите первой:</p>
+
+    <form id="testForm">
+        <div class="options">
+            <div class="option" data-value="1">
+                <input type="radio" name="book" id="book1" value="1">
+                <label for="book1">
+                    <strong>«Цифровая экономика: алгоритмы и нейросети»</strong>
+                    <span class="meta">Научный язык, высокий уровень сложности</span>
+                </label>
+            </div>
+            <div class="option" data-value="2">
+                <input type="radio" name="book" id="book2" value="2">
+                <label for="book2">
+                    <strong>«Мир после интернета»</strong>
+                    <span class="meta">Публицистика, средний уровень сложности, живой язык</span>
+                </label>
+            </div>
+            <div class="option" data-value="3">
+                <input type="radio" name="book" id="book3" value="3">
+                <label for="book3">
+                    <strong>«Этика искусственного интеллекта»</strong>
+                    <span class="meta">Академическая монография, высокий уровень сложности</span>
+                </label>
+            </div>
+            <div class="option" data-value="4">
+                <input type="radio" name="book" id="book4" value="4">
+                <label for="book4">
+                    <strong>«Как гаджеты меняют мозг»</strong>
+                    <span class="meta">Научпоп, средний уровень сложности, простые примеры</span>
+                </label>
+            </div>
+        </div>
+    </form>
+
+    <!-- Блоки ответов -->
+    <div id="response2" class="response">
+        <p><span class="badge good">✓ Верный выбор</span> Верно. Это отличный старт для дискуссии. Книга написана публицистическим языком и отвечает запросу на «живой формат». Вы попали в «социальный» запрос читателя и предложили формат лонгрида.</p>
+    </div>
+
+    <div id="response4" class="response">
+        <p><span class="badge ok">✓ Хороший выбор</span> Хороший выбор. Эта книга лучше всего отвечает запросу на «примеры из жизни» и «научпоп». Она поможет читателю плавно войти в тему. Вы сделали ставку на доступность и психологический аспект, что идеально совпадает с «простыми примерами» из запроса.</p>
+    </div>
+
+    <div id="response1" class="response">
+        <p><span class="badge wrong">✗ Не совсем то</span> Не совсем то.</p>
+        <p class="reason"><strong>Почему:</strong> Читатель просил «без цифр и программирования», а вы предложили узкоспециальную литературу. Это «тяжелое» чтение: перегружено терминологией и абстрактными моделями. Читатель, который ищет «живой» текст с примерами из жизни, скорее всего, закроет такую книгу на первой странице и вернется к вам разочарованным. Попробуйте поискать более доступный научпоп.</p>
+    </div>
+
+    <div id="response3" class="response">
+        <p><span class="badge wrong">✗ Не совсем то</span> Не совсем то.</p>
+        <p class="reason"><strong>Почему:</strong> Читатель просил «без цифр и программирования», а вы предложили узкоспециальную литературу. Это «тяжелое» чтение: перегружено терминологией и абстрактными моделями. Читатель, который ищет «живой» текст с примерами из жизни, скорее всего, закроет такую книгу на первой странице и вернется к вам разочарованным. Попробуйте поискать более доступный научпоп.</p>
+    </div>
+
+    <!-- Кнопка "Заново" -->
+    <div class="actions">
+        <button type="button" class="reset-btn" id="resetBtn">Заново</button>
+    </div>
+
+</div>
+
+<script>
+    (function() {
+        const radios = document.querySelectorAll('input[name="book"]');
+        const responses = {
+            1: document.getElementById('response1'),
+            2: document.getElementById('response2'),
+            3: document.getElementById('response3'),
+            4: document.getElementById('response4')
+        };
+        const optionDivs = document.querySelectorAll('.option');
+        const resetBtn = document.getElementById('resetBtn');
+
+        function hideAll() {
+            Object.values(responses).forEach(el => el.classList.remove('visible'));
+            optionDivs.forEach(div => div.classList.remove('selected'));
+        }
+
+        function enableRadios() {
+            radios.forEach(radio => {
+                radio.disabled = false;
+            });
+            optionDivs.forEach(div => {
+                div.classList.remove('disabled-option');
+            });
+        }
+
+        function disableRadios() {
+            radios.forEach(radio => {
+                radio.disabled = true;
+            });
+            optionDivs.forEach(div => {
+                div.classList.add('disabled-option');
+            });
+        }
+
+        function showResponse(value) {
+            hideAll();
+            if (responses[value]) {
+                responses[value].classList.add('visible');
+                optionDivs.forEach(div => {
+                    if (div.dataset.value === value) {
+                        div.classList.add('selected');
+                    }
+                });
+            }
+            disableRadios();
+        }
+
+        radios.forEach(radio => {
+            radio.addEventListener('change', function(e) {
+                if (this.checked && !this.disabled) {
+                    showResponse(this.value);
+                }
+            });
+        });
+
+        resetBtn.addEventListener('click', function() {
+            radios.forEach(radio => {
+                radio.checked = false;
+                radio.disabled = false;
+            });
+            optionDivs.forEach(div => {
+                div.classList.remove('selected', 'disabled-option');
+            });
+            hideAll();
+        });
+
+        // При загрузке сбрасываем всё
+        resetBtn.click();
+    })();
+</script>
+
+</body>
+</html>
