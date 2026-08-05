@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Соберите сайт</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    body {
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .container {
+      max-width: 1100px;
+      width: 100%;
+      background: white;
+      padding: 18px 20px 20px;
+      border-radius: 14px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      border: 1px solid #d0d7de;
+      display: grid;
+      grid-template-columns: 1fr 200px;
+      gap: 16px;
+      align-items: start;
+    }
+    .header-area {
+      grid-column: 1 / -1;
+    }
+    h1 {
+      font-size: 22px;
+      text-align: center;
+      color: #b91c1c;
+      margin: 0 0 4px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+    }
+    .sub {
+      text-align: center;
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+
+    .site-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #f2f4f6;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+    }
+    .zone {
+      background: white;
+      border-radius: 8px;
+      padding: 6px 10px 8px;
+      border: 1px solid #d0d7de;
+      width: 100%;
+      min-height: 44px;
+    }
+    .zone-label {
+      font-weight: 600;
+      font-size: 11px;
+      color: #000;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .zone-drop {
+      min-height: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+    }
+    .placed-item {
+      background: #e6f0fa;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      border: 1px solid #1a56db;
+      display: inline-flex;
+      align-items: center;
+      color: #111;
+    }
+    .placed-item.correct {
+      background: #d1fae5;
+      border-color: #1a56db;
+    }
+
+    .items-panel {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 12px 12px 14px;
+      border: 1px solid #d0d7de;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .items-panel h3 {
+      font-size: 13px;
+      margin: 0;
+      font-weight: 500;
+      color: #111;
+      text-align: center;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 6px;
+    }
+    .items-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .drag-item {
+      background: white;
+      padding: 4px 12px;
+      border-radius: 30px;
+      border: 1.5px solid #0b3b8c;
+      color: #0b3b8c;
+      font-weight: 500;
+      font-size: 12px;
+      cursor: grab;
+      user-select: none;
+      box-shadow: 0 1px 3px rgba(11,59,140,0.15);
+      transition: 0.1s;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .drag-item:active { cursor: grabbing; opacity: 0.6; }
+    .drag-item.dragging { opacity: 0.4; }
+    .drag-item.placed {
+      opacity: 0.2;
+      pointer-events: none;
+      border-color: #94a3b8;
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .toast-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(3px);
+    }
+    .toast-overlay.show { display: flex; }
+    .toast-box {
+      background: white;
+      border-radius: 16px;
+      padding: 20px 28px 20px 28px;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      text-align: center;
+      animation: popIn 0.25s ease-out;
+      border-left: 6px solid;
+      position: relative;
+    }
+    .toast-box.error { border-left-color: #b91c1c; }
+    .toast-box.success { border-left-color: #0b7e3d; }
+    .toast-box.warning { border-left-color: #e67e22; }
+
+    .toast-close {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: #888;
+      transition: 0.2s;
+      line-height: 1;
+    }
+    .toast-close:hover {
+      color: #111;
+      transform: scale(1.1);
+    }
+
+    .toast-box .icon { font-size: 28px; margin-bottom: 4px; }
+    .toast-box .title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .toast-box .message { font-size: 13px; line-height: 1.4; color: #111; }
+
+    @keyframes popIn {
+      0% { transform: scale(0.95); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .result-area {
+      grid-column: 1 / -1;
+      margin-top: 2px;
+    }
+    .result {
+      padding: 8px 16px;
+      background: #f8fafc;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      border: 1px solid #d0d7de;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .result span { color: #1a56db; font-weight: 700; }
+
+    .btn-reset {
+      background: #fff5e6;
+      color: #4a3a2a;
+      border: 1px solid #e0c9a0;
+      padding: 5px 18px;
+      border-radius: 30px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: 0.15s;
+      font-weight: 500;
+    }
+    .btn-reset:hover {
+      background: #ffebd0;
+      border-color: #c7a87a;
+    }
+    .btn-reset:active {
+      transform: scale(0.96);
+    }
+
+    @media (max-width: 700px) {
+      .container {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .items-panel {
+        order: 2;
+      }
+      .items-grid {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .drag-item {
+        white-space: normal;
+      }
+      .result-area {
+        order: 3;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header-area">
+    <h1>💻 Упражнение: соберите сайт</h1>
+    <p class="sub">Перетащите каждый элемент в ту зону, где его будет удобно искать посетителю. Учитывайте логику навигации.</p>
+  </div>
+
+  <div class="site-layout">
+    <div class="zone" data-zone="header">
+      <div class="zone-label">ШАПКА</div>
+      <div class="zone-drop" id="zone-header"></div>
+    </div>
+    <div class="zone" data-zone="menu">
+      <div class="zone-label">НАВИГАЦИОННАЯ ПАНЕЛЬ</div>
+      <div class="zone-drop" id="zone-menu"></div>
+    </div>
+    <div class="zone" data-zone="main">
+      <div class="zone-label">ОСНОВНОЙ КОНТЕНТ</div>
+      <div class="zone-drop" id="zone-main"></div>
+    </div>
+    <div class="zone" data-zone="footer">
+      <div class="zone-label">ПОДВАЛ</div>
+      <div class="zone-drop" id="zone-footer"></div>
+    </div>
+    <div class="zone" data-zone="page">
+      <div class="zone-label">ОТДЕЛЬНАЯ СТРАНИЦА</div>
+      <div class="zone-drop" id="zone-page"></div>
+    </div>
+  </div>
+
+  <div class="items-panel">
+    <h3>Элементы для размещения</h3>
+    <div class="items-grid" id="itemsGrid"></div>
+  </div>
+
+  <div class="result-area">
+    <div class="result">
+      <span id="scoreText">0</span> из <span id="totalText">9</span>
+      <button class="btn-reset" id="resetBtn">🔄 Начать заново</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastOverlay" class="toast-overlay">
+  <div id="toastBox" class="toast-box">
+    <button class="toast-close" id="toastCloseBtn" aria-label="Закрыть">✕</button>
+    <div id="toastIcon" class="icon"></div>
+    <div id="toastTitle" class="title"></div>
+    <div id="toastMessage" class="message"></div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const itemsData = [
+      { id: 'search', label: '🔍 Поиск', correctZone: 'header', alternativeZones: ['menu'],
+        reason: 'Поиск должен быть в шапке, чтобы посетитель мог найти нужное с любой страницы.',
+        wrongReason: 'Поиск должен быть всегда на виду, чтобы посетитель мог найти нужное без прокрутки.',
+        alternativeMessage: 'Попробуйте разместить поиск в другой зоне.' },
+      { id: 'menu', label: '📋 Меню', correctZone: 'menu', alternativeZones: ['header'],
+        reason: 'Меню — главный инструмент навигации, его место на навигационной панели.',
+        wrongReason: 'Меню должно быть на видном месте, чтобы посетитель сразу видел разделы.',
+        alternativeMessage: 'Попробуйте разместить меню в другой зоне.' },
+      { id: 'contacts', label: '📞 Контакты', correctZone: 'footer', alternativeZones: ['header'],
+        reason: 'Контакты удобно размещать в подвале — они всегда под рукой, но не отвлекают.',
+        wrongReason: 'Контакты должны находиться там, где посетитель привык их искать.',
+        alternativeMessage: 'Попробуйте разместить контакты в другой зоне.' },
+      { id: 'schedule', label: '🕒 Режим работы', correctZone: 'footer',
+        reason: 'Режим работы логично размещать в подвале, рядом с контактами.',
+        wrongReason: 'Режим работы обычно ищут в том же месте, что и контакты. Здесь он будет не на месте.' },
+      { id: 'sitemap', label: '🗺️ Карта сайта', correctZone: 'page',
+        reason: 'Карта сайта должна быть на отдельной странице — это оглавление всего ресурса.',
+        wrongReason: 'Карта сайта не должна перегружать основное содержание.' },
+      { id: 'charter', label: '📄 Устав учреждения', correctZone: 'main',
+        reason: 'Устав — документ, его логично размещать в основном контенте, в разделе «Документы».',
+        wrongReason: 'Устав — официальный документ, и посетители ожидают найти его среди других документов.' },
+      { id: 'plan', label: '📊 План ФХД', correctZone: 'main',
+        reason: 'План ФХД — финансовый документ, он должен быть в основном контенте, с отчётами.',
+        wrongReason: 'План ФХД — финансовый документ, его логично размещать вместе с отчётностью.' },
+      { id: 'prices', label: '💰 Информация о ценах', correctZone: 'main',
+        reason: 'Цены на услуги должны быть в основном контенте, чтобы посетитель мог их увидеть сразу.',
+        wrongReason: 'Цены относятся к услугам, их место рядом с описанием услуг.' },
+      { id: 'survey', label: '📝 Анкета для опроса', correctZone: 'footer', alternativeZones: ['page'],
+        reason: 'Анкету удобно размещать в подвале — она всегда доступна, но не мешает основному контенту.',
+        wrongReason: 'Анкета не должна перекрывать основной контент и отвлекать посетителя.',
+        alternativeMessage: 'Попробуйте разместить анкету в подвале или на отдельной странице.' }
+    ];
+
+    const zoneDropMap = {
+      header: document.getElementById('zone-header'),
+      menu: document.getElementById('zone-menu'),
+      main: document.getElementById('zone-main'),
+      footer: document.getElementById('zone-footer'),
+      page: document.getElementById('zone-page')
+    };
+    const itemsGrid = document.getElementById('itemsGrid');
+    const toastOverlay = document.getElementById('toastOverlay');
+    const toastBox = document.getElementById('toastBox');
+    const toastIcon = document.getElementById('toastIcon');
+    const toastTitle = document.getElementById('toastTitle');
+    const toastMessage = document.getElementById('toastMessage');
+    const toastCloseBtn = document.getElementById('toastCloseBtn');
+    const scoreSpan = document.getElementById('scoreText');
+    const totalSpan = document.getElementById('totalText');
+
+    let placedItems = {};
+
+    function updateScore() {
+      const placed = Object.keys(placedItems).length;
+      scoreSpan.textContent = placed;
+      totalSpan.textContent = itemsData.length;
+    }
+
+    function createDragItem(item) {
+      const div = document.createElement('div');
+      div.className = 'drag-item';
+      div.dataset.id = item.id;
+      div.dataset.correctZone = item.correctZone;
+      div.textContent = item.label;
+      div.draggable = true;
+      div.addEventListener('dragstart', function(e) {
+        e.dataTransfer.setData('text/plain', this.dataset.id);
+        this.classList.add('dragging');
+      });
+      div.addEventListener('dragend', function(e) {
+        this.classList.remove('dragging');
+      });
+      return div;
+    }
+
+    function renderItems() {
+      itemsGrid.innerHTML = '';
+      itemsData.forEach(item => {
+        if (!placedItems[item.id]) {
+          itemsGrid.appendChild(createDragItem(item));
+        }
+      });
+    }
+
+    function resetAll() {
+      Object.values(zoneDropMap).forEach(el => el.innerHTML = '');
+      placedItems = {};
+      updateScore();
+      renderItems();
+      closeToast();
+    }
+
+    function closeToast() {
+      toastOverlay.classList.remove('show');
+    }
+
+    function showToast(type, titleText, messageText) {
+      closeToast();
+      toastBox.className = 'toast-box';
+      if (type === 'error') {
+        toastBox.classList.add('error');
+        toastIcon.textContent = '❌';
+        toastTitle.textContent = titleText || 'Ошибка!';
+      } else if (type === 'warning') {
+        toastBox.classList.add('warning');
+        toastIcon.textContent = '⚠️';
+        toastTitle.textContent = titleText || 'Внимание!';
+      } else {
+        toastBox.classList.add('success');
+        toastIcon.textContent = '✅';
+        toastTitle.textContent = titleText || 'Верно!';
+      }
+      toastMessage.textContent = messageText || '';
+      toastOverlay.classList.add('show');
+    }
+
+    function placeItem(itemId, zoneId) {
+      const item = itemsData.find(i => i.id === itemId);
+      if (!item || placedItems[itemId]) return false;
+      const isAlternative = item.alternativeZones && item.alternativeZones.includes(zoneId);
+
+      if (item.correctZone === zoneId) {
+        placedItems[itemId] = zoneId;
+        const span = document.createElement('span');
+        span.className = 'placed-item correct';
+        span.textContent = item.label;
+        zoneDropMap[zoneId].appendChild(span);
+        const dragEl = itemsGrid.querySelector(`.drag-item[data-id="${itemId}"]`);
+        if (dragEl) dragEl.remove();
+        updateScore();
+        showToast('success', 'Верно!', item.reason);
+        return true;
+      } else if (isAlternative) {
+        showToast('warning', 'Вариант допустим, но есть лучше', item.alternativeMessage || 'Попробуйте разместить этот элемент в другой зоне.');
+        return false;
+      } else {
+        showToast('error', 'Ошибка!', item.wrongReason);
+        return false;
+      }
+    }
+
+    toastCloseBtn.addEventListener('click', closeToast);
+    toastOverlay.addEventListener('click', function(e) {
+      if (e.target === toastOverlay) closeToast();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && toastOverlay.classList.contains('show')) closeToast();
+    });
+
+    Object.keys(zoneDropMap).forEach(zoneId => {
+      const zone = zoneDropMap[zoneId];
+      zone.addEventListener('dragover', e => e.preventDefault());
+      zone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        const data = e.dataTransfer.getData('text/plain');
+        if (!data) return;
+        if (placedItems[data]) return;
+        placeItem(data, zoneId);
+      });
+    });
+
+    document.addEventListener('dragover', e => e.preventDefault());
+    document.addEventListener('drop', e => e.preventDefault());
+
+    document.getElementById('resetBtn').addEventListener('click', resetAll);
+    totalSpan.textContent = itemsData.length;
+    resetAll();
+  })();
+</script>
+</body>
+</html>
