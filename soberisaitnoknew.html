@@ -27,9 +27,9 @@
       box-shadow: 0 4px 16px rgba(0,0,0,0.06);
       border: 1px solid #d0d7de;
       display: grid;
-      grid-template-columns: 1fr 200px;
+      grid-template-columns: 1fr 220px; /* Увеличили ширину для удобства */
       gap: 16px;
-      align-items: start; /* колонки выравниваются по верхнему краю */
+      align-items: start; /* Колонки выравниваются по верхнему краю */
     }
     .header-area {
       grid-column: 1 / -1;
@@ -97,7 +97,7 @@
       border-color: #1a56db;
     }
 
-    /* Правая колонка — элементы прижаты к верху */
+    /* Правая колонка — строго зафиксирована справа и прижата к верху */
     .items-panel {
       background: #f8fafc;
       border-radius: 10px;
@@ -105,30 +105,37 @@
       border: 1px solid #d0d7de;
       display: flex;
       flex-direction: column;
-      align-items: stretch;     /* чтобы дочерние растягивались по ширине */
-      justify-content: flex-start; /* прижимаем всё к верху */
-      gap: 6px;
-      height: auto;            /* высота по содержимому */
+      align-items: stretch;
+      justify-content: flex-start;
+      gap: 8px;
+      
+      /* ОСНОВНЫЕ ИЗМЕНЕНИЯ ДЛЯ ЗАКРЕПЛЕНИЯ */
+      position: sticky;
+      top: 16px;
+      align-self: start;
     }
+    
     .items-panel h3 {
       font-size: 13px;
       margin: 0;
-      font-weight: 500;
+      font-weight: 600;
       color: #111;
       text-align: center;
       border-bottom: 1px solid #e2e8f0;
       padding-bottom: 6px;
     }
+    
     .items-grid {
       display: flex;
       flex-direction: column;
       gap: 6px;
-      justify-content: flex-start; /* элементы строго сверху */
-      align-items: stretch;        /* растягиваем по ширине */
+      justify-content: flex-start;
+      align-items: stretch;
     }
+    
     .drag-item {
       background: white;
-      padding: 4px 12px;
+      padding: 6px 12px;
       border-radius: 30px;
       border: 1.5px solid #0b3b8c;
       color: #0b3b8c;
@@ -137,19 +144,14 @@
       cursor: grab;
       user-select: none;
       box-shadow: 0 1px 3px rgba(11,59,140,0.15);
-      transition: 0.1s;
+      transition: background 0.15s, transform 0.1s;
       text-align: center;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .drag-item:active { cursor: grabbing; opacity: 0.6; }
     .drag-item.dragging { opacity: 0.4; }
-    .drag-item.placed {
-      opacity: 0.2;
-      pointer-events: none;
-      border-color: #94a3b8;
-      background: #f1f5f9;
-      color: #64748b;
-    }
 
     .toast-overlay {
       position: fixed;
@@ -243,12 +245,14 @@
       transform: scale(0.96);
     }
 
+    /* Адаптив для маленьких экранов (телефонов) */
     @media (max-width: 700px) {
       .container {
         grid-template-columns: 1fr;
         gap: 12px;
       }
       .items-panel {
+        position: static; /* На мобильных возвращаем обычный поток */
         order: 2;
       }
       .items-grid {
