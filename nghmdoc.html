@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Слайдер презентация</title>
+    <title>Слайдер с увеличением</title>
     <style>
         * {
             box-sizing: border-box;
@@ -39,7 +39,6 @@
             letter-spacing: -0.3px;
         }
 
-        /* Обёртка слайдера — как экран презентации */
         .slider-wrapper {
             position: relative;
             background: #f8fafc;
@@ -49,7 +48,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 400px; /* опорная высота, но картинка сама определяет */
+            min-height: 320px;
         }
 
         .slides {
@@ -63,21 +62,28 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 24px;
             background: #f8fafc;
+            cursor: pointer; /* указываем, что кликабельно */
         }
 
         .slide img {
             display: block;
             max-width: 100%;
-            max-height: 70vh;      /* не выше 70% высоты экрана */
+            max-height: 60vh;
             height: auto;
             width: auto;
-            object-fit: contain;    /* сохраняем пропорции, не обрезаем */
+            object-fit: contain;
             border-radius: 12px;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
             background: #ffffff;
-            transition: box-shadow 0.3s;
+            transition: box-shadow 0.3s, transform 0.2s;
+            pointer-events: auto; /* чтобы клик по картинке срабатывал */
+        }
+
+        .slide img:hover {
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+            transform: scale(1.01);
         }
 
         /* Кнопки навигации */
@@ -111,22 +117,16 @@
         .slider-btn:active {
             transform: translateY(-50%) scale(0.94);
         }
+        .slider-btn.prev { left: 16px; }
+        .slider-btn.next { right: 16px; }
 
-        .slider-btn.prev {
-            left: 16px;
-        }
-        .slider-btn.next {
-            right: 16px;
-        }
-
-        /* Точки-индикаторы */
+        /* Точки */
         .dots {
             display: flex;
             justify-content: center;
             gap: 14px;
             margin-top: 24px;
         }
-
         .dot {
             width: 12px;
             height: 12px;
@@ -137,17 +137,83 @@
             cursor: pointer;
             transition: background 0.3s, transform 0.2s;
         }
-
         .dot.active {
             background: #2563eb;
             transform: scale(1.2);
         }
-
         .dot:hover {
             background: #94a3b8;
         }
         .dot.active:hover {
             background: #2563eb;
+        }
+
+        /* ----- Модальное окно (лайтбокс) ----- */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(6px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 40px 20px;
+            animation: fadeIn 0.25s ease;
+        }
+        .lightbox.open {
+            display: flex;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 95%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .lightbox-close {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border: none;
+            color: #fff;
+            font-size: 32px;
+            line-height: 1;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-bottom: 12px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 300;
+        }
+        .lightbox-close:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .lightbox-image {
+            max-width: 100%;
+            max-height: 82vh;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            background: #fff;
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.97); }
+            to   { opacity: 1; transform: scale(1); }
         }
 
         /* Адаптив */
@@ -163,14 +229,15 @@
                 height: 40px;
                 font-size: 20px;
             }
-            .slider-btn.prev {
-                left: 8px;
-            }
-            .slider-btn.next {
-                right: 8px;
-            }
+            .slider-btn.prev { left: 8px; }
+            .slider-btn.next { right: 8px; }
             .slide img {
-                max-height: 50vh;
+                max-height: 45vh;
+            }
+            .lightbox-close {
+                width: 44px;
+                height: 44px;
+                font-size: 26px;
             }
         }
     </style>
@@ -182,10 +249,10 @@
 
     <div class="slider-wrapper">
         <div class="slides" id="slides">
-            <div class="slide">
+            <div class="slide" data-img="https://www.cultmanager.ru/images/Vibecoding/nghm1.png">
                 <img src="https://www.cultmanager.ru/images/Vibecoding/nghm1.png" alt="Документ 1" loading="lazy" />
             </div>
-            <div class="slide">
+            <div class="slide" data-img="https://www.cultmanager.ru/images/Vibecoding/nghm2.png">
                 <img src="https://www.cultmanager.ru/images/Vibecoding/nghm2.png" alt="Документ 2" loading="lazy" />
             </div>
         </div>
@@ -200,13 +267,22 @@
     </div>
 </div>
 
+<!-- Модальное окно -->
+<div class="lightbox" id="lightbox">
+    <div class="lightbox-content">
+        <button class="lightbox-close" id="lightboxClose" aria-label="Закрыть">✕</button>
+        <img class="lightbox-image" id="lightboxImage" src="" alt="Увеличенное изображение" />
+    </div>
+</div>
+
 <script>
     (function() {
+        // ---- Слайдер ----
         const slides = document.getElementById('slides');
         const dots = document.querySelectorAll('.dot');
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
-
+        const slideElements = document.querySelectorAll('.slide');
         let currentIndex = 0;
         const total = 2;
 
@@ -236,6 +312,59 @@
             if (e.key === 'ArrowRight') { e.preventDefault(); goTo(currentIndex + 1); }
         });
 
+        // ---- Лайтбокс (увеличение) ----
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImage = document.getElementById('lightboxImage');
+        const lightboxClose = document.getElementById('lightboxClose');
+
+        // Открыть лайтбокс с картинкой
+        function openLightbox(src) {
+            lightboxImage.src = src;
+            lightbox.classList.add('open');
+            document.body.style.overflow = 'hidden'; // запрещаем прокрутку
+        }
+
+        // Закрыть лайтбокс
+        function closeLightbox() {
+            lightbox.classList.remove('open');
+            document.body.style.overflow = '';
+            // небольшая задержка, чтобы убрать src после анимации (опционально)
+            // но можно оставить, чтобы при повторном открытии не было мерцания
+        }
+
+        // Клик по слайду (по картинке) — открываем увеличенную версию
+        slideElements.forEach(slide => {
+            slide.addEventListener('click', function(e) {
+                // Если клик именно по картинке или по самому слайду — берём src из data-атрибута или из img
+                let imgSrc = this.dataset.img;
+                if (!imgSrc) {
+                    const img = this.querySelector('img');
+                    if (img) imgSrc = img.src;
+                }
+                if (imgSrc) {
+                    openLightbox(imgSrc);
+                }
+            });
+        });
+
+        // Закрытие по клику на фон (на сам lightbox, но не на контент)
+        lightbox.addEventListener('click', function(e) {
+            if (e.target === lightbox) {
+                closeLightbox();
+            }
+        });
+
+        // Закрытие по кнопке
+        lightboxClose.addEventListener('click', closeLightbox);
+
+        // Закрытие по Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && lightbox.classList.contains('open')) {
+                closeLightbox();
+            }
+        });
+
+        // Инициализация
         updateSlider(0);
     })();
 </script>
