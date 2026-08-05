@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Слайдер с увеличением</title>
+    <title>Слайдер с зумом</title>
     <style>
         * {
             box-sizing: border-box;
@@ -64,13 +64,13 @@
             align-items: center;
             padding: 24px;
             background: #f8fafc;
-            cursor: pointer; /* указываем, что кликабельно */
+            cursor: pointer;
         }
 
         .slide img {
             display: block;
             max-width: 100%;
-            max-height: 60vh;
+            max-height: 65vh;
             height: auto;
             width: auto;
             object-fit: contain;
@@ -78,7 +78,7 @@
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
             background: #ffffff;
             transition: box-shadow 0.3s, transform 0.2s;
-            pointer-events: auto; /* чтобы клик по картинке срабатывал */
+            pointer-events: auto;
         }
 
         .slide img:hover {
@@ -86,7 +86,6 @@
             transform: scale(1.01);
         }
 
-        /* Кнопки навигации */
         .slider-btn {
             position: absolute;
             top: 50%;
@@ -120,7 +119,6 @@
         .slider-btn.prev { left: 16px; }
         .slider-btn.next { right: 16px; }
 
-        /* Точки */
         .dots {
             display: flex;
             justify-content: center;
@@ -148,7 +146,7 @@
             background: #2563eb;
         }
 
-        /* ----- Модальное окно (лайтбокс) ----- */
+        /* ----- Модальное окно с зумом ----- */
         .lightbox {
             display: none;
             position: fixed;
@@ -156,13 +154,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.82);
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(6px);
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            padding: 40px 20px;
-            animation: fadeIn 0.25s ease;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
         }
         .lightbox.open {
             display: flex;
@@ -170,50 +168,121 @@
 
         .lightbox-content {
             position: relative;
-            max-width: 95%;
-            max-height: 90vh;
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
 
-        .lightbox-close {
+        /* Контейнер для картинки с возможностью скролла */
+        .lightbox-image-wrapper {
+            width: 100%;
+            height: calc(100% - 70px); /* оставляем место для кнопок */
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: grab;
+            background: transparent;
+            position: relative;
+        }
+
+        .lightbox-image-wrapper:active {
+            cursor: grabbing;
+        }
+
+        .lightbox-image {
+            display: block;
+            max-width: none;
+            max-height: none;
+            width: auto;
+            height: auto;
+            transform-origin: center center;
+            transition: transform 0.1s ease;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            background: #fff;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        /* Панель управления зумом */
+        .zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 16px;
+            background: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(8px);
+            padding: 10px 18px;
+            border-radius: 40px;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .zoom-btn {
             background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(4px);
             border: none;
             color: #fff;
-            font-size: 32px;
-            line-height: 1;
-            width: 50px;
-            height: 50px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
+            font-size: 24px;
+            font-weight: 300;
             cursor: pointer;
-            margin-bottom: 12px;
             transition: background 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 300;
+            line-height: 1;
         }
-        .lightbox-close:hover {
+
+        .zoom-btn:hover {
             background: rgba(255,255,255,0.3);
         }
 
-        .lightbox-image {
-            max-width: 100%;
-            max-height: 82vh;
-            width: auto;
-            height: auto;
-            object-fit: contain;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-            background: #fff;
-            display: block;
+        .zoom-level {
+            color: #fff;
+            font-size: 14px;
+            min-width: 50px;
+            text-align: center;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .close-lightbox {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border: none;
+            color: #fff;
+            font-size: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            font-weight: 300;
+        }
+
+        .close-lightbox:hover {
+            background: rgba(255,255,255,0.3);
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.97); }
-            to   { opacity: 1; transform: scale(1); }
+            from { opacity: 0; }
+            to   { opacity: 1; }
         }
 
         /* Адаптив */
@@ -234,10 +303,22 @@
             .slide img {
                 max-height: 45vh;
             }
-            .lightbox-close {
+            .close-lightbox {
+                top: 12px;
+                right: 16px;
                 width: 44px;
                 height: 44px;
                 font-size: 26px;
+            }
+            .zoom-controls {
+                padding: 8px 14px;
+                gap: 12px;
+                bottom: 12px;
+            }
+            .zoom-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 20px;
             }
         }
     </style>
@@ -267,11 +348,21 @@
     </div>
 </div>
 
-<!-- Модальное окно -->
+<!-- Модальное окно с зумом -->
 <div class="lightbox" id="lightbox">
     <div class="lightbox-content">
-        <button class="lightbox-close" id="lightboxClose" aria-label="Закрыть">✕</button>
-        <img class="lightbox-image" id="lightboxImage" src="" alt="Увеличенное изображение" />
+        <button class="close-lightbox" id="lightboxClose" aria-label="Закрыть">✕</button>
+
+        <div class="lightbox-image-wrapper" id="imageWrapper">
+            <img class="lightbox-image" id="lightboxImage" src="" alt="Увеличенное изображение" />
+        </div>
+
+        <div class="zoom-controls">
+            <button class="zoom-btn" id="zoomOut" aria-label="Уменьшить">−</button>
+            <span class="zoom-level" id="zoomLevel">100%</span>
+            <button class="zoom-btn" id="zoomIn" aria-label="Увеличить">+</button>
+            <button class="zoom-btn" id="zoomReset" aria-label="Сбросить масштаб" style="font-size:18px;">⟲</button>
+        </div>
     </div>
 </div>
 
@@ -312,30 +403,59 @@
             if (e.key === 'ArrowRight') { e.preventDefault(); goTo(currentIndex + 1); }
         });
 
-        // ---- Лайтбокс (увеличение) ----
+        // ---- Лайтбокс с зумом ----
         const lightbox = document.getElementById('lightbox');
         const lightboxImage = document.getElementById('lightboxImage');
-        const lightboxClose = document.getElementById('lightboxClose');
+        const imageWrapper = document.getElementById('imageWrapper');
+        const closeBtn = document.getElementById('lightboxClose');
+        const zoomInBtn = document.getElementById('zoomIn');
+        const zoomOutBtn = document.getElementById('zoomOut');
+        const zoomResetBtn = document.getElementById('zoomReset');
+        const zoomLevelSpan = document.getElementById('zoomLevel');
+
+        let scale = 1;
+        let translateX = 0;
+        let translateY = 0;
+        let isDragging = false;
+        let startX, startY, startTranslateX, startTranslateY;
+
+        // Функция обновления трансформации картинки
+        function updateImageTransform() {
+            lightboxImage.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+            zoomLevelSpan.textContent = Math.round(scale * 100) + '%';
+        }
+
+        // Сброс позиции и масштаба
+        function resetZoom() {
+            scale = 1;
+            translateX = 0;
+            translateY = 0;
+            updateImageTransform();
+            // центрируем картинку в вьюпорте (скроллим в начало)
+            imageWrapper.scrollTo(0, 0);
+        }
 
         // Открыть лайтбокс с картинкой
         function openLightbox(src) {
             lightboxImage.src = src;
             lightbox.classList.add('open');
-            document.body.style.overflow = 'hidden'; // запрещаем прокрутку
+            document.body.style.overflow = 'hidden';
+            // Сбрасываем масштаб при открытии новой картинки
+            resetZoom();
+            // Ждём загрузки, чтобы отцентрировать (опционально)
+            lightboxImage.onload = function() {
+                // Можем попытаться подогнать под размер экрана, но оставим как есть
+            };
         }
 
-        // Закрыть лайтбокс
         function closeLightbox() {
             lightbox.classList.remove('open');
             document.body.style.overflow = '';
-            // небольшая задержка, чтобы убрать src после анимации (опционально)
-            // но можно оставить, чтобы при повторном открытии не было мерцания
         }
 
-        // Клик по слайду (по картинке) — открываем увеличенную версию
+        // Обработчики открытия по клику на слайд
         slideElements.forEach(slide => {
             slide.addEventListener('click', function(e) {
-                // Если клик именно по картинке или по самому слайду — берём src из data-атрибута или из img
                 let imgSrc = this.dataset.img;
                 if (!imgSrc) {
                     const img = this.querySelector('img');
@@ -347,24 +467,99 @@
             });
         });
 
-        // Закрытие по клику на фон (на сам lightbox, но не на контент)
+        // Закрытие
+        closeBtn.addEventListener('click', closeLightbox);
         lightbox.addEventListener('click', function(e) {
-            if (e.target === lightbox) {
+            if (e.target === lightbox || e.target === imageWrapper) {
                 closeLightbox();
             }
         });
-
-        // Закрытие по кнопке
-        lightboxClose.addEventListener('click', closeLightbox);
-
-        // Закрытие по Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && lightbox.classList.contains('open')) {
                 closeLightbox();
             }
         });
 
-        // Инициализация
+        // ---- Управление зумом ----
+        function zoomIn() {
+            scale = Math.min(scale + 0.2, 5); // максимум 500%
+            updateImageTransform();
+        }
+
+        function zoomOut() {
+            scale = Math.max(scale - 0.2, 0.2); // минимум 20%
+            updateImageTransform();
+        }
+
+        zoomInBtn.addEventListener('click', zoomIn);
+        zoomOutBtn.addEventListener('click', zoomOut);
+        zoomResetBtn.addEventListener('click', resetZoom);
+
+        // Колесико мыши для зума (над картинкой)
+        imageWrapper.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -0.1 : 0.1;
+            scale = Math.min(Math.max(scale + delta, 0.2), 5);
+            updateImageTransform();
+        }, { passive: false });
+
+        // ---- Перетаскивание (drag) ----
+        imageWrapper.addEventListener('mousedown', function(e) {
+            // Если картинка не увеличена (scale=1) или мало увеличена, возможно, не нужно перетаскивать?
+            // Но разрешим всегда.
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            startTranslateX = translateX;
+            startTranslateY = translateY;
+            imageWrapper.style.cursor = 'grabbing';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            translateX = startTranslateX + dx;
+            translateY = startTranslateY + dy;
+            updateImageTransform();
+        });
+
+        document.addEventListener('mouseup', function() {
+            if (isDragging) {
+                isDragging = false;
+                imageWrapper.style.cursor = 'grab';
+            }
+        });
+
+        // Поддержка touch (для мобильных)
+        let touchStartX, touchStartY, touchStartTranslateX, touchStartTranslateY;
+        imageWrapper.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 1) {
+                const touch = e.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+                touchStartTranslateX = translateX;
+                touchStartTranslateY = translateY;
+                isDragging = true;
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchmove', function(e) {
+            if (!isDragging || e.touches.length !== 1) return;
+            const touch = e.touches[0];
+            const dx = touch.clientX - touchStartX;
+            const dy = touch.clientY - touchStartY;
+            translateX = touchStartTranslateX + dx;
+            translateY = touchStartTranslateY + dy;
+            updateImageTransform();
+        }, { passive: true });
+
+        document.addEventListener('touchend', function() {
+            isDragging = false;
+        }, { passive: true });
+
+        // Инициализация слайдера
         updateSlider(0);
     })();
 </script>
