@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Слайдер презентация</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: #eef2f7;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .slider-container {
+            max-width: 960px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.10);
+            padding: 30px 30px 35px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #0b1e33;
+            margin-bottom: 20px;
+            letter-spacing: -0.3px;
+        }
+
+        /* Обёртка слайдера — как экран презентации */
+        .slider-wrapper {
+            position: relative;
+            background: #f8fafc;
+            border-radius: 18px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px; /* опорная высота, но картинка сама определяет */
+        }
+
+        .slides {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            width: 100%;
+        }
+
+        .slide {
+            min-width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: #f8fafc;
+        }
+
+        .slide img {
+            display: block;
+            max-width: 100%;
+            max-height: 70vh;      /* не выше 70% высоты экрана */
+            height: auto;
+            width: auto;
+            object-fit: contain;    /* сохраняем пропорции, не обрезаем */
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            background: #ffffff;
+            transition: box-shadow 0.3s;
+        }
+
+        /* Кнопки навигации */
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(4px);
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            font-size: 26px;
+            font-weight: 300;
+            color: #1e293b;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+            transition: background 0.2s, transform 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            user-select: none;
+        }
+
+        .slider-btn:hover {
+            background: #ffffff;
+            transform: translateY(-50%) scale(1.04);
+        }
+        .slider-btn:active {
+            transform: translateY(-50%) scale(0.94);
+        }
+
+        .slider-btn.prev {
+            left: 16px;
+        }
+        .slider-btn.next {
+            right: 16px;
+        }
+
+        /* Точки-индикаторы */
+        .dots {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-top: 24px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #d1d9e6;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .dot.active {
+            background: #2563eb;
+            transform: scale(1.2);
+        }
+
+        .dot:hover {
+            background: #94a3b8;
+        }
+        .dot.active:hover {
+            background: #2563eb;
+        }
+
+        /* Адаптив */
+        @media (max-width: 640px) {
+            .slider-container {
+                padding: 20px 16px 30px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+            .slider-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+            .slider-btn.prev {
+                left: 8px;
+            }
+            .slider-btn.next {
+                right: 8px;
+            }
+            .slide img {
+                max-height: 50vh;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="slider-container">
+    <h1>Пример расположения документов</h1>
+
+    <div class="slider-wrapper">
+        <div class="slides" id="slides">
+            <div class="slide">
+                <img src="https://www.cultmanager.ru/images/Vibecoding/nghm1.png" alt="Документ 1" loading="lazy" />
+            </div>
+            <div class="slide">
+                <img src="https://www.cultmanager.ru/images/Vibecoding/nghm2.png" alt="Документ 2" loading="lazy" />
+            </div>
+        </div>
+
+        <button class="slider-btn prev" id="prevBtn" aria-label="Назад">‹</button>
+        <button class="slider-btn next" id="nextBtn" aria-label="Вперёд">›</button>
+    </div>
+
+    <div class="dots" id="dots">
+        <button class="dot active" data-index="0" aria-label="Слайд 1"></button>
+        <button class="dot" data-index="1" aria-label="Слайд 2"></button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const slides = document.getElementById('slides');
+        const dots = document.querySelectorAll('.dot');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        let currentIndex = 0;
+        const total = 2;
+
+        function updateSlider(index) {
+            slides.style.transform = `translateX(-${index * 100}%)`;
+            dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+        }
+
+        function goTo(index) {
+            if (index < 0) index = total - 1;
+            if (index >= total) index = 0;
+            currentIndex = index;
+            updateSlider(currentIndex);
+        }
+
+        prevBtn.addEventListener('click', () => goTo(currentIndex - 1));
+        nextBtn.addEventListener('click', () => goTo(currentIndex + 1));
+
+        dots.forEach(dot => {
+            dot.addEventListener('click', function() {
+                goTo(parseInt(this.dataset.index, 10));
+            });
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(currentIndex - 1); }
+            if (e.key === 'ArrowRight') { e.preventDefault(); goTo(currentIndex + 1); }
+        });
+
+        updateSlider(0);
+    })();
+</script>
+
+</body>
+</html>
