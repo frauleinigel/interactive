@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Собери урожай решений</title>
     <style>
         * {
@@ -106,6 +106,7 @@
             gap: 48px;
         }
 
+        /* ——— ЯБЛОКИ ——— */
         .card-item {
             width: 112px;
             height: 112px;
@@ -117,19 +118,21 @@
             font-weight: 700;
             color: #ffffff;
             cursor: grab;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease, background 0.2s ease;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                box-shadow 0.2s ease,
+                background 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            box-shadow: 0 4px 0 #8a1414, inset 0 -4px 0 rgba(0,0,0,0.1), inset 0 4px 10px rgba(255,200,100,0.3);
+            box-shadow: 0 4px 0 #8a1414, inset 0 -4px 0 rgba(0, 0, 0, 0.1), inset 0 4px 10px rgba(255, 200, 100, 0.3);
             user-select: none;
             word-break: normal;
             overflow-wrap: normal;
             hyphens: none;
             position: relative;
             line-height: 1.3;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
             flex-shrink: 0;
         }
 
@@ -159,10 +162,11 @@
             border: 1px solid #5a7a3a;
         }
 
+        /* ——— ТЕКСТ ВНУТРИ ЯБЛОКА (УМЕНЬШЕН) ——— */
         .card-item .text {
-            font-size: 11px;
+            font-size: 8px;
             font-weight: 700;
-            line-height: 1.3;
+            line-height: 1.25;
             padding: 0 2px;
             max-width: 95%;
             display: block;
@@ -172,10 +176,12 @@
             white-space: normal;
         }
 
-        /* ── МОЩНЫЙ ХОВЕР ДЛЯ ЯБЛОК ── */
+        /* ——— ОБЫЧНЫЙ ХОВЕР (для активных яблок) ——— */
         .card-item:hover:not(.placed):not(.locked) {
-            transform: translateY(-14px) scale(1.38);
-            box-shadow: 0 16px 25px rgba(138, 20, 20, 0.4), inset 0 -4px 0 rgba(0,0,0,0.15), 0 0 15px rgba(255, 80, 80, 0.6);
+            transform: translateY(-20px) scale(2.2);
+            box-shadow: 0 20px 35px rgba(138, 20, 20, 0.5),
+                inset 0 -4px 0 rgba(0, 0, 0, 0.15),
+                0 0 25px rgba(255, 80, 80, 0.7);
             background: #ff3333;
             z-index: 50;
         }
@@ -194,15 +200,15 @@
             box-shadow: 0 2px 0 #8a1414;
         }
 
-        /* ── ПОЧЕРНЕВШИЕ НЕВЕРНЫЕ ЯБЛОКИ ── */
+        /* ——— ПОЧЕРНЕВШИЕ НЕВЕРНЫЕ (теперь реагируют на ховер) ——— */
         .card-item.locked {
             opacity: 1;
             cursor: not-allowed;
-            pointer-events: none;
+            pointer-events: auto;          /* разрешаем наведение */
             transform: scale(0.95);
             background: #2a2523;
             border-color: #121010;
-            box-shadow: 0 4px 0 #121010, inset 0 -4px 0 rgba(0,0,0,0.5);
+            box-shadow: 0 4px 0 #121010, inset 0 -4px 0 rgba(0, 0, 0, 0.5);
             transition: all 0.5s ease;
         }
         .card-item.locked::before {
@@ -214,10 +220,18 @@
         }
         .card-item.locked .text {
             color: #ffffff;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
         }
 
-        /* ── КОРЗИНА И ПОЗИЦИОНИРОВАНИЕ НА СТВОЛЕ ── */
+        /* ——— ХОВЕР ДЛЯ ПОЧЕРНЕВШИХ (увеличение без подъёма) ——— */
+        .card-item.locked:hover {
+            transform: scale(2.2);
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 255, 255, 0.1);
+            z-index: 50;
+            background: #2a2523;          /* цвет не меняем */
+        }
+
+        /* ——— КОРЗИНА ——— */
         .basket-area {
             flex: 1;
             min-width: 280px;
@@ -241,8 +255,8 @@
             flex-direction: column;
             align-items: center;
             position: relative;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.25), inset 0 -10px 20px rgba(0,0,0,0.05);
-            background-image: 
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25), inset 0 -10px 20px rgba(0, 0, 0, 0.05);
+            background-image:
                 repeating-linear-gradient(45deg, rgba(139, 107, 74, 0.08) 0px, rgba(139, 107, 74, 0.08) 2px, transparent 2px, transparent 6px),
                 repeating-linear-gradient(-45deg, rgba(139, 107, 74, 0.08) 0px, rgba(139, 107, 74, 0.08) 2px, transparent 2px, transparent 6px);
         }
@@ -264,7 +278,7 @@
             background-position: center;
             flex-shrink: 0;
             margin-bottom: 2px;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
         }
 
         .basket-label {
@@ -276,7 +290,7 @@
             width: 100%;
             text-align: center;
             letter-spacing: 1px;
-            background: rgba(255,255,255,0.3);
+            background: rgba(255, 255, 255, 0.3);
             border-radius: 0 0 10px 10px;
             margin-top: auto;
             flex-shrink: 0;
@@ -310,8 +324,14 @@
         }
 
         @keyframes popIn {
-            0% { transform: scale(0.7); opacity: 0.4; }
-            100% { transform: scale(1); opacity: 1; }
+            0% {
+                transform: scale(0.7);
+                opacity: 0.4;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
         .basket-empty {
@@ -320,12 +340,12 @@
             font-weight: 600;
             padding: 12px 8px;
             text-align: center;
-            background: rgba(255,255,255,0.5);
+            background: rgba(255, 255, 255, 0.5);
             border-radius: 12px;
             margin: auto 0;
         }
 
-        /* ── Модальное окно завершения ── */
+        /* ——— МОДАЛКА ЗАВЕРШЕНИЯ ——— */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -379,8 +399,14 @@
         }
 
         @keyframes toastIn {
-            0% { transform: scale(0.85) translateY(20px); opacity: 0; }
-            100% { transform: scale(1) translateY(0); opacity: 1; }
+            0% {
+                transform: scale(0.85) translateY(20px);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
         }
 
         .modal-icon {
@@ -421,7 +447,7 @@
             background: #f5ede4;
         }
 
-        /* ── Тосты для ошибок ── */
+        /* ——— ТОСТЫ ——— */
         .toast-overlay {
             position: fixed;
             top: 0;
@@ -495,35 +521,50 @@
             opacity: 0.8;
         }
 
+        /* ——— АДАПТИВ ——— */
         @media (max-width: 768px) {
-            .game-area { 
-                flex-direction: column; 
+            .game-area {
+                flex-direction: column;
                 align-items: center;
             }
-            .cards-area { 
+            .cards-area {
                 width: 100%;
-                min-height: 520px; 
-                background-size: cover; 
+                min-height: 520px;
+                background-size: cover;
             }
-            .basket-area { 
-                margin-left: 0; 
-                margin-top: -120px; 
-                width: 90%; 
-                max-width: 380px; 
-                align-self: center; 
+            .basket-area {
+                margin-left: 0;
+                margin-top: -120px;
+                width: 90%;
+                max-width: 380px;
+                align-self: center;
             }
-            .basket { min-height: 240px; }
-            .toast-box { padding: 24px 18px; }
-            .toast-box .toast-text { font-size: 17px; }
+            .basket {
+                min-height: 240px;
+            }
+            .toast-box {
+                padding: 24px 18px;
+            }
+            .toast-box .toast-text {
+                font-size: 17px;
+            }
             .cards-grid {
                 padding: 2% 6% 25% 6%;
                 min-height: 500px;
                 gap: 20px;
             }
-            .row-container { gap: 20px; }
-            .row-container:nth-child(1) { gap: 24px; }
-            .row-container:nth-child(2) { gap: 22px; }
-            .row-container:nth-child(3) { gap: 28px; }
+            .row-container {
+                gap: 20px;
+            }
+            .row-container:nth-child(1) {
+                gap: 24px;
+            }
+            .row-container:nth-child(2) {
+                gap: 22px;
+            }
+            .row-container:nth-child(3) {
+                gap: 28px;
+            }
             .card-item {
                 width: 84px;
                 height: 84px;
@@ -531,7 +572,7 @@
                 padding: 8px 6px;
             }
             .card-item .text {
-                font-size: 9px;
+                font-size: 7px;
             }
             .card-item::before {
                 height: 14px;
@@ -543,7 +584,10 @@
                 top: -14px;
             }
             .card-item:hover:not(.placed):not(.locked) {
-                transform: translateY(-8px) scale(1.28);
+                transform: translateY(-12px) scale(2.0);
+            }
+            .card-item.locked:hover {
+                transform: scale(2.0);
             }
             .toast-close {
                 top: 10px;
@@ -574,305 +618,289 @@
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>🍎 Соберите урожай решений</h1>
-    <div class="sub">Перетащите яблоки с верными решениями в корзину. Ошибочные оставьте на дереве.</div>
 
-    <div class="game-area">
-        <div class="cards-area" id="treeArea">
-            <div class="cards-grid" id="cardsContainer">
-                <!-- Ряды создаются JS -->
-            </div>
-        </div>
+    <div class="container">
+        <h1>🍎 Соберите урожай решений</h1>
+        <div class="sub">Перетащите яблоки с верными решениями в корзину. Ошибочные оставьте на дереве.</div>
 
-        <div class="basket-area">
-            <div class="basket" id="basket">
-                <div class="basket-icon"></div>
-                <div class="basket-items" id="basketItems">
-                    <div class="basket-empty">Собирайте сюда яблоки 🍎</div>
+        <div class="game-area">
+            <div class="cards-area" id="treeArea">
+                <div class="cards-grid" id="cardsContainer">
+                    <!-- Ряды создаются JS -->
                 </div>
-                <div class="basket-label">КОРЗИНА</div>
             </div>
+
+            <div class="basket-area">
+                <div class="basket" id="basket">
+                    <div class="basket-icon"></div>
+                    <div class="basket-items" id="basketItems">
+                        <div class="basket-empty">Собирайте сюда яблоки 🍎</div>
+                    </div>
+                    <div class="basket-label">КОРЗИНА</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-reset" id="resetBtn">⟳ Начать заново</button>
+    </div>
+
+    <!-- Модалка завершения -->
+    <div class="modal-overlay" id="completeModal">
+        <div class="modal-box">
+            <button class="modal-close" id="completeModalClose" aria-label="Закрыть">✕</button>
+            <span class="modal-icon">🎉</span>
+            <div class="modal-text">Урожай собран!</div>
+            <div class="modal-sub">Все верные решения в корзине!</div>
         </div>
     </div>
 
-    <button class="btn-reset" id="resetBtn">⟳ Начать заново</button>
-</div>
-
-<!-- ─── Модальное окно завершения ─── -->
-<div class="modal-overlay" id="completeModal">
-    <div class="modal-box">
-        <button class="modal-close" id="completeModalClose" aria-label="Закрыть">✕</button>
-        <span class="modal-icon">🎉</span>
-        <div class="modal-text">Урожай собран!</div>
-        <div class="modal-sub">Все верные решения в корзине!</div>
+    <!-- Тосты -->
+    <div class="toast-overlay" id="toastOverlay">
+        <div class="toast-box">
+            <button class="toast-close" id="toastCloseBtn" aria-label="Закрыть">✕</button>
+            <span class="toast-emoji" id="toastEmoji">✅</span>
+            <div class="toast-text" id="toastText">Верно!</div>
+            <div class="toast-sub" id="toastSub"> </div>
+        </div>
     </div>
-</div>
 
-<!-- ─── Тосты для ошибок ─── -->
-<div class="toast-overlay" id="toastOverlay">
-    <div class="toast-box">
-        <button class="toast-close" id="toastCloseBtn" aria-label="Закрыть">✕</button>
-        <span class="toast-emoji" id="toastEmoji">✅</span>
-        <div class="toast-text" id="toastText">Верно!</div>
-        <div class="toast-sub" id="toastSub"> </div>
-    </div>
-</div>
-
-<script>
-    (function() {
-        const items = [
-            {
+    <script>
+        (function() {
+            const items = [{
                 id: 'coffee',
                 text: 'Установить автоматы с&nbsp;напитками и&nbsp;снеками',
                 correct: true,
                 toast: 'Верно! Сытый и согретый гость — самый лояльный и доброжелательный респондент.'
-            },
-            {
+            }, {
                 id: 'mailing',
                 text: 'Настроить систему персональных рассылок и&nbsp;поздравлений для&nbsp;постояльцев',
                 correct: true,
                 toast: 'Верно! Так будет проще собрать лояльное «ядро» аудитории, которое поддержит вас при проверке.'
-            },
-            {
+            }, {
                 id: 'promise',
                 text: 'Применять правило «обещать меньше, а&nbsp;делать больше»',
                 correct: true,
                 toast: 'Верно! Это гарантирует «вау-эффект» и восторженные рекомендации друзьям.'
-            },
-            {
+            }, {
                 id: 'backstage',
                 text: 'Проводить экскурсии «за&nbsp;кулисы» и&nbsp;рассказывать о&nbsp;«внутрянке» учреждения',
                 correct: true,
                 toast: 'Верно! Это повышает эмпатию: люди начинают понимать реальные сложности и снижают завышенные требования.'
-            },
-            {
+            }, {
                 id: 'early',
-                text: 'Начинать рабдень сотрудников одновременно с&nbsp;открытием дверей для&nbsp;посетителей',
+                text: 'Начинать рабочий день сотрудников одновременно с&nbsp;открытием дверей для&nbsp;посетителей', // исправлено
                 correct: false,
                 toast: 'Ошибка! Это гарантирует очереди на входе и неготовность залов к приему.'
-            },
-            {
+            }, {
                 id: 'ignore',
                 text: 'Игнорировать негативные комментарии на&nbsp;сайте и&nbsp;в&nbsp;соцсетях',
                 correct: false,
                 toast: 'Ошибка! Это провоцирует публичные скандалы и официальные жалобы в вышестоящие органы.'
-            },
-            {
+            }, {
                 id: 'sanitary',
                 text: 'Отменить санитарные дни ради максимального времени работы учреждения',
                 correct: false,
                 toast: 'Ошибка! Это ведет к ухудшению чистоты, что посетители охотно отметят в анкетах.'
-            },
-            {
+            }, {
                 id: 'qr',
                 text: 'Заменить все бумажные афиши, буклеты и&nbsp;программы на&nbsp;QR-коды',
                 correct: false,
                 toast: 'Ошибка! Посетители старшего возраста и гости без мобильного интернета лишатся информации, что приведет к низким оценкам.'
+            }];
+
+            let placedIds = [];
+            const totalCorrect = items.filter(i => i.correct).length;
+            let isComplete = false;
+
+            const cardsContainer = document.getElementById('cardsContainer');
+            const basketItems = document.getElementById('basketItems');
+            const resetBtn = document.getElementById('resetBtn');
+
+            const completeModal = document.getElementById('completeModal');
+            const completeModalClose = document.getElementById('completeModalClose');
+
+            const toastOverlay = document.getElementById('toastOverlay');
+            const toastText = document.getElementById('toastText');
+            const toastEmoji = document.getElementById('toastEmoji');
+            const toastSub = document.getElementById('toastSub');
+            const toastCloseBtn = document.getElementById('toastCloseBtn');
+            const basket = document.getElementById('basket');
+
+            const rowsIndices = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7]
+            ];
+
+            function isGameComplete() {
+                const correctPlaced = items.filter(i => i.correct && placedIds.includes(i.id)).length;
+                return correctPlaced === totalCorrect;
             }
-        ];
 
-        let placedIds = [];
-        let totalCorrect = items.filter(i => i.correct).length;
-        let isComplete = false;
+            function renderCards() {
+                const complete = isGameComplete();
+                cardsContainer.innerHTML = '';
 
-        const cardsContainer = document.getElementById('cardsContainer');
-        const basketItems = document.getElementById('basketItems');
-        const resetBtn = document.getElementById('resetBtn');
+                rowsIndices.forEach(row => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = 'row-container';
+                    row.forEach(idx => {
+                        const item = items[idx];
+                        const div = document.createElement('div');
+                        div.className = 'card-item';
+                        if (placedIds.includes(item.id)) {
+                            div.classList.add('placed');
+                        } else if (complete && !item.correct) {
+                            div.classList.add('locked');
+                        }
+                        div.dataset.id = item.id;
+                        div.dataset.correct = item.correct;
+                        div.draggable = !div.classList.contains('placed') && !div.classList.contains('locked');
+                        div.innerHTML = `<span class="text">${item.text}</span>`;
 
-        // Модалка завершения
-        const completeModal = document.getElementById('completeModal');
-        const completeModalClose = document.getElementById('completeModalClose');
+                        if (div.draggable) {
+                            div.addEventListener('dragstart', handleDragStart);
+                            div.addEventListener('dragend', handleDragEnd);
+                        }
 
-        // Тосты
-        const toastOverlay = document.getElementById('toastOverlay');
-        const toastText = document.getElementById('toastText');
-        const toastEmoji = document.getElementById('toastEmoji');
-        const toastSub = document.getElementById('toastSub');
-        const toastCloseBtn = document.getElementById('toastCloseBtn');
-        const basket = document.getElementById('basket');
-
-        const rowsIndices = [
-            [0, 1, 2],
-            [3, 4, 5],
-            [6, 7]
-        ];
-
-        function isGameComplete() {
-            const correctPlaced = items.filter(i => i.correct && placedIds.includes(i.id)).length;
-            return correctPlaced === totalCorrect;
-        }
-
-        function renderCards() {
-            const complete = isGameComplete();
-            cardsContainer.innerHTML = '';
-
-            rowsIndices.forEach(row => {
-                const rowDiv = document.createElement('div');
-                rowDiv.className = 'row-container';
-                row.forEach(idx => {
-                    const item = items[idx];
-                    const div = document.createElement('div');
-                    div.className = 'card-item';
-                    if (placedIds.includes(item.id)) {
-                        div.classList.add('placed');
-                    } else if (complete && !item.correct) {
-                        div.classList.add('locked');
-                    }
-                    div.dataset.id = item.id;
-                    div.dataset.correct = item.correct;
-                    div.draggable = !div.classList.contains('placed') && !div.classList.contains('locked');
-                    div.innerHTML = `<span class="text">${item.text}</span>`;
-
-                    if (div.draggable) {
-                        div.addEventListener('dragstart', handleDragStart);
-                        div.addEventListener('dragend', handleDragEnd);
-                    }
-
-                    rowDiv.appendChild(div);
+                        rowDiv.appendChild(div);
+                    });
+                    cardsContainer.appendChild(rowDiv);
                 });
-                cardsContainer.appendChild(rowDiv);
+
+                renderBasket();
+                checkComplete();
+            }
+
+            function renderBasket() {
+                basketItems.innerHTML = '';
+                const placedCorrect = items.filter(i => placedIds.includes(i.id) && i.correct);
+                if (placedCorrect.length === 0) {
+                    basketItems.innerHTML = '<div class="basket-empty">Собирайте сюда яблоки 🍎</div>';
+                } else {
+                    placedCorrect.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'basket-item';
+                        div.innerHTML = item.text;
+                        basketItems.appendChild(div);
+                    });
+                }
+            }
+
+            function checkComplete() {
+                const complete = isGameComplete();
+                if (complete) {
+                    isComplete = true;
+                    completeModal.classList.add('active');
+                    renderCards();
+                } else {
+                    isComplete = false;
+                    completeModal.classList.remove('active');
+                }
+            }
+
+            function showToast(message, isError = false) {
+                toastEmoji.textContent = isError ? '❌' : '✅';
+                toastText.textContent = message;
+                toastSub.textContent = isError ? 'Попробуйте выбрать только верные решения' : ' ';
+                toastOverlay.classList.add('active');
+            }
+
+            function closeToast() {
+                toastOverlay.classList.remove('active');
+            }
+
+            let draggedId = null;
+
+            function handleDragStart(e) {
+                const el = e.target.closest('.card-item');
+                if (!el) return;
+                if (el.classList.contains('placed') || el.classList.contains('locked')) {
+                    e.preventDefault();
+                    return false;
+                }
+                draggedId = el.dataset.id;
+                e.dataTransfer.setData('text/plain', draggedId);
+                e.dataTransfer.effectAllowed = 'move';
+                setTimeout(() => el.style.opacity = '0.4', 0);
+            }
+
+            function handleDragEnd(e) {
+                const el = e.target.closest('.card-item');
+                if (el) el.style.opacity = '1';
+                basket.classList.remove('drag-over');
+            }
+
+            basket.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                basket.classList.add('drag-over');
             });
 
-            renderBasket();
-            checkComplete();
-        }
+            basket.addEventListener('dragleave', () => {
+                basket.classList.remove('drag-over');
+            });
 
-        function renderBasket() {
-            basketItems.innerHTML = '';
-            const placedCorrect = items.filter(i => placedIds.includes(i.id) && i.correct);
-            if (placedCorrect.length === 0) {
-                basketItems.innerHTML = '<div class="basket-empty">Собирайте сюда яблоки 🍎</div>';
-            } else {
-                placedCorrect.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'basket-item';
-                    div.innerHTML = item.text;
-                    basketItems.appendChild(div);
-                });
-            }
-        }
-
-        function checkComplete() {
-            const complete = isGameComplete();
-            if (complete) {
-                isComplete = true;
-                completeModal.classList.add('active');
-                renderCards();
-            } else {
-                isComplete = false;
-                completeModal.classList.remove('active');
-            }
-        }
-
-        function showToast(message, isError = false) {
-            toastEmoji.textContent = isError ? '❌' : '✅';
-            toastText.textContent = message;
-            toastSub.textContent = isError ? 'Попробуйте выбрать только верные решения' : ' ';
-            toastOverlay.classList.add('active');
-        }
-
-        function closeToast() {
-            toastOverlay.classList.remove('active');
-        }
-
-        let draggedId = null;
-
-        function handleDragStart(e) {
-            const el = e.target.closest('.card-item');
-            if (!el) return;
-            if (el.classList.contains('placed') || el.classList.contains('locked')) {
+            basket.addEventListener('drop', (e) => {
                 e.preventDefault();
-                return false;
-            }
-            draggedId = el.dataset.id;
-            e.dataTransfer.setData('text/plain', draggedId);
-            e.dataTransfer.effectAllowed = 'move';
-            setTimeout(() => el.style.opacity = '0.4', 0);
-        }
+                basket.classList.remove('drag-over');
 
-        function handleDragEnd(e) {
-            const el = e.target.closest('.card-item');
-            if (el) el.style.opacity = '1';
-            basket.classList.remove('drag-over');
-        }
+                if (isComplete) {
+                    showToast('Урожай уже собран!', true);
+                    return;
+                }
 
-        basket.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            basket.classList.add('drag-over');
-        });
+                const id = e.dataTransfer.getData('text/plain');
+                if (!id) return;
 
-        basket.addEventListener('dragleave', () => {
-            basket.classList.remove('drag-over');
-        });
+                const item = items.find(i => i.id === id);
+                if (!item) return;
 
-        basket.addEventListener('drop', (e) => {
-            e.preventDefault();
-            basket.classList.remove('drag-over');
+                if (placedIds.includes(id)) return;
 
-            if (isComplete) {
-                showToast('Урожай уже собран!', true);
-                return;
-            }
+                if (!item.correct) {
+                    showToast(item.toast, true);
+                    return;
+                }
 
-            const id = e.dataTransfer.getData('text/plain');
-            if (!id) return;
+                placedIds.push(id);
+                renderCards();
+                renderBasket();
+                checkComplete();
+                showToast(item.toast, false);
+            });
 
-            const item = items.find(i => i.id === id);
-            if (!item) return;
+            document.addEventListener('dragover', (e) => e.preventDefault());
+            document.addEventListener('drop', (e) => e.preventDefault());
 
-            if (placedIds.includes(id)) return;
+            toastCloseBtn.addEventListener('click', closeToast);
+            toastOverlay.addEventListener('click', function(e) {
+                if (e.target === toastOverlay) closeToast();
+            });
 
-            if (!item.correct) {
-                showToast(item.toast, true);
-                return;
-            }
-
-            placedIds.push(id);
-            renderCards();
-            renderBasket();
-            checkComplete();
-            showToast(item.toast, false);
-        });
-
-        document.addEventListener('dragover', (e) => e.preventDefault());
-        document.addEventListener('drop', (e) => e.preventDefault());
-
-        // Закрытие тоста
-        toastCloseBtn.addEventListener('click', closeToast);
-        toastOverlay.addEventListener('click', function(e) {
-            if (e.target === toastOverlay) {
-                closeToast();
-            }
-        });
-
-        // Закрытие модалки завершения
-        completeModalClose.addEventListener('click', function() {
-            completeModal.classList.remove('active');
-        });
-        completeModal.addEventListener('click', function(e) {
-            if (e.target === completeModal) {
+            completeModalClose.addEventListener('click', function() {
                 completeModal.classList.remove('active');
-            }
-        });
+            });
+            completeModal.addEventListener('click', function(e) {
+                if (e.target === completeModal) completeModal.classList.remove('active');
+            });
 
-        function resetGame() {
-            placedIds = [];
-            isComplete = false;
-            closeToast();
-            completeModal.classList.remove('active');
+            function resetGame() {
+                placedIds = [];
+                isComplete = false;
+                closeToast();
+                completeModal.classList.remove('active');
+                renderCards();
+                renderBasket();
+                checkComplete();
+            }
+
+            resetBtn.addEventListener('click', resetGame);
+
             renderCards();
             renderBasket();
             checkComplete();
-        }
-
-        resetBtn.addEventListener('click', resetGame);
-
-        renderCards();
-        renderBasket();
-        checkComplete();
-    })();
-</script>
+        })();
+    </script>
 </body>
 </html>
