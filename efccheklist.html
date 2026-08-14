@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чек-лист ЕФС-1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: white;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            padding: 30px 40px 40px;
+            border: 1px solid #eaeaea;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #cc0000;
+            text-align: center;
+            margin: 0 0 28px 0;
+            letter-spacing: -0.2px;
+            line-height: 1.3;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .checklist {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            line-height: 1.5;
+            color: #000000;
+        }
+        .checklist li:last-child {
+            margin-bottom: 0;
+        }
+        /* Кастомный чекбокс */
+        .custom-checkbox {
+            flex-shrink: 0;
+            width: 22px;
+            height: 22px;
+            margin-top: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+        .custom-checkbox input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+        }
+        .custom-checkbox .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 22px;
+            height: 22px;
+            border: 2px solid #0b2b4a;
+            border-radius: 4px;
+            background: white;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .custom-checkbox input:checked + .checkmark {
+            background: #2e7d32;   /* зелёный */
+            border-color: #2e7d32;
+        }
+        .custom-checkbox .checkmark::after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 7px;
+            top: 3px;
+            width: 6px;
+            height: 12px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        .custom-checkbox input:checked + .checkmark::after {
+            display: block;
+        }
+        /* Жирный тёмно-синий заголовок внутри пункта */
+        .item-head {
+            font-weight: 700;
+            color: #0b2b4a;
+        }
+        /* Кнопка PDF */
+        .pdf-btn-wrap {
+            margin-top: 35px;
+            text-align: right;
+            border-top: 1px solid #ddd;
+            padding-top: 24px;
+        }
+        .pdf-btn {
+            background: #0b2b4a;
+            color: white;
+            border: none;
+            padding: 10px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            letter-spacing: 0.3px;
+        }
+        .pdf-btn:hover {
+            background: #1a3f5e;
+        }
+        .pdf-btn:focus {
+            outline: 2px solid #0b2b4a;
+            outline-offset: 2px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+            .container {
+                border: none;
+                padding: 25px 30px;
+                max-width: 100%;
+            }
+            .pdf-btn-wrap {
+                display: none;
+            }
+            h1 {
+                color: #cc0000 !important;
+            }
+            .item-head {
+                color: #0b2b4a !important;
+            }
+            .custom-checkbox .checkmark {
+                border-color: #0b2b4a !important;
+                background: white !important;
+            }
+            .custom-checkbox input:checked + .checkmark {
+                background: #2e7d32 !important;
+                border-color: #2e7d32 !important;
+            }
+            .custom-checkbox input:checked + .checkmark::after {
+                display: block !important;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 15px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            .checklist li {
+                font-size: 15px;
+                gap: 10px;
+            }
+            .custom-checkbox {
+                width: 20px;
+                height: 20px;
+            }
+            .custom-checkbox .checkmark {
+                width: 20px;
+                height: 20px;
+            }
+            .custom-checkbox .checkmark::after {
+                left: 6px;
+                top: 2px;
+                width: 5px;
+                height: 11px;
+            }
+            .pdf-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>📋 Чек-лист контроля ЕФС-1 для руководителя учреждения культуры</h1>
+
+    <ul class="checklist">
+        <li>
+            <label class="custom-checkbox">
+                <input type="checkbox">
+                <span class="checkmark"></span>
+            </label>
+            <span><span class="item-head">Обновление программ.</span> Проверьте, чтобы учетная система (1С/Парус) была обновлена под приказ СФР № 1462 и новый классификатор ОКПДТР (ОК 016-2025).</span>
+        </li>
+        <li>
+            <label class="custom-checkbox">
+                <input type="checkbox">
+                <span class="checkmark"></span>
+            </label>
+            <span><span class="item-head">Переход на 12-значные коды (подраздел 1.3).</span> Убедитесь, что в ежемесячных отчетах по зарплате используются новые 12-значные коды должностей взамен старых 5-значных.</span>
+        </li>
+        <li>
+            <label class="custom-checkbox">
+                <input type="checkbox">
+                <span class="checkmark"></span>
+            </label>
+            <span><span class="item-head">Подбор кодов ОКЗ.</span> Поручите кадровику подбирать код строго по фактическим обязанностям сотрудника, если его двойной или редкой должности нет в классификаторе.</span>
+        </li>
+        <li>
+            <label class="custom-checkbox">
+                <input type="checkbox">
+                <span class="checkmark"></span>
+            </label>
+            <span><span class="item-head">Регламент «24 часа».</span> Контролируйте отправку подраздела 1.1 при приемах, увольнениях и приостановках договоров не позже следующего рабочего дня.</span>
+        </li>
+        <li>
+            <label class="custom-checkbox">
+                <input type="checkbox">
+                <span class="checkmark"></span>
+            </label>
+            <span><span class="item-head">Льготный стаж (подраздел 1.2).</span> Проверьте учет стажа артистов с правом на досрочную пенсию, а также фиксацию периодов простоя и отпусков за свой счет.</span>
+        </li>
+        <li>
+            <label class="custom-checkbox">
+                <input type="checkbox">
+                <span class="checkmark"></span>
+            </label>
+            <span><span class="item-head">Премии уволенным.</span> Следите, чтобы уволенных сотрудников с премией не включали в среднесписочную численность, но включали в численность застрахованных (раздел 2).</span>
+        </li>
+        <li>
+            <label class="custom-checkbox">
+                <input type="checkbox">
+                <span class="checkmark"></span>
+            </label>
+            <span><span class="item-head">Справки МСЭ (инвалидность).</span> Применяйте льготный тариф 60% с 1-го числа месяца выдачи справки, без перерасчетов задним числом за прошлые годы.</span>
+        </li>
+        <li>
+            <label class="custom-checkbox">
+                <input type="checkbox">
+                <span class="checkmark"></span>
+            </label>
+            <span><span class="item-head">Реакция на ошибки.</span> Обяжите кадры и бухгалтерию исправлять отрицательные протоколы СФР в течение 5 рабочих дней с даты электронного уведомления.</span>
+        </li>
+    </ul>
+
+    <div class="pdf-btn-wrap">
+        <button class="pdf-btn" onclick="window.print()">Сохранить в PDF</button>
+    </div>
+
+</div>
+</body>
+</html>
