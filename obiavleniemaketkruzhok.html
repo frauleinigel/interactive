@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Конструктор афиши</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f1f5f9;
+            padding: 30px 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .game-container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            padding: 30px 30px 40px;
+            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.15);
+        }
+        .poster {
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 20px;
+            border: 2px dashed #94a3b8;
+        }
+        .poster-title {
+            font-weight: 700;
+            font-size: 18px;
+            color: #1e293b;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .zone {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
+        }
+        .zone:last-child { margin-bottom: 0; }
+        .zone-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        /* Кастомный селект */
+        .custom-select {
+            position: relative;
+            margin-bottom: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .custom-select .selected-option {
+            padding: 12px 16px;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            background: #ffffff;
+            font-size: 15px;
+            font-weight: 600;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 48px;
+            transition: all 0.2s ease;
+        }
+        .custom-select .selected-option.has-value {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+        .custom-select .selected-option::after {
+            content: "▼";
+            font-size: 11px;
+            color: #64748b;
+            margin-left: 10px;
+            transition: transform 0.2s ease;
+        }
+        .custom-select.open .selected-option::after {
+            transform: rotate(180deg);
+        }
+        .custom-select .dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            max-height: 340px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 12px 28px -6px rgba(0,0,0,0.18);
+            padding: 8px 0;
+        }
+        .custom-select.open .dropdown { display: block; }
+        .custom-select .dropdown-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            border-radius: 8px;
+            margin: 4px 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid transparent;
+        }
+        .custom-select .dropdown-item:hover { background: #f1f5f9; }
+        .custom-select .dropdown-item.selected {
+            background: #eff6ff;
+            border-color: #3b82f6;
+        }
+        .dropdown-item .item-number {
+            font-weight: 700;
+            color: #3b82f6;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .mini-card { flex: 1; overflow: hidden; }
+        .mini-card .card {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border-width: 1px;
+            box-shadow: none;
+            margin: 0;
+        }
+        .mini-card .card-A3 { font-size: 0.85rem; padding: 6px 8px; }
+        .mini-card .card-C3 { font-size: 0.7rem; padding: 6px; }
+        .mini-card .card-D3 { font-size: 0.65rem; padding: 6px; }
+        .mini-card .card-D3 img { max-width: 40px; height: auto; }
+        .mini-card .card-img {
+            max-height: 40px;
+            width: auto;
+            max-width: 100%;
+            border-radius: 4px;
+            object-fit: contain;
+        }
+        .mini-card .card-B2 span { font-size: 24px !important; }
+        .mini-card .card-B3 .card-img { max-height: 50px; }
+
+        .card-preview {
+            min-height: 70px;
+            border-radius: 12px;
+            padding: 4px;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .card-preview .placeholder {
+            color: #94a3b8;
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        /* Стили карточек */
+        .card {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            border: 1px solid #e2e8f0;
+            background: white;
+        }
+        .card-A1 { font-family: 'Times New Roman', serif; font-size: 15px; color: #0f172a; background: #ffffff; }
+        .card-A2 { font-family: 'Arial Black', sans-serif; font-size: 20px; color: #d97706; background: #fef3c7; text-align: center; }
+        .card-A3 {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1.35;
+            color: #ffffff;
+            background: #4f46e5;
+            text-align: center;
+            padding: 16px;
+            border-radius: 12px;
+            letter-spacing: -0.01em;
+        }
+
+        /* Картинки (B1, B2, B3) */
+        .card-img {
+            width: 100%;
+            max-height: 120px;
+            object-fit: contain;
+            border-radius: 8px;
+            display: block;
+            margin: 0 auto;
+        }
+        .card-B1, .card-B3 {
+            background: #ffffff;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-B2 {
+            background: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            min-height: 70px;
+        }
+        .card-B2 span {
+            font-size: 48px;
+            color: #94a3b8;
+        }
+
+        .card-C1 { font-family: 'Times New Roman', serif; font-size: 14px; color: #1e293b; background: #ffffff; line-height: 1.6; }
+        .card-C2 { font-family: sans-serif; font-size: 14px; color: #475569; background: #ffffff; padding: 14px; text-align: center; }
+        .card-C3 { font-family: sans-serif; font-size: 15px; font-weight: 600; background: #eff6ff; color: #1e3a8a; padding: 14px; border-left: 5px solid #2563eb; }
+        .card-C3 ul { margin: 0; padding-left: 18px; list-style: none; }
+        .card-C3 ul li::before { content: "• "; color: #2563eb; font-weight: 800; }
+
+        .card-D1 { font-size: 13px; color: #475569; background: #ffffff; text-align: center; padding: 12px; }
+        .card-D2 { font-size: 15px; font-weight: 600; background: #ffffff; text-align: center; padding: 12px; }
+        .card-D3 {
+            background: #0f172a;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            border: 2px solid #facc15;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+        .card-D3 .qr-sim {
+            display: inline-block;
+            background: white;
+            padding: 4px;
+            border-radius: 6px;
+        }
+        .card-D3 .qr-sim img {
+            display: block;
+            width: 80px;
+            height: 80px;
+        }
+        .card-D3 .btn-sim {
+            background: #facc15;
+            color: #0f172a;
+            padding: 8px 0;
+            border-radius: 20px;
+            font-weight: 700;
+            width: 100%;
+        }
+
+        .zone.correct { border-color: #22c55e; background: #f0fdf4; }
+        .zone.wrong { border-color: #ef4444; background: #fef2f2; }
+
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+        }
+        .btn {
+            background: #0f172a;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: #1e293b; }
+        .btn-reset { background: #94a3b8; }
+        .btn-reset:hover { background: #64748b; }
+
+        /* Модальные окна */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 28px;
+            max-width: 500px;
+            width: 100%;
+            padding: 40px 36px 36px;
+            box-shadow: 0 30px 60px -20px rgba(0,0,0,0.4);
+            position: relative;
+            animation: modalFade 0.3s ease;
+        }
+        @keyframes modalFade {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            font-size: 28px;
+            line-height: 1;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: color 0.2s;
+            padding: 4px 8px;
+        }
+        .modal-close:hover { color: #0f172a; }
+        .modal-icon {
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .modal-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #334155;
+            text-align: center;
+        }
+        .modal-text.error {
+            color: #991b1b;
+        }
+
+        @media (max-width: 600px) {
+            .game-container { padding: 20px 16px; }
+            .modal { padding: 32px 20px 24px; }
+            .card-img { max-height: 80px; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="poster">
+        <div class="poster-title">🖼 Макет объявления</div>
+
+        <!-- Зона 1 -->
+        <div id="zone1" class="zone" data-category="A">
+            <div class="zone-label">ЗОНА 1: Заголовок</div>
+            <div class="custom-select" data-zone="zone1">
+                <div class="selected-option">Выберите вариант...</div>
+                <div class="dropdown"></div>
+            </div>
+            <div class="card-preview" id="preview1">
+                <span class="placeholder">Здесь появится вариант заголовка</span>
+            </div>
+        </div>
+
+        <!-- Зона 2 -->
+        <div id="zone2" class="zone" data-category="B">
+            <div class="zone-label">ЗОНА 2: Картинка</div>
+            <div class="custom-select" data-zone="zone2">
+                <div class="selected-option">Выберите вариант...</div>
+                <div class="dropdown"></div>
+            </div>
+            <div class="card-preview" id="preview2">
+                <span class="placeholder">Здесь появится вариант визуала</span>
+            </div>
+        </div>
+
+        <!-- Зона 3 -->
+        <div id="zone3" class="zone" data-category="C">
+            <div class="zone-label">ЗОНА 3: Основная информация</div>
+            <div class="custom-select" data-zone="zone3">
+                <div class="selected-option">Выберите вариант...</div>
+                <div class="dropdown"></div>
+            </div>
+            <div class="card-preview" id="preview3">
+                <span class="placeholder">Здесь появится текст объявления</span>
+            </div>
+        </div>
+
+        <!-- Зона 4 -->
+        <div id="zone4" class="zone" data-category="D">
+            <div class="zone-label">ЗОНА 4: Контакты</div>
+            <div class="custom-select" data-zone="zone4">
+                <div class="selected-option">Выберите вариант...</div>
+                <div class="dropdown"></div>
+            </div>
+            <div class="card-preview" id="preview4">
+                <span class="placeholder">Здесь появятся контакты</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="actions">
+        <button class="btn" id="checkBtn">✅ Проверить</button>
+        <button class="btn btn-reset" id="resetBtn">🔄 Сбросить</button>
+    </div>
+</div>
+
+<!-- Модальное окно успеха -->
+<div class="modal-overlay" id="successModal">
+    <div class="modal">
+        <button class="modal-close" id="successClose">&times;</button>
+        <div class="modal-icon">🎉</div>
+        <div class="modal-title">Отлично!</div>
+        <div class="modal-text">
+            Вы собрали образцовое объявление. Заголовок привлекает внимание издалека, живое фото вызывает доверие, текст читается за 5 секунд, а QR-код позволяет сразу записаться.
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно ошибки -->
+<div class="modal-overlay" id="errorModal">
+    <div class="modal">
+        <button class="modal-close" id="errorClose">&times;</button>
+        <div class="modal-icon">⚠️</div>
+        <div class="modal-title">Ошибка</div>
+        <div class="modal-text error">
+            Зона с ошибкой подсвечена красным. Помните: объявление должно быть ярким, текст — коротким и понятным, а способ записи — мгновенным. Попробуйте изменить выбор.
+        </div>
+    </div>
+</div>
+
+<script>
+    // HTML разметка карточек
+    const cardHTML = {
+        'A1': '<div class="card card-A1">Объявление о наборе в вокальный кружок</div>',
+        'A2': '<div class="card card-A2">ПОЙТЕ С НАМИ ВСЕ-ВСЕ-ВСЕ ДЕТИ И ВЗРОСЛЫЕ!</div>',
+        'A3': '<div class="card card-A3">Хочешь петь на сцене?<br>Набор в вокальную студию «Голос» (7–12 лет)</div>',
+        'B1': '<div class="card card-B1"><img src="https://s.cultmanager.ru/images/Vibecoding/image---2026-08-15t224813.412.jpeg" class="card-img" alt="Ч/б рисунок"></div>',
+        'B2': '<div class="card card-B2"><span>🎵</span></div>',
+        'B3': '<div class="card card-B3"><img src="https://s.cultmanager.ru/images/Vibecoding/image---2026-08-15t224855.631.jpeg" class="card-img" alt="Яркое фото детей"></div>',
+        'C1': '<div class="card card-C1">Муниципальное бюджетное учреждение культуры объявляет набор граждан на обучение основам вокального искусства. Занятия направлены на эстетическое воспитание и развитие слуха согласно программе...</div>',
+        'C2': '<div class="card card-C2">Учим петь. Подробности при встрече.</div>',
+        'C3': '<div class="card card-C3"><ul><li>Постановка голоса и дыхания</li><li>Выступления на городских концертах</li><li>Расписание: Вт / Чт в 16:00 (БЕСПЛАТНО)</li></ul></div>',
+        'D1': '<div class="card card-D1">Подробная информация на сайте учреждения или в кабинете 304 по четным дням.</div>',
+        'D2': '<div class="card card-D2">📞 Звонить по т. 8-900-000-00-00</div>',
+        'D3': `<div class="card card-D3">
+            <div>Наведи камеру и запишись за 1 минуту:</div>
+            <div class="qr-sim">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?data=Запись+в+кружок+Голос&size=100x100" alt="QR-код">
+            </div>
+            <div class="btn-sim">📱 Записаться</div>
+            <div style="font-size:13px;font-weight:400;">Или звони: +7 (495) 000-00-00</div>
+        </div>`
+    };
+
+    const correctMap = {
+        zone1: 'A3',
+        zone2: 'B3',
+        zone3: 'C3',
+        zone4: 'D3'
+    };
+
+    let selectedValues = {
+        zone1: null,
+        zone2: null,
+        zone3: null,
+        zone4: null
+    };
+
+    const zoneOptions = {
+        zone1: ['A2', 'A3', 'A1'],
+        zone2: ['B1', 'B3', 'B2'],
+        zone3: ['C3', 'C1', 'C2'],
+        zone4: ['D2', 'D1', 'D3']
+    };
+
+    const numbering = ['Вариант 1', 'Вариант 2', 'Вариант 3'];
+
+    function initCustomSelects() {
+        document.querySelectorAll('.custom-select').forEach(container => {
+            const zoneId = container.dataset.zone;
+            const selectedDisplay = container.querySelector('.selected-option');
+            const dropdown = container.querySelector('.dropdown');
+            const options = zoneOptions[zoneId] || [];
+
+            dropdown.innerHTML = '';
+            options.forEach((id, index) => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.dataset.id = id;
+                item.dataset.label = numbering[index];
+
+                const numSpan = document.createElement('span');
+                numSpan.className = 'item-number';
+                numSpan.textContent = numbering[index];
+                item.appendChild(numSpan);
+
+                const mini = document.createElement('div');
+                mini.className = 'mini-card';
+                mini.innerHTML = cardHTML[id];
+                item.appendChild(mini);
+
+                dropdown.appendChild(item);
+
+                item.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const selectedId = this.dataset.id;
+                    const selectedLabel = this.dataset.label;
+
+                    selectedValues[zoneId] = selectedId;
+                    selectedDisplay.textContent = `✓ Выбран ${selectedLabel}`;
+                    selectedDisplay.classList.add('has-value');
+
+                    container.classList.remove('open');
+                    dropdown.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('selected'));
+                    this.classList.add('selected');
+
+                    updatePreview(zoneId);
+                    document.getElementById(zoneId).classList.remove('correct', 'wrong');
+                });
+            });
+
+            container.addEventListener('click', function(e) {
+                if (e.target.closest('.dropdown')) return;
+                const isOpen = this.classList.contains('open');
+                document.querySelectorAll('.custom-select.open').forEach(el => {
+                    if (el !== this) el.classList.remove('open');
+                });
+                if (isOpen) {
+                    this.classList.remove('open');
+                } else {
+                    this.classList.add('open');
+                }
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!container.contains(e.target)) {
+                    container.classList.remove('open');
+                }
+            });
+        });
+    }
+
+    function updatePreview(zoneId) {
+        const preview = document.getElementById('preview' + zoneId.slice(-1));
+        const selected = selectedValues[zoneId];
+        if (selected && cardHTML[selected]) {
+            preview.innerHTML = cardHTML[selected];
+        } else {
+            preview.innerHTML = '<span class="placeholder">Здесь появится выбранный вариант</span>';
+        }
+    }
+
+    function checkSolution() {
+        let allCorrect = true;
+        let hasEmpty = false;
+
+        for (let zoneId in correctMap) {
+            const zone = document.getElementById(zoneId);
+            zone.classList.remove('correct', 'wrong');
+            const selected = selectedValues[zoneId];
+
+            if (!selected) {
+                hasEmpty = true;
+                zone.classList.add('wrong');
+                continue;
+            }
+            if (selected === correctMap[zoneId]) {
+                zone.classList.add('correct');
+            } else {
+                allCorrect = false;
+                zone.classList.add('wrong');
+            }
+        }
+
+        if (hasEmpty) {
+            document.getElementById('errorModal').classList.add('active');
+            return;
+        }
+        if (allCorrect) {
+            document.getElementById('successModal').classList.add('active');
+        } else {
+            document.getElementById('errorModal').classList.add('active');
+        }
+    }
+
+    function resetGame() {
+        for (let zoneId in selectedValues) {
+            selectedValues[zoneId] = null;
+            const container = document.querySelector(`.custom-select[data-zone="${zoneId}"]`);
+            if (container) {
+                const display = container.querySelector('.selected-option');
+                display.textContent = 'Выберите вариант...';
+                display.classList.remove('has-value');
+                container.querySelector('.dropdown').querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('selected'));
+            }
+            const preview = document.getElementById('preview' + zoneId.slice(-1));
+            preview.innerHTML = '<span class="placeholder">Здесь появится выбранный вариант</span>';
+            document.getElementById(zoneId).classList.remove('correct', 'wrong');
+        }
+        document.getElementById('successModal').classList.remove('active');
+        document.getElementById('errorModal').classList.remove('active');
+    }
+
+    document.getElementById('successClose').addEventListener('click', function() {
+        document.getElementById('successModal').classList.remove('active');
+    });
+    document.getElementById('errorClose').addEventListener('click', function() {
+        document.getElementById('errorModal').classList.remove('active');
+    });
+
+    document.getElementById('successModal').addEventListener('click', function(e) {
+        if (e.target === this) this.classList.remove('active');
+    });
+    document.getElementById('errorModal').addEventListener('click', function(e) {
+        if (e.target === this) this.classList.remove('active');
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initCustomSelects();
+    });
+
+    document.getElementById('checkBtn').addEventListener('click', checkSolution);
+    document.getElementById('resetBtn').addEventListener('click', resetGame);
+</script>
+</body>
+</html>

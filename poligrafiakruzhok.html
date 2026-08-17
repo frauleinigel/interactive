@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Подбираем полиграфию</title>
+    <style>
+        /* ----- RESET & BASE ----- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+            background: #f4f7fb;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1320px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 32px;
+            box-shadow: 0 20px 60px rgba(0, 20, 40, 0.12);
+            padding: 32px 36px 40px;
+            transition: all 0.2s;
+            overflow-x: auto; /* чтобы при сильном сужении был скролл, но колонки не переносились */
+        }
+
+        /* ----- HEADER ----- */
+        .header {
+            border-bottom: 2px solid #eef3f8;
+            padding-bottom: 20px;
+            margin-bottom: 28px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0b2a40;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap; /* заголовок может переноситься, это нормально */
+        }
+
+        .header .instruction {
+            margin-top: 12px;
+            font-size: 16px;
+            color: #2c4c6a;
+            line-height: 1.6;
+            padding: 0;
+            border: none;
+        }
+
+        /* ----- MAIN LAYOUT ----- */
+        .exercise-area {
+            display: flex;
+            gap: 30px;
+            min-height: 440px;
+            margin-bottom: 30px;
+            align-items: stretch;
+            flex-wrap: nowrap; /* колонки не переносятся */
+        }
+
+        /* ----- LEFT: ZONES (занимает всё свободное место) ----- */
+        .zones-column {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .zones-column .column-label {
+            font-size: 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #1f4a6e;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .zones-column .column-label::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, #d6e4f0, transparent);
+        }
+
+        .zone-item {
+            background: #f8faff;
+            border: 2px dashed #c7dae8;
+            border-radius: 18px;
+            padding: 16px 20px;
+            min-height: 88px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+        }
+
+        .zone-item.drag-over {
+            border-color: #2b6c9e;
+            background: #e8f0fe;
+            box-shadow: 0 0 0 4px rgba(43, 108, 158, 0.15);
+            transform: scale(1.01);
+        }
+
+        .zone-item .zone-label {
+            flex: 1;
+            font-size: 16px;
+            font-weight: 500;
+            color: #1a3a53;
+            line-height: 1.4;
+        }
+
+        .zone-item .placed-card {
+            flex-shrink: 0;
+            background: #e1effa;
+            border-radius: 12px;
+            padding: 10px 18px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #0b2a40;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 2px solid #2b6c9e;
+            box-shadow: 0 4px 12px rgba(43, 108, 158, 0.15);
+            animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-width: 100%;
+            word-break: break-word;
+        }
+
+        .zone-item .placed-card .check {
+            color: #1c8b4a;
+            font-size: 20px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .zone-item .placed-card .card-label {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: clip;
+            word-break: break-word;
+        }
+
+        .zone-item.correct {
+            border-color: #1c8b4a;
+            background: #f0faf3;
+        }
+
+        .zone-item.wrong-flash {
+            animation: shake 0.45s ease;
+        }
+
+        /* ----- RIGHT: CARDS (фиксированная ширина, не сжимается) ----- */
+        .cards-column {
+            flex: 0 0 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .cards-column .column-label {
+            font-size: 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #1f4a6e;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cards-column .column-label::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, #d6e4f0, transparent);
+        }
+
+        .card-item {
+            background: #ffffff;
+            border: 2px solid #dce6ef;
+            border-radius: 18px;
+            padding: 16px 22px;
+            cursor: grab;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .card-item:hover {
+            border-color: #8fb4d0;
+            box-shadow: 0 6px 18px rgba(43, 108, 158, 0.10);
+            transform: translateY(-1px);
+        }
+
+        .card-item:active {
+            cursor: grabbing;
+        }
+
+        .card-item .card-icon {
+            flex-shrink: 0;
+            width: 38px;
+            height: 38px;
+            background: #e1effa;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .card-item .card-text {
+            font-size: 16px;
+            font-weight: 500;
+            color: #1a3a53;
+        }
+
+        .card-item.dragging {
+            opacity: 0.4;
+            transform: scale(0.96);
+        }
+
+        .card-item.placed {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.92);
+            transition: opacity 0.3s, transform 0.3s;
+            height: 0;
+            padding: 0 22px;
+            margin: 0;
+            border: 2px solid transparent;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* ----- BUTTONS ----- */
+        .actions {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 6px;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-reset {
+            background: #ffffff;
+            color: #1a1a1a;
+            border: 2px solid #1a1a1a;
+            box-shadow: none;
+        }
+
+        .btn-reset:hover {
+            background: #1a1a1a;
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        .status-text {
+            font-size: 15px;
+            color: #557a9a;
+            margin-left: 6px;
+            font-weight: 500;
+        }
+
+        .status-text strong {
+            color: #0b2a40;
+        }
+
+        .completion-msg {
+            display: none;
+            color: #1c8b4a;
+            font-weight: 600;
+        }
+
+        .completion-msg.visible {
+            display: inline;
+        }
+
+        /* ----- MODAL / POPUP ----- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 25, 40, 0.55);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #ffffff;
+            border-radius: 28px;
+            max-width: 480px;
+            width: 90%;
+            padding: 32px 36px 28px;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.25);
+            animation: modalPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+
+        .modal .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            line-height: 1;
+            color: #8aaec9;
+            cursor: pointer;
+            transition: 0.2s;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+
+        .modal .close-btn:hover {
+            color: #1f4a6e;
+            background: #eef4fa;
+        }
+
+        .modal .modal-icon {
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .modal h2 {
+            font-size: 26px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .modal .modal-card {
+            font-weight: 600;
+            color: #1f4a6e;
+            font-size: 15px;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .modal .modal-description {
+            font-size: 16px;
+            color: #2c4c6a;
+            line-height: 1.6;
+            margin: 10px 0 20px;
+            text-align: left;
+        }
+
+        .modal .btn-primary {
+            background: #2b6c9e;
+            color: #fff;
+            border: none;
+            padding: 12px 36px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 14px rgba(43, 108, 158, 0.25);
+            display: block;
+            margin: 0 auto;
+        }
+
+        .modal .btn-primary:hover {
+            background: #1f5780;
+            transform: scale(1.02);
+        }
+
+        .modal .btn-danger {
+            background: #c73a3a;
+            color: #fff;
+            border: none;
+            padding: 12px 36px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 14px rgba(199, 58, 58, 0.25);
+            display: block;
+            margin: 0 auto;
+        }
+
+        .modal .btn-danger:hover {
+            background: #a82e2e;
+            transform: scale(1.02);
+        }
+
+        /* ----- ANIMATIONS ----- */
+        @keyframes popIn {
+            0% {
+                transform: scale(0.85);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            20% {
+                transform: translateX(-12px);
+            }
+            40% {
+                transform: translateX(12px);
+            }
+            60% {
+                transform: translateX(-6px);
+            }
+            80% {
+                transform: translateX(6px);
+            }
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes modalPop {
+            0% {
+                transform: scale(0.85);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* ----- RESPONSIVE (только для мелких правок, без перестройки колонок) ----- */
+        @media (max-width: 900px) {
+            .container {
+                padding: 20px 18px 28px;
+            }
+            .header h1 {
+                font-size: 22px;
+                flex-wrap: wrap;
+            }
+            .zone-item {
+                padding: 14px 16px;
+                min-height: 72px;
+                flex-wrap: wrap;
+            }
+            .zone-item .placed-card {
+                max-width: 100%;
+                width: 100%;
+                justify-content: center;
+            }
+            .card-item {
+                padding: 14px 16px;
+            }
+            .modal {
+                padding: 28px 24px 24px;
+            }
+            .actions {
+                flex-wrap: wrap;
+            }
+            .btn {
+                padding: 10px 22px;
+                font-size: 14px;
+            }
+            /* Уменьшаем ширину правой колонки, чтобы она влезала */
+            .cards-column {
+                flex: 0 0 240px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .cards-column {
+                flex: 0 0 200px;
+            }
+            .zone-item .zone-label {
+                font-size: 14px;
+            }
+            .card-item .card-text {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 18px;
+            }
+            .header .instruction {
+                font-size: 14px;
+                padding: 0;
+            }
+            .zone-item .zone-label {
+                font-size: 13px;
+            }
+            .card-item .card-text {
+                font-size: 13px;
+            }
+            .card-item {
+                padding: 12px 14px;
+            }
+            .cards-column {
+                flex: 0 0 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <h1>📘 Подбираем полиграфию под задачу и аудиторию</h1>
+            <div class="instruction">
+                Рассмотрите четыре практические задачи и перетащите наиболее подходящий вид печатного материала из правой колонки в соответствующую зону слева.
+            </div>
+        </div>
+
+        <!-- EXERCISE AREA -->
+        <div class="exercise-area" id="exerciseArea">
+
+            <!-- LEFT: ZONES -->
+            <div class="zones-column" id="zonesColumn">
+                <div class="column-label">🎯 Зоны (куда перетаскивать)</div>
+
+                <!-- Zone 1 -->
+                <div class="zone-item" id="zone-1" data-zone="1" data-correct="card-1">
+                    <div class="zone-label">
+                        Набор детей через школьные «интерактивные переменки»
+                    </div>
+                </div>
+
+                <!-- Zone 2 -->
+                <div class="zone-item" id="zone-2" data-zone="2" data-correct="card-2">
+                    <div class="zone-label">
+                        Набор пенсионеров в библиотеке или центре соцобслуживания
+                    </div>
+                </div>
+
+                <!-- Zone 3 -->
+                <div class="zone-item" id="zone-3" data-zone="3" data-correct="card-3">
+                    <div class="zone-label">
+                        Привлечение проходящего потока людей в фойе или витрине ДК
+                    </div>
+                </div>
+
+                <!-- Zone 4 -->
+                <div class="zone-item" id="zone-4" data-zone="4" data-correct="card-4">
+                    <div class="zone-label">
+                        Набор участников среди зрителей после показательного концерта или спектакля
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: CARDS (фиксированная ширина) -->
+            <div class="cards-column" id="cardsColumn">
+                <div class="column-label">📄 Полиграфия (что перетаскивать)</div>
+
+                <!-- Card 1 -->
+                <div class="card-item" id="card-1" draggable="true" data-card="1">
+                    <div class="card-icon">🔖</div>
+                    <div class="card-text">Брендированная закладка для книг</div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="card-item" id="card-2" draggable="true" data-card="2">
+                    <div class="card-icon">📖</div>
+                    <div class="card-text">Информационный буклет</div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="card-item" id="card-3" draggable="true" data-card="3">
+                    <div class="card-icon">🖼️</div>
+                    <div class="card-text">Яркий плакат</div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="card-item" id="card-4" draggable="true" data-card="4">
+                    <div class="card-icon">🎭</div>
+                    <div class="card-text">Программка выступления</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="actions">
+            <button class="btn btn-reset" id="resetBtn">🔄 Сбросить</button>
+            <span class="status-text">
+                Размещено: <strong id="placedCount">0</strong> / 4
+            </span>
+            <span class="completion-msg" id="completionMsg">🎉 Все карточки размещены!</span>
+        </div>
+
+    </div>
+
+    <!-- MODAL / POPUP -->
+    <div class="modal-overlay" id="resultModal">
+        <div class="modal">
+            <button class="close-btn" id="modalCloseBtn" aria-label="Закрыть">&times;</button>
+            <div class="modal-icon" id="modalIcon">✅</div>
+            <h2 id="modalTitle">Правильно!</h2>
+            <div class="modal-card" id="modalCard"></div>
+            <div class="modal-description" id="modalDesc"></div>
+            <button class="btn-primary" id="modalActionBtn">Закрыть</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ----- DATA -----
+            const zoneData = {
+                'zone-1': {
+                    id: 'zone-1',
+                    correctCard: 'card-1',
+                    label: 'Зона 1: Набор детей через школьные «интерактивные переменки»',
+                    feedback: {
+                        card: 'Брендированная закладка для книг',
+                        text: 'Обычную рекламную листовку ребенок выбросит или потеряет. Закладка — полезный предмет, который школьник использует в учебе. Он приносит ее домой, и контакты с QR-кодом видят его родители.'
+                    }
+                },
+                'zone-2': {
+                    id: 'zone-2',
+                    correctCard: 'card-2',
+                    label: 'Зона 2: Набор пенсионеров в библиотеке или центре соцобслуживания',
+                    feedback: {
+                        card: 'Информационный буклет',
+                        text: 'Для старшего поколения важны бумажный носитель и крупный читаемый шрифт.'
+                    }
+                },
+                'zone-3': {
+                    id: 'zone-3',
+                    correctCard: 'card-3',
+                    label: 'Зона 3: Привлечение проходящего потока людей в фойе или витрине ДК',
+                    feedback: {
+                        card: 'Яркий плакат',
+                        text: 'Проходящий поток людей в фойе не останавливается читать мелкий текст. Плакат работает как визуальный якорь — за 2–3 секунды цепляет эмоцией, крупным заголовком и даёт ключевую информацию.'
+                    }
+                },
+                'zone-4': {
+                    id: 'zone-4',
+                    correctCard: 'card-4',
+                    label: 'Зона 4: Набор участников среди зрителей после показательного концерта или спектакля',
+                    feedback: {
+                        card: 'Программка выступления',
+                        text: 'Зрители уже эмоционально разогреты и впечатлены выступлением. Предложение записаться в кружок на обратной стороне программки дает самый высокий процент отклика.'
+                    }
+                }
+            };
+
+            // ----- STATE -----
+            const placement = {};
+            const placedCardsSet = new Set();
+
+            // ----- DOM REFS -----
+            const zoneElements = document.querySelectorAll('.zone-item');
+            const cardElements = document.querySelectorAll('.card-item');
+            const resetBtn = document.getElementById('resetBtn');
+            const placedCountEl = document.getElementById('placedCount');
+            const completionMsg = document.getElementById('completionMsg');
+
+            const modalOverlay = document.getElementById('resultModal');
+            const modalCloseBtn = document.getElementById('modalCloseBtn');
+            const modalIcon = document.getElementById('modalIcon');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalCard = document.getElementById('modalCard');
+            const modalDesc = document.getElementById('modalDesc');
+            const modalActionBtn = document.getElementById('modalActionBtn');
+
+            // ----- HELPERS -----
+            function updateUI() {
+                const count = placedCardsSet.size;
+                placedCountEl.textContent = count;
+                if (count === 4) {
+                    completionMsg.classList.add('visible');
+                } else {
+                    completionMsg.classList.remove('visible');
+                }
+            }
+
+            function placeCard(cardId, zoneId) {
+                const card = document.getElementById(cardId);
+                const zone = document.getElementById(zoneId);
+                if (!card || !zone) return false;
+                if (placement[zoneId]) return false;
+                if (placedCardsSet.has(cardId)) return false;
+
+                placement[zoneId] = cardId;
+                placedCardsSet.add(cardId);
+
+                card.classList.add('placed');
+                card.style.display = 'none';
+
+                const cardLabel = card.querySelector('.card-text')?.textContent || cardId;
+                const placedDiv = document.createElement('div');
+                placedDiv.className = 'placed-card';
+                placedDiv.innerHTML = `
+                    <span class="check">✔</span>
+                    <span class="card-label">${cardLabel}</span>
+                `;
+
+                const existing = zone.querySelector('.placed-card');
+                if (existing) existing.remove();
+
+                zone.appendChild(placedDiv);
+                zone.classList.add('correct');
+
+                updateUI();
+                return true;
+            }
+
+            function flashWrong(zoneId) {
+                const zone = document.getElementById(zoneId);
+                if (zone) {
+                    zone.classList.add('wrong-flash');
+                    setTimeout(() => zone.classList.remove('wrong-flash'), 500);
+                }
+            }
+
+            function showModal(type, zoneId) {
+                if (type === 'error') {
+                    modalIcon.textContent = '⛔';
+                    modalTitle.textContent = 'Ошибка!';
+                    modalCard.textContent = '';
+                    modalDesc.textContent = '';
+                    modalActionBtn.textContent = 'Понятно, попробую другой вариант';
+                    modalActionBtn.className = 'btn-danger';
+                } else if (type === 'success') {
+                    const data = zoneData[zoneId];
+                    if (!data) return;
+                    const fb = data.feedback;
+                    modalIcon.textContent = '✅';
+                    modalTitle.textContent = 'Правильно!';
+                    modalCard.textContent = fb.card;
+                    modalDesc.textContent = fb.text;
+                    modalActionBtn.textContent = 'Закрыть';
+                    modalActionBtn.className = 'btn-primary';
+                }
+                modalOverlay.classList.add('active');
+            }
+
+            function hideModal() {
+                modalOverlay.classList.remove('active');
+            }
+
+            function resetExercise() {
+                for (const key in placement) delete placement[key];
+                placedCardsSet.clear();
+
+                zoneElements.forEach(zone => {
+                    const placedDiv = zone.querySelector('.placed-card');
+                    if (placedDiv) placedDiv.remove();
+                    zone.classList.remove('correct', 'wrong-flash');
+                });
+
+                cardElements.forEach(card => {
+                    card.classList.remove('placed');
+                    card.style.display = 'flex';
+                    card.draggable = true;
+                    card.style.opacity = '1';
+                    card.style.pointerEvents = 'auto';
+                    card.style.height = '';
+                    card.style.padding = '';
+                    card.style.margin = '';
+                    card.style.overflow = '';
+                    card.style.minHeight = '';
+                    card.style.border = '';
+                    card.style.transform = '';
+                });
+
+                updateUI();
+                hideModal();
+            }
+
+            // ----- DRAG & DROP -----
+            let draggedCardId = null;
+
+            cardElements.forEach(card => {
+                card.addEventListener('dragstart', function(e) {
+                    if (placedCardsSet.has(this.id)) {
+                        e.preventDefault();
+                        return false;
+                    }
+                    draggedCardId = this.id;
+                    this.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', this.id);
+                });
+
+                card.addEventListener('dragend', function(e) {
+                    this.classList.remove('dragging');
+                });
+            });
+
+            zoneElements.forEach(zone => {
+                zone.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    this.classList.add('drag-over');
+                });
+
+                zone.addEventListener('dragenter', function(e) {
+                    e.preventDefault();
+                    this.classList.add('drag-over');
+                });
+
+                zone.addEventListener('dragleave', function(e) {
+                    this.classList.remove('drag-over');
+                });
+
+                zone.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('drag-over');
+
+                    const cardId = e.dataTransfer.getData('text/plain') || draggedCardId;
+                    if (!cardId) return;
+
+                    const zoneId = this.id;
+
+                    if (placedCardsSet.has(cardId)) return;
+                    if (placement[zoneId]) {
+                        showModal('error');
+                        flashWrong(zoneId);
+                        return;
+                    }
+
+                    const correctCard = zoneData[zoneId]?.correctCard;
+                    if (cardId === correctCard) {
+                        placeCard(cardId, zoneId);
+                        showModal('success', zoneId);
+                    } else {
+                        showModal('error');
+                        flashWrong(zoneId);
+                    }
+                });
+            });
+
+            document.addEventListener('dragover', function(e) {
+                e.preventDefault();
+            });
+            document.addEventListener('drop', function(e) {
+                e.preventDefault();
+            });
+
+            // ----- RESET -----
+            resetBtn.addEventListener('click', function() {
+                resetExercise();
+                document.querySelector('.container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+
+            // ----- MODAL CONTROLS -----
+            modalCloseBtn.addEventListener('click', hideModal);
+            modalActionBtn.addEventListener('click', hideModal);
+            modalOverlay.addEventListener('click', function(e) {
+                if (e.target === this) hideModal();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') hideModal();
+            });
+
+            // ----- INIT -----
+            resetExercise();
+
+            console.log('📘 Подбираем полиграфию — готово!');
+        })();
+    </script>
+
+</body>
+</html>
