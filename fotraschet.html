@@ -23,7 +23,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1100px;
             width: 100%;
             background: #ffffff;
             border-radius: 28px;
@@ -39,34 +39,46 @@
             }
         }
 
-        /* === Основной макет: грид, колонки не переносятся === */
+        /* === Основной макет: двухстрочный грид === */
         .main-layout {
             display: grid;
             grid-template-columns: 1fr minmax(180px, 240px);
-            gap: 28px;
+            grid-template-rows: auto 1fr;
+            gap: 0 28px;
             align-items: start;
         }
 
-        .left-column {
-            min-width: 0;
-            max-width: 780px; /* ограничиваем ширину, чтобы не была слишком широкой */
+        /* Верхняя строка: заголовок и данные — на всю ширину */
+        .top-row {
+            grid-column: 1 / -1;
+            grid-row: 1;
         }
 
+        /* Левая колонка (шаги) — первая колонка, вторая строка */
+        .steps-column {
+            grid-column: 1;
+            grid-row: 2;
+            min-width: 0;
+            max-width: 780px;
+        }
+
+        /* Правая колонка (карточки) — вторая колонка, вторая строка */
         .right-column {
+            grid-column: 2;
+            grid-row: 2;
+            align-self: start;
             background: #f8fafe;
             border-radius: 18px;
             padding: 14px 12px 12px;
             border: 1px solid #e5edf6;
             min-width: 0;
+            margin-top: 0; /* выравнивается по верхнему краю шагов */
         }
 
         @media (max-width: 820px) {
             .main-layout {
                 grid-template-columns: 1fr minmax(150px, 200px);
-                gap: 20px;
-            }
-            .left-column {
-                max-width: 100%;
+                gap: 0 20px;
             }
             .right-column {
                 padding: 12px 8px;
@@ -76,7 +88,7 @@
         @media (max-width: 600px) {
             .main-layout {
                 grid-template-columns: 1fr minmax(130px, 170px);
-                gap: 14px;
+                gap: 0 14px;
             }
             .right-column {
                 padding: 10px 6px;
@@ -86,14 +98,14 @@
         @media (max-width: 480px) {
             .main-layout {
                 grid-template-columns: 1fr minmax(110px, 150px);
-                gap: 10px;
+                gap: 0 10px;
             }
             .right-column {
                 padding: 8px 4px;
             }
         }
 
-        /* === Левая колонка === */
+        /* === Левая колонка (шаги) === */
         .header {
             display: flex;
             align-items: center;
@@ -327,7 +339,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
-            margin: 14px 0 12px;
+            margin: 14px 0 0;
         }
 
         .btn {
@@ -573,9 +585,9 @@
     <div class="container" role="main">
 
         <div class="main-layout">
-            <!-- Левая колонка -->
-            <div class="left-column">
 
+            <!-- Верхняя строка: заголовок и данные -->
+            <div class="top-row">
                 <div class="header">
                     <span class="header-icon">🧮</span>
                     <h1>Расчет реальной экономии ФОТ на IV квартал</h1>
@@ -595,7 +607,10 @@
                         <span class="value">3 246 500 ₽ / мес.</span>
                     </div>
                 </div>
+            </div>
 
+            <!-- Левая колонка: шаги расчёта -->
+            <div class="steps-column">
                 <div class="instruction-text">
                     Перетащите в пропуски верные карточки
                 </div>
@@ -640,10 +655,9 @@
                     <button class="btn btn-primary" id="checkBtn">✅ Проверить</button>
                     <button class="btn btn-secondary" id="resetBtn">⟳ Сбросить</button>
                 </div>
+            </div>
 
-            </div><!-- /left-column -->
-
-            <!-- Правая колонка: карточки (всегда справа) -->
+            <!-- Правая колонка: карточки (только на уровне шагов) -->
             <div class="right-column">
                 <span class="pool-label">📦 Карточки для перетаскивания</span>
                 <div class="cards-grid" id="cardsPool" role="list" aria-label="Набор карточек">
@@ -671,7 +685,7 @@
                     </div>
 
                 </div>
-            </div><!-- /right-column -->
+            </div>
 
         </div><!-- /main-layout -->
 
