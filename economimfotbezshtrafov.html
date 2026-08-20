@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Экономим ФОТ без штрафов</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: white;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            padding: 30px 40px 40px;
+            border: 1px solid #eaeaea;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #cc0000;
+            text-align: center;
+            margin: 0 0 28px 0;
+            letter-spacing: -0.2px;
+            line-height: 1.2;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .step-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            counter-reset: step;
+        }
+        .step-list li {
+            counter-increment: step;
+            display: flex;
+            gap: 18px;
+            margin-bottom: 22px; /* уменьшено с 32px */
+            font-size: 16px;
+            line-height: 1.6;
+            color: #000000;
+            align-items: flex-start;
+        }
+        .step-list li:last-child {
+            margin-bottom: 0;
+        }
+        .step-number {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            background: #0b2b4a;
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2px;
+        }
+        .step-content {
+            flex: 1;
+        }
+        .step-title {
+            font-weight: 700;
+            color: #0b2b4a;
+            font-size: 17px;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .step-text {
+            margin-bottom: 4px;
+        }
+        .sub-item {
+            padding-left: 0;
+            margin-top: 3px; /* уменьшено с 4px */
+            position: relative;
+        }
+        .diamond {
+            color: #0b2b4a;
+            font-weight: 400;
+            margin-right: 4px;
+        }
+        .formula {
+            background: #f7f9fb;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            color: #0b2b4a;
+            margin: 6px 0 4px 0;
+            display: inline-block;
+            border-left: 4px solid #0b2b4a;
+        }
+        .red-flag {
+            color: #cc0000;
+            font-weight: 700;
+        }
+        .chain {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px 10px;
+            margin: 8px 0 4px 0;
+            padding: 10px 16px;
+            background: #f7f9fb;
+            border-radius: 6px;
+            border-left: 4px solid #0b2b4a;
+        }
+        .chain-step {
+            background: #0b2b4a;
+            color: white;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .chain-arrow {
+            color: #0b2b4a;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .pdf-btn-wrap {
+            margin-top: 35px;
+            text-align: right;
+            border-top: 1px solid #ddd;
+            padding-top: 24px;
+        }
+        .pdf-btn {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 10px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            letter-spacing: 0.3px;
+        }
+        .pdf-btn:hover {
+            background: #1b5e20;
+        }
+        .pdf-btn:focus {
+            outline: 2px solid #2e7d32;
+            outline-offset: 2px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+            .container {
+                border: none;
+                padding: 25px 30px;
+                max-width: 100%;
+            }
+            .pdf-btn-wrap {
+                display: none;
+            }
+            h1 {
+                color: #cc0000 !important;
+            }
+            .step-number {
+                background: #0b2b4a !important;
+                color: white !important;
+            }
+            .step-title {
+                color: #0b2b4a !important;
+            }
+            .formula {
+                color: #0b2b4a !important;
+                border-left-color: #0b2b4a !important;
+            }
+            .chain {
+                border-left-color: #0b2b4a !important;
+            }
+            .chain-step {
+                background: #0b2b4a !important;
+                color: white !important;
+            }
+            .chain-arrow {
+                color: #0b2b4a !important;
+            }
+            .red-flag {
+                color: #cc0000 !important;
+            }
+            .diamond {
+                color: #0b2b4a !important;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 15px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+            .step-list li {
+                gap: 12px;
+                font-size: 15px;
+                margin-bottom: 18px; /* чуть меньше на мобильных */
+            }
+            .step-number {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+            .chain {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .chain-arrow {
+                transform: rotate(90deg);
+            }
+            .pdf-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>ЭКОНОМИМ ФОТ БЕЗ ШТРАФОВ</h1>
+
+    <ul class="step-list">
+
+        <!-- 1 -->
+        <li>
+            <div class="step-number">1</div>
+            <div class="step-content">
+                <span class="step-title">Источники экономии:</span>
+                <div class="sub-item">✅ Вакантные ставки по штатному расписанию.</div>
+                <div class="sub-item">✅ Больничные свыше 3 дней.</div>
+                <div class="sub-item">✅ Перевод сотрудников на неполную ставку.</div>
+                <div class="sub-item">✅ Снижение взносов с 30% до 15,1% при превышении предельной базы.</div>
+            </div>
+        </li>
+
+        <!-- 2 -->
+        <li>
+            <div class="step-number">2</div>
+            <div class="step-content">
+                <span class="step-title">Формула безопасного расчета на IV квартал:</span>
+                <div class="formula">Свободный остаток = (План на год − Факт за 9 месяцев) − (Месячный ФОТ × 3) − Предстоящие выплаты</div>
+            </div>
+        </li>
+
+        <!-- 3 -->
+        <li>
+            <div class="step-number">3</div>
+            <div class="step-content">
+                <span class="step-title">Условия для выплаты премий из экономии:</span>
+                <div class="sub-item"><span class="diamond">◆</span> Вид выплаты и ее периодичность прямо прописаны в Положении об оплате труда или Коллективном договоре.</div>
+                <div class="sub-item"><span class="diamond">◆</span> Для персональной надбавки специалисту обязательны служебная записка с описанием заслуг и приказ руководителя.</div>
+                <div class="sub-item"><span class="diamond">◆</span> Выплаты сотрудникам оформляются только письменным приказом директора.</div>
+            </div>
+        </li>
+
+        <!-- 4 -->
+        <li>
+            <div class="step-number">4</div>
+            <div class="step-content">
+                <span class="step-title">"Красные флаги" КСП:</span>
+                <div class="sub-item"><span class="red-flag">❌</span> Запрещено заменять вакансии договорами ГПХ, чтобы выводить сэкономленный ФОТ на премии администрации. Для подмены используйте только механизмы ТК РФ.</div>
+                <div class="sub-item"><span class="red-flag">❌</span> Директору нельзя издавать приказы о премиях и матпомощи в отношении самого себя. Любые выплаты руководителю назначаются исключительно решением учредителя.</div>
+            </div>
+        </li>
+
+        <!-- 5 -->
+        <li>
+            <div class="step-number">5</div>
+            <div class="step-content">
+                <span class="step-title">Ваша юридическая защита — цепочка визирования приказов.</span>
+                <div class="step-text">Пропишите в регламенте, что перед подписью директора проект приказа о премиях обязаны проверить и завизировать:</div>
+                <div class="chain">
+                    <span class="chain-step">бухгалтер-расчетчик</span>
+                    <span class="chain-arrow">→</span>
+                    <span class="chain-step">главный бухгалтер</span>
+                    <span class="chain-arrow">→</span>
+                    <span class="chain-step">юрист</span>
+                </div>
+            </div>
+        </li>
+
+    </ul>
+
+    <div class="pdf-btn-wrap">
+        <button class="pdf-btn" onclick="window.print()">Сохранить в PDF</button>
+    </div>
+
+</div>
+</body>
+</html>

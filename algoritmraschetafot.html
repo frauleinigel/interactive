@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Памятка ФОТ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: white;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            padding: 30px 40px 40px;
+            border: 1px solid #eaeaea;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #cc0000;
+            text-align: center;
+            margin: 0 0 6px 0;
+            letter-spacing: -0.2px;
+            line-height: 1.2;
+        }
+        .subhead {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e6b2e; /* тёмно-зелёный */
+            text-align: center;
+            margin: 0 0 28px 0;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .step-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            counter-reset: step;
+        }
+        .step-list li {
+            counter-increment: step;
+            display: flex;
+            gap: 18px;
+            margin-bottom: 28px;
+            font-size: 16px;
+            line-height: 1.5;
+            color: #000000;
+            align-items: flex-start;
+        }
+        .step-list li:last-child {
+            margin-bottom: 0;
+        }
+        .step-number {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            background: #0b2b4a;
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2px;
+        }
+        .step-content {
+            flex: 1;
+        }
+        .step-text {
+            margin-bottom: 6px;
+        }
+        .step-result {
+            font-weight: 700;
+            color: #0b2b4a;
+            margin-top: 4px;
+            padding-left: 14px;
+            border-left: 3px solid #0b2b4a;
+        }
+        .pdf-btn-wrap {
+            margin-top: 35px;
+            text-align: right;
+            border-top: 1px solid #ddd;
+            padding-top: 24px;
+        }
+        .pdf-btn {
+            background: #0b2b4a;
+            color: white;
+            border: none;
+            padding: 10px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            letter-spacing: 0.3px;
+        }
+        .pdf-btn:hover {
+            background: #1a3f5e;
+        }
+        .pdf-btn:focus {
+            outline: 2px solid #0b2b4a;
+            outline-offset: 2px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+            .container {
+                border: none;
+                padding: 25px 30px;
+                max-width: 100%;
+            }
+            .pdf-btn-wrap {
+                display: none;
+            }
+            h1 {
+                color: #cc0000 !important;
+            }
+            .subhead {
+                color: #1e6b2e !important; /* тёмно-зелёный для печати */
+            }
+            .step-number {
+                background: #0b2b4a !important;
+                color: white !important;
+            }
+            .step-result {
+                color: #0b2b4a !important;
+                border-left-color: #0b2b4a !important;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 15px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .subhead {
+                font-size: 17px;
+            }
+            .step-list li {
+                gap: 12px;
+                font-size: 15px;
+            }
+            .step-number {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+            .pdf-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>ПАМЯТКА</h1>
+    <div class="subhead">Алгоритм расчета экономии фонда оплаты труда</div>
+
+    <ul class="step-list">
+        <li>
+            <div class="step-number">1</div>
+            <div class="step-content">
+                <div class="step-text">Возьмите из формы обоснований к смете или плану ФХД сумму, которую запланировали на год. Вычтите из нее средства, которые фактически потратили на зарплату и налоги за 9 месяцев.</div>
+                <div class="step-result">Результат — общая сумма средств, оставшаяся на IV квартал.</div>
+            </div>
+        </li>
+        <li>
+            <div class="step-number">2</div>
+            <div class="step-content">
+                <div class="step-text">Рассчитайте обязательные расходы на заработную плату за IV квартал по штатному расписанию. Для этого плановый фонд оплаты труда за месяц умножьте на 3.</div>
+                <div class="step-result">Результат — обязательный фонд зарплаты до конца года.</div>
+            </div>
+        </li>
+        <li>
+            <div class="step-number">3</div>
+            <div class="step-content">
+                <div class="step-text">Вычтите из остатка средств на IV квартал (Шаг 1) обязательные расходы за IV квартал (Шаг 2). Учтите неиспользованные отпуска, плановые увольнения, приемы на работу и предусмотренные выплаты — матпомощь, годовые премии.</div>
+                <div class="step-result">Результат — реальная экономия по ФОТ, которую можно перераспределить.</div>
+            </div>
+        </li>
+    </ul>
+
+    <div class="pdf-btn-wrap">
+        <button class="pdf-btn" onclick="window.print()">Сохранить в PDF</button>
+    </div>
+
+</div>
+</body>
+</html>
