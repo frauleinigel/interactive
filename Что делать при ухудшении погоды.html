@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Что делать при ухудшении погоды</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: white;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .card {
+            max-width: 700px;
+            width: 100%;
+            background: white;
+            padding: 30px 35px 35px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #cc0000;
+            text-align: center;
+            margin: 0 0 12px 0;
+            letter-spacing: -0.2px;
+            line-height: 1.2;
+        }
+        .subhead {
+            font-size: 16px;
+            font-weight: 400;
+            color: #000000;
+            margin: 0 0 20px 0;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 14px;
+        }
+        .action-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .action-list li {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #000000;
+            margin-bottom: 8px;
+            padding-left: 0;
+            position: relative;
+        }
+        .action-list li:last-child {
+            margin-bottom: 0;
+        }
+        .action-list li strong {
+            color: #0b2b4a;
+            font-weight: 700;
+        }
+        .diamond {
+            color: #0b2b4a;
+            font-weight: 400;
+            margin-right: 6px;
+        }
+        .pdf-btn-wrap {
+            margin-top: 30px;
+            text-align: right;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        .pdf-btn {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            letter-spacing: 0.3px;
+        }
+        .pdf-btn:hover {
+            background: #1b5e20;
+        }
+        .pdf-btn:focus {
+            outline: 2px solid #2e7d32;
+            outline-offset: 2px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+            .card {
+                border: none;
+                box-shadow: none;
+                padding: 20px 25px;
+                max-width: 100%;
+                border-radius: 0;
+            }
+            .pdf-btn-wrap {
+                display: none;
+            }
+            h1 {
+                color: #cc0000 !important;
+            }
+            .action-list li strong {
+                color: #0b2b4a !important;
+            }
+            .diamond {
+                color: #0b2b4a !important;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 20px 18px;
+            }
+            h1 {
+                font-size: 21px;
+            }
+            .action-list li {
+                font-size: 15px;
+            }
+            .pdf-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+
+    <h1>Что делать при ухудшении погоды</h1>
+
+    <div class="subhead">Ситуация. Прогноз обещал ясную погоду, но начался сильный дождь, снегопад или поднялся ветер. Дорога стала опасной.</div>
+
+    <ul class="action-list">
+        <li><span class="diamond">◆</span> <strong>Остановите экскурсию.</strong></li>
+        <li><span class="diamond">◆</span> <strong>Уведите группу в укрытие — под навес, в здание, в автобус.</strong></li>
+        <li><span class="diamond">◆</span> <strong>Объясните группе, что вы приостанавливаете экскурсию до улучшения погоды.</strong></li>
+        <li><span class="diamond">◆</span> <strong>Следите за прогнозом при наличии связи.</strong></li>
+        <li><span class="diamond">◆</span> <strong>Если погода не улучшается в ближайшее время — завершайте экскурсию и возвращайте группу в безопасное место. Согласуйте решение с руководством.</strong></li>
+    </ul>
+
+    <div class="pdf-btn-wrap">
+        <button class="pdf-btn" onclick="window.print()">Сохранить в PDF</button>
+    </div>
+
+</div>
+</body>
+</html>
