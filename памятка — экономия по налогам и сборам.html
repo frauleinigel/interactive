@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Распределение экономии</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: white;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            padding: 30px 40px 40px;
+            border: 1px solid #eaeaea;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #cc0000;
+            text-align: center;
+            margin: 0 0 28px 0;
+            letter-spacing: -0.2px;
+            line-height: 1.2;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .step-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            counter-reset: step;
+        }
+        .step-list li {
+            counter-increment: step;
+            display: flex;
+            gap: 18px;
+            margin-bottom: 22px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #000000;
+            align-items: flex-start;
+        }
+        .step-list li:last-child {
+            margin-bottom: 0;
+        }
+        .step-number {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            background: #0b2b4a;
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2px;
+        }
+        .step-content {
+            flex: 1;
+        }
+        .step-title {
+            font-weight: 700;
+            color: #0b2b4a;
+            font-size: 17px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .step-text {
+            margin-bottom: 4px;
+        }
+        .sub-item {
+            padding-left: 0;
+            margin-top: 3px;
+            position: relative;
+        }
+
+        /* Блоки формул */
+        .formula-block {
+            background: #f7f9fb;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border-left: 4px solid #0b2b4a;
+            margin-bottom: 6px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .formula-block .label {
+            font-weight: 700;
+            color: #0b2b4a;
+        }
+        .formula-block .term {
+            font-weight: 700;
+        }
+        .formula-block .minus {
+            font-weight: 700;
+            color: #cc0000;
+            margin: 0 4px;
+        }
+
+        /* Основание — без ромба и подчёркивания */
+        .base-block {
+            margin-top: 8px;
+        }
+        .base-block .base-label {
+            font-weight: 700;
+        }
+
+        .green-check {
+            color: #2e7d32;
+            font-weight: 700;
+            margin-right: 4px;
+        }
+        .red-flag {
+            color: #cc0000;
+            font-weight: 700;
+        }
+        .diamond {
+            color: #0b2b4a;
+            font-weight: 400;
+            margin-right: 4px;
+        }
+
+        .chain {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px 10px;
+            margin: 8px 0 4px 0;
+            padding: 10px 16px;
+            background: #f7f9fb;
+            border-radius: 6px;
+            border-left: 4px solid #0b2b4a;
+        }
+        .chain-step {
+            background: #0b2b4a;
+            color: white;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .chain-arrow {
+            color: #0b2b4a;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .pdf-btn-wrap {
+            margin-top: 35px;
+            text-align: right;
+            border-top: 1px solid #ddd;
+            padding-top: 24px;
+        }
+        .pdf-btn {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 10px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            letter-spacing: 0.3px;
+        }
+        .pdf-btn:hover {
+            background: #1b5e20;
+        }
+        .pdf-btn:focus {
+            outline: 2px solid #2e7d32;
+            outline-offset: 2px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+            .container {
+                border: none;
+                padding: 25px 30px;
+                max-width: 100%;
+            }
+            .pdf-btn-wrap {
+                display: none;
+            }
+            h1 {
+                color: #cc0000 !important;
+            }
+            .step-number {
+                background: #0b2b4a !important;
+                color: white !important;
+            }
+            .step-title {
+                color: #0b2b4a !important;
+            }
+            .formula-block {
+                border-left-color: #0b2b4a !important;
+                background: #f7f9fb !important;
+            }
+            .formula-block .minus {
+                color: #cc0000 !important;
+            }
+            .chain {
+                border-left-color: #0b2b4a !important;
+            }
+            .chain-step {
+                background: #0b2b4a !important;
+                color: white !important;
+            }
+            .chain-arrow {
+                color: #0b2b4a !important;
+            }
+            .red-flag {
+                color: #cc0000 !important;
+            }
+            .green-check {
+                color: #2e7d32 !important;
+            }
+            .diamond {
+                color: #0b2b4a !important;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 15px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+            .step-list li {
+                gap: 12px;
+                font-size: 15px;
+                margin-bottom: 18px;
+            }
+            .step-number {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+            .chain {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .chain-arrow {
+                transform: rotate(90deg);
+            }
+            .pdf-btn {
+                width: 100%;
+            }
+            .formula-block {
+                font-size: 15px;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>КАК БЕЗОПАСНО РАСПРЕДЕЛЯТЬ ЭКОНОМИЮ ПО ОБЯЗАТЕЛЬНЫМ ПЛАТЕЖАМ И ВЗНОСАМ</h1>
+
+    <ul class="step-list">
+
+        <!-- 1 -->
+        <li>
+            <div class="step-number">1</div>
+            <div class="step-content">
+                <span class="step-title">Подтвердите экономию расчетом</span>
+
+                <div class="formula-block">
+                    <span class="label">ЗАКУПКИ:</span>
+                    <span class="term">НМЦК</span>
+                    <span class="minus">—</span>
+                    <span class="term">Цена контракта</span>
+                </div>
+
+                <div class="formula-block">
+                    <span class="label">НАЛОГИ:</span>
+                    <span class="term">План</span>
+                    <span class="minus">—</span>
+                    <span class="term">Факт после пересчета</span>
+                </div>
+
+                <div class="base-block">
+                    <span class="base-label">Основание:</span> служебная записка с расчетом и ссылкой на План ФХД.
+                </div>
+            </div>
+        </li>
+
+        <!-- 2 -->
+        <li>
+            <div class="step-number">2</div>
+            <div class="step-content">
+                <span class="step-title">Соблюдайте ограничения КФО</span>
+                <div class="sub-item"><span class="diamond">◆</span> КФО 4: Только на мероприятия госзадания.</div>
+                <div class="sub-item"><span class="diamond">◆</span> КФО 5: Только на цели соглашения с учредителем.</div>
+                <div class="sub-item"><span class="diamond">◆</span> КФО 2: Строго по смете доходов и расходов.</div>
+            </div>
+        </li>
+
+        <!-- 3 -->
+        <li>
+            <div class="step-number">3</div>
+            <div class="step-content">
+                <span class="step-title">Четко формулируйте цели</span>
+                <div class="sub-item"><span class="red-flag">❌</span> <strong>Нельзя:</strong> писать «на нужды», «на текущую деятельность», «на оптимизацию».</div>
+                <div class="sub-item"><span class="green-check">✅</span> <strong>Можно:</strong> указывать конкретный пункт госзадания или соглашения, который вы реализуете за счет этой траты.</div>
+            </div>
+        </li>
+
+        <!-- 4 -->
+        <li>
+            <div class="step-number">4</div>
+            <div class="step-content">
+                <span class="step-title">Внедрите «регламент трех виз»</span>
+                <div class="step-text">Приказ о распределении средств подписывайте после того, как его завизировали:</div>
+                <div class="chain">
+                    <span class="chain-step">бухгалтер-расчетчик</span>
+                    <span class="chain-arrow">→</span>
+                    <span class="chain-step">главный бухгалтер</span>
+                    <span class="chain-arrow">→</span>
+                    <span class="chain-step">юрист</span>
+                </div>
+            </div>
+        </li>
+
+    </ul>
+
+    <div class="pdf-btn-wrap">
+        <button class="pdf-btn" onclick="window.print()">Сохранить в PDF</button>
+    </div>
+
+</div>
+</body>
+</html>
