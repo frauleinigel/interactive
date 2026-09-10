@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Примените правило переключения внимания</title>
+<style>
+  :root {
+    --sidebar-w: 240px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+  }
+
+  body {
+    padding-right: var(--sidebar-w);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1e293b;
+    background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 55%, #ecfeff 100%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ================= ЛЕВАЯ ЧАСТЬ ================= */
+
+  .stage {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 22px 20px 30px;
+  }
+
+  header { text-align: center; margin-bottom: 16px; }
+
+  h1 {
+    font-size: clamp(16px, 2.4vw, 20px);
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+    background: linear-gradient(90deg, #4f46e5, #db2777);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  header p {
+    margin: 0 auto;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #475569;
+  }
+
+  /* ---------- Цепочка ---------- */
+
+  .chain {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .arrow {
+    text-align: center;
+    font-size: 11px;
+    line-height: 1;
+    color: #b4c0f5;
+    user-select: none;
+    padding: 1px 0;
+  }
+
+  .slot {
+    position: relative;
+    height: 46px;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 11px;
+    background: rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color .16s, background .16s, box-shadow .16s, transform .16s;
+  }
+
+  .slot::after {
+    content: attr(data-num);
+    position: absolute;
+    top: 3px;
+    left: 9px;
+    font-size: 9px;
+    font-weight: 700;
+    color: #b6c2d6;
+    pointer-events: none;
+  }
+
+  .slot.filled {
+    border-color: transparent;
+    background: transparent;
+  }
+
+  .slot.filled::after { opacity: 0; }
+
+  .slot.dragover {
+    border-color: #6366f1;
+    background: #eef2ff;
+    transform: scale(1.015);
+  }
+
+  .slot.ok  { box-shadow: 0 0 0 2px rgba(34, 197, 94, .5); }
+  .slot.bad { box-shadow: 0 0 0 2px rgba(244, 63, 94, .5); }
+
+  /* ---------- Карточка ---------- */
+
+  .card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    height: 46px;
+    padding: 6px 11px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 11px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, .07);
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform .15s, box-shadow .15s, border-color .15s, opacity .15s;
+  }
+
+  .card:hover {
+    border-color: #c7d2fe;
+    box-shadow: 0 6px 14px rgba(79, 70, 229, .16);
+    transform: translateY(-1px);
+  }
+
+  .card:active { cursor: grabbing; }
+
+  .card.dragging { opacity: .35; }
+
+  .ico {
+    flex: 0 0 26px;
+    width: 26px;
+    height: 26px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .card[data-type="talk"] .ico { background: #e0e7ff; }
+  .card[data-type="move"] .ico { background: #d1fae5; }
+
+  .txt {
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #334155;
+  }
+
+  /* ---------- Подсказка и кнопки ---------- */
+
+  .hint {
+    margin: 14px 0 0;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #94a3b8;
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    font: inherit;
+    font-weight: 700;
+    font-size: 13.5px;
+    padding: 9px 24px;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s, border-color .15s, color .15s;
+  }
+
+  button:active { transform: scale(.97); }
+
+  #check {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(79, 70, 229, .3);
+  }
+
+  #check:hover { box-shadow: 0 9px 20px rgba(79, 70, 229, .4); }
+
+  #reset {
+    background: #fff;
+    color: #475569;
+    border: 2px solid #e2e8f0;
+  }
+
+  #reset:hover { border-color: #c7d2fe; color: #4f46e5; }
+
+  .celebrate { animation: celebrate .55s ease; }
+
+  @keyframes celebrate {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+
+  /* ================= ПРАВАЯ КОЛОНКА ================= */
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: var(--sidebar-w);
+    padding: 22px 14px 20px;
+    background: rgba(255, 255, 255, 0.72);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-left: 1px solid rgba(148, 163, 184, 0.32);
+    box-shadow: -10px 0 30px rgba(15, 23, 42, .05);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pool-label {
+    flex: 0 0 auto;
+    margin: 0 0 9px 4px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: #94a3b8;
+  }
+
+  .pool {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 8px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    transition: border-color .16s, background .16s;
+  }
+
+  .pool.dragover {
+    border-color: #6366f1;
+    background: #eef2ff;
+  }
+
+  .pool:empty::after {
+    content: "Все карточки расставлены ✓";
+    display: block;
+    padding: 18px 0;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #94a3b8;
+  }
+
+  /* ================= ВСПЛЫВАЮЩЕЕ ОКОШКО ================= */
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 22px;
+    background: rgba(15, 23, 42, .45);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .2s ease, visibility .2s ease;
+  }
+
+  .overlay.open { opacity: 1; visibility: visible; }
+
+  .modal {
+    position: relative;
+    width: 100%;
+    max-width: 380px;
+    padding: 30px 26px 26px;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 30px 70px rgba(15, 23, 42, .3);
+    text-align: center;
+    transform: translateY(16px) scale(.95);
+    opacity: 0;
+    transition: transform .28s cubic-bezier(.2, .9, .3, 1.2), opacity .2s ease;
+  }
+
+  .overlay.open .modal {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  .modal__close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background .15s, color .15s, transform .15s;
+  }
+
+  .modal__close:hover { background: #e2e8f0; color: #1e293b; }
+  .modal__close:active { transform: scale(.92); }
+
+  .modal__badge {
+    width: 62px;
+    height: 62px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 30px;
+    line-height: 1;
+  }
+
+  .modal--ok .modal__badge {
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    box-shadow: 0 0 0 7px rgba(16, 185, 129, .12);
+  }
+
+  .modal--err .modal__badge {
+    background: linear-gradient(135deg, #ffe4e6, #fecdd3);
+    box-shadow: 0 0 0 7px rgba(244, 63, 94, .12);
+  }
+
+  .modal__title {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .modal--ok .modal__title { color: #059669; }
+  .modal--err .modal__title { color: #e11d48; }
+
+  .modal__text {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.45;
+    color: #475569;
+  }
+
+  /* ================= АДАПТАЦИЯ ================= */
+
+  @media (max-width: 860px) {
+    :root { --sidebar-w: 210px; }
+  }
+
+  @media (max-width: 640px) {
+    :root { --sidebar-w: 168px; }
+    .stage { padding: 16px 12px 24px; }
+    .txt { font-size: 11px; }
+    .ico { flex: 0 0 22px; width: 22px; height: 22px; font-size: 12px; border-radius: 7px; }
+    .card { padding: 5px 8px; gap: 6px; height: 42px; border-radius: 10px; }
+    .slot { height: 42px; border-radius: 10px; }
+    .sidebar { padding: 14px 8px; }
+    .pool { padding: 6px; gap: 6px; }
+    #check, #reset { padding: 8px 18px; font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<main class="stage">
+
+  <header>
+    <h1>Примените правило переключения внимания</h1>
+    <p>Переместите карточки в пустые ячейки так, чтобы получилась цепочка: разговорная работа ↔ двигательная активность</p>
+  </header>
+
+  <section class="chain" id="chain"></section>
+
+  <p class="hint">Перетащите карточки мышкой в пустые ячейки цепочки.</p>
+
+  <div class="actions">
+    <button id="check" type="button">Проверить</button>
+    <button id="reset" type="button">Сбросить</button>
+  </div>
+
+</main>
+
+<aside class="sidebar">
+  <p class="pool-label">Карточки</p>
+  <div class="pool" id="pool"></div>
+</aside>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal" id="modal">
+    <button class="modal__close" id="modalClose" type="button" aria-label="Закрыть">×</button>
+    <div class="modal__badge" id="modalBadge">🎉</div>
+    <h2 class="modal__title" id="modalTitle"></h2>
+    <p class="modal__text" id="modalText"></p>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var CARDS = [
+    { id: "c1", type: "talk", icon: "💬", text: "Обсуждение в парах" },
+    { id: "c2", type: "move", icon: "🚶", text: "Пройтись по классу" },
+    { id: "c3", type: "talk", icon: "🎤", text: "Дебаты в группах" },
+    { id: "c4", type: "move", icon: "🪑", text: "Переставить предметы" },
+    { id: "c5", type: "talk", icon: "❓", text: "Вопрос-ответ с педагогом" },
+    { id: "c6", type: "move", icon: "🤸", text: "Короткая физминутка" }
+  ];
+
+  var SLOTS = 6;
+
+  var state = { slots: new Array(SLOTS).fill(null) };
+  var dragId = null;
+
+  var chainEl = document.getElementById("chain");
+  var poolEl  = document.getElementById("pool");
+
+  var overlay    = document.getElementById("overlay");
+  var modal      = document.getElementById("modal");
+  var modalBadge = document.getElementById("modalBadge");
+  var modalTitle = document.getElementById("modalTitle");
+  var modalText  = document.getElementById("modalText");
+  var modalClose = document.getElementById("modalClose");
+
+  function byId(id) {
+    for (var i = 0; i < CARDS.length; i++) if (CARDS[i].id === id) return CARDS[i];
+    return null;
+  }
+
+  function typeOf(id) {
+    var c = byId(id);
+    return c ? c.type : null;
+  }
+
+  function clearHighlights() {
+    var marked = document.querySelectorAll(".dragover");
+    for (var i = 0; i < marked.length; i++) marked[i].classList.remove("dragover");
+  }
+
+  function openModal(kind) {
+    if (kind === "ok") {
+      modal.className = "modal modal--ok";
+      modalBadge.textContent = "🎉";
+      modalTitle.textContent = "Все верно!";
+      modalText.textContent = "Разговорная работа чередуется с двигательной активностью.";
+    } else {
+      modal.className = "modal modal--err";
+      modalBadge.textContent = "🤔";
+      modalTitle.textContent = "Вы ошиблись!";
+      modalText.textContent = "Подумайте еще и соберите цепочку повторно.";
+    }
+    overlay.classList.add("open");
+    modalClose.focus();
+  }
+
+  function closeModal() {
+    overlay.classList.remove("open");
+  }
+
+  modalClose.addEventListener("click", closeModal);
+
+  overlay.addEventListener("mousedown", function (e) {
+    if (e.target === overlay) closeModal();
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && overlay.classList.contains("open")) closeModal();
+  });
+
+  function makeCard(id) {
+    var data = byId(id);
+
+    var el = document.createElement("div");
+    el.className = "card";
+    el.dataset.id = id;
+    el.dataset.type = data.type;
+    el.draggable = true;
+
+    var ico = document.createElement("span");
+    ico.className = "ico";
+    ico.textContent = data.icon;
+
+    var txt = document.createElement("span");
+    txt.className = "txt";
+    txt.textContent = data.text;
+
+    el.appendChild(ico);
+    el.appendChild(txt);
+
+    el.addEventListener("dragstart", function (e) {
+      dragId = id;
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", id);
+      setTimeout(function () { el.classList.add("dragging"); }, 0);
+    });
+
+    el.addEventListener("dragend", function () {
+      el.classList.remove("dragging");
+      dragId = null;
+      clearHighlights();
+    });
+
+    return el;
+  }
+
+  function attachSlotEvents(slot, index) {
+    slot.addEventListener("dragover", function (e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      if (!slot.classList.contains("dragover")) {
+        clearHighlights();
+        slot.classList.add("dragover");
+      }
+    });
+
+    slot.addEventListener("dragleave", function (e) {
+      if (!slot.contains(e.relatedTarget)) slot.classList.remove("dragover");
+    });
+
+    slot.addEventListener("drop", function (e) {
+      e.preventDefault();
+      slot.classList.remove("dragover");
+      dropOnSlot(index);
+    });
+  }
+
+  function render() {
+    chainEl.innerHTML = "";
+
+    for (var i = 0; i < SLOTS; i++) {
+      var slot = document.createElement("div");
+      slot.className = "slot";
+      slot.dataset.index = i;
+      slot.dataset.num = i + 1;
+
+      if (state.slots[i]) {
+        slot.classList.add("filled");
+        slot.appendChild(makeCard(state.slots[i]));
+      }
+
+      attachSlotEvents(slot, i);
+      chainEl.appendChild(slot);
+
+      if (i < SLOTS - 1) {
+        var arrow = document.createElement("div");
+        arrow.className = "arrow";
+        arrow.textContent = "↓";
+        chainEl.appendChild(arrow);
+      }
+    }
+
+    poolEl.innerHTML = "";
+    for (var j = 0; j < CARDS.length; j++) {
+      if (state.slots.indexOf(CARDS[j].id) === -1) {
+        poolEl.appendChild(makeCard(CARDS[j].id));
+      }
+    }
+  }
+
+  function endDrag() {
+    dragId = null;
+    clearHighlights();
+  }
+
+  function dropOnSlot(index) {
+    if (!dragId) return;
+
+    var from = state.slots.indexOf(dragId);
+    if (from === index) { endDrag(); return; }
+
+    var occupant = state.slots[index];
+
+    if (from > -1) {
+      state.slots[from] = occupant || null;
+    }
+    state.slots[index] = dragId;
+
+    endDrag();
+    render();
+  }
+
+  function dropOnPool() {
+    if (!dragId) return;
+
+    var from = state.slots.indexOf(dragId);
+    if (from > -1) {
+      state.slots[from] = null;
+      render();
+    }
+    endDrag();
+  }
+
+  poolEl.addEventListener("dragover", function (e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (!poolEl.classList.contains("dragover")) {
+      clearHighlights();
+      poolEl.classList.add("dragover");
+    }
+  });
+
+  poolEl.addEventListener("dragleave", function (e) {
+    if (!poolEl.contains(e.relatedTarget)) poolEl.classList.remove("dragover");
+  });
+
+  poolEl.addEventListener("drop", function (e) {
+    e.preventDefault();
+    poolEl.classList.remove("dragover");
+    dropOnPool();
+  });
+
+  function check() {
+    var slotEls = chainEl.querySelectorAll(".slot");
+    var bad = [];
+    var empty = false;
+
+    for (var i = 0; i < SLOTS; i++) {
+      if (!state.slots[i]) { empty = true; continue; }
+      if (i < SLOTS - 1 && state.slots[i + 1] &&
+          typeOf(state.slots[i]) === typeOf(state.slots[i + 1])) {
+        if (bad.indexOf(i) === -1) bad.push(i);
+        if (bad.indexOf(i + 1) === -1) bad.push(i + 1);
+      }
+    }
+
+    for (var c = 0; c < slotEls.length; c++) {
+      slotEls[c].classList.remove("ok", "bad");
+    }
+
+    if (empty || bad.length) {
+      for (var k = 0; k < bad.length; k++) slotEls[bad[k]].classList.add("bad");
+      openModal("err");
+      return;
+    }
+
+    for (var m = 0; m < slotEls.length; m++) slotEls[m].classList.add("ok");
+    chainEl.classList.add("celebrate");
+    setTimeout(function () { chainEl.classList.remove("celebrate"); }, 600);
+    openModal("ok");
+  }
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function reset() {
+    closeModal();
+    state.slots = new Array(SLOTS).fill(null);
+    dragId = null;
+
+    CARDS = shuffle(CARDS);
+    render();
+  }
+
+  CARDS = shuffle(CARDS);
+  render();
+
+  document.getElementById("check").addEventListener("click", check);
+  document.getElementById("reset").addEventListener("click", reset);
+})();
+</script>
+
+</body>
+</html>
