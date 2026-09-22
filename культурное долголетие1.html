@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Навигатор по источникам финансирования</title>
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 20px 16px 48px;
+    background: #ffffff;
+    color: #000000;
+    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+  }
+
+  h1 {
+    color: #0a2f8f;
+    font-size: 22px;
+    margin: 0 0 10px;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  .lead {
+    color: #000000;
+    max-width: 1000px;
+    line-height: 1.5;
+    margin: 0 auto 20px;
+    font-size: 13px;
+    text-align: center;
+  }
+
+  /* ---------- карусель: карточка шириной ровно с колонку ---------- */
+  .carousel {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 22px;
+    align-items: center;
+  }
+
+  .card-slot {
+    grid-column: 2;
+    min-height: 150px;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+  }
+
+  .arrow {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid #0a2f8f;
+    background: #0a2f8f;
+    color: #ffffff;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background .15s, transform .15s;
+  }
+
+  .arrow.prev { grid-column: 1; justify-self: center; }
+  .arrow.next { grid-column: 3; justify-self: center; }
+
+  .arrow:hover {
+    background: #08256f;
+    border-color: #08256f;
+  }
+
+  .arrow:active {
+    transform: scale(.94);
+  }
+
+  /* ---------- карточка в карусели ---------- */
+  .card {
+    width: 100%;
+    border: 3px solid #0a2f8f;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #000000;
+    padding: 16px 18px;
+    font-size: 14px;
+    line-height: 1.45;
+    display: flex;
+    align-items: center;
+    cursor: grab;
+    user-select: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+
+  .card:active { cursor: grabbing; }
+  .card.dragging { opacity: .45; }
+  .card.placed { border-color: #0b8a2f; cursor: default; }
+
+  .card.wrong {
+    border-color: #d0021b;
+    animation: shake .4s;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-7px); }
+    75% { transform: translateX(7px); }
+  }
+
+  /* ---------- колонки: всегда три в один ряд ---------- */
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .col {
+    display: flex;
+    flex-direction: column;
+    border: 2px dashed #0a2f8f;
+    border-radius: 12px;
+    padding: 12px 10px;
+    background: #ffffff;
+    min-height: 240px;
+    height: 240px;
+    overflow: hidden;
+    transition: background .15s, border-color .15s;
+    cursor: pointer;
+  }
+
+  .col h2 {
+    color: #0a2f8f;
+    font-size: 13px;
+    margin: 0 0 10px;
+    text-align: center;
+    line-height: 1.25;
+    pointer-events: none;
+    flex: 0 0 auto;
+  }
+
+  .col.over { background: #f2f5ff; }
+
+  .col.done {
+    border-style: solid;
+    border-color: #0b8a2f;
+    cursor: default;
+  }
+
+  /* ---------- финальный режим: карточки внутри колонок ---------- */
+  .col-card-area {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .col-card {
+    width: 100%;
+    border: 2px solid #0b8a2f;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #000000;
+    padding: 12px 12px;
+    font-size: 12px;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    overflow-y: auto;
+    user-select: none;
+  }
+
+  .col-nav {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    gap: 6px;
+  }
+
+  .col-arrow {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 2px solid #0a2f8f;
+    background: #0a2f8f;
+    color: #ffffff;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background .15s, transform .15s;
+    flex: 0 0 auto;
+  }
+
+  .col-arrow:hover {
+    background: #08256f;
+    border-color: #08256f;
+  }
+
+  .col-arrow:active { transform: scale(.94); }
+
+  /* ---------- всплывающая плашка ---------- */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .38);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 100;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    position: relative;
+    background: #ffffff;
+    border: 3px solid #0a2f8f;
+    border-radius: 14px;
+    padding: 24px 46px 24px 24px;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 12px 44px rgba(0, 0, 0, .28);
+  }
+
+  .modal p {
+    margin: 0;
+    color: #0b8a2f;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 4px;
+    right: 12px;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 26px;
+    line-height: 1;
+    color: #d0021b;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .modal-close:hover { color: #a10014; }
+
+  /* ---------- очень узкие экраны: ещё меньше шрифт, но всё ещё 3 колонки ---------- */
+  @media (max-width: 640px) {
+    body { padding: 14px 10px 36px; }
+
+    .carousel { gap: 8px; margin-bottom: 16px; }
+    .board { gap: 8px; }
+
+    .card {
+      font-size: 12px;
+      padding: 12px;
+      line-height: 1.4;
+    }
+
+    .card-slot { min-height: 130px; }
+
+    .arrow {
+      width: 36px;
+      height: 36px;
+      font-size: 16px;
+    }
+
+    .col {
+      padding: 8px 6px;
+      min-height: 220px;
+      height: 220px;
+    }
+
+    .col h2 { font-size: 11px; margin-bottom: 8px; }
+
+    .col-card {
+      font-size: 10.5px;
+      padding: 8px;
+      line-height: 1.35;
+    }
+
+    .col-arrow {
+      width: 28px;
+      height: 28px;
+      font-size: 13px;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <h1>🧭 Навигатор по источникам финансирования</h1>
+  <p class="lead">Распределите карточки с описанием проектов по трем колонкам: Федеральный уровень, Региональный уровень и Муниципальный уровень.<br>Кейсы вымышленные, но основаны на реальной практике.</p>
+
+  <div class="carousel" id="carousel">
+    <button class="arrow prev" id="prevBtn" type="button" aria-label="Предыдущая карточка">&#8592;</button>
+    <div class="card-slot" id="cardSlot"></div>
+    <button class="arrow next" id="nextBtn" type="button" aria-label="Следующая карточка">&#8594;</button>
+  </div>
+
+  <div class="board">
+    <section class="col" data-level="federal">
+      <h2>Федеральный уровень</h2>
+    </section>
+    <section class="col" data-level="regional">
+      <h2>Региональный уровень</h2>
+    </section>
+    <section class="col" data-level="municipal">
+      <h2>Муниципальный уровень</h2>
+    </section>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <button class="modal-close" id="modalClose" type="button" aria-label="Закрыть">&#215;</button>
+      <p id="modalText"></p>
+    </div>
+  </div>
+
+<script>
+  const DATA = [
+    {
+      id: 1,
+      level: "federal",
+      text: "Музей-заповедник «Кижи» в Карелии хочет разработать всероссийскую методику «арт-терапия для серебряного возраста» и провести большое исследование, чтобы применить этот опыт по всей стране.",
+      feedback: "Верно! Разработка методик общероссийского масштаба и масштабные исследования — профиль федеральных фондов."
+    },
+    {
+      id: 2,
+      level: "regional",
+      text: "Заявка от Краснодарского краевого художественного музея им. Ф. А. Коваленко на создание цифровой выставки, которая полгода будет гастролировать по МФЦ и районным больницам Кубани.",
+      feedback: "Абсолютно верно! Проекты, которые охватывают целый субъект РФ и задействуют региональные ведомства, финансируются из краевого бюджета."
+    },
+    {
+      id: 3,
+      level: "municipal",
+      text: "Проект библиотеки «Эврика» в Октябрьском районе Томска: закупка пряжи, спиц и материалов для мастер-классов по рукоделию для 30 местных пенсионеров.",
+      feedback: "Правильно! Локальная точечная инициатива с небольшим бюджетом для жителей конкретного района города поддерживается через муниципальные гранты."
+    },
+    {
+      id: 4,
+      level: "regional",
+      text: "Запрос на возмещение расходов ДК «Энергетик» в Новосибирске за проведение цикла бесплатных занятий по скандинавской ходьбе для пенсионеров за прошлый квартал.",
+      feedback: "Отлично! Механизм прямой компенсации уже понесенных затрат учреждениям культуры за работу с пожилыми заложен в региональных целевых субсидиях."
+    },
+    {
+      id: 5,
+      level: "federal",
+      text: "Инициатива создания межрегионального волонтерского движения «Серебряные гиды», объединяющего музеи Ярославской, Костромской и Ивановской областей.",
+      feedback: "Верно! Межрегиональный охват выводит проект за рамки одного региона, поэтому за деньгами нужно идти на федеральный уровень."
+    },
+    {
+      id: 6,
+      level: "municipal",
+      text: "Заявка на проведение городского фестиваля художественной самодеятельности среди ветеранов труда в ДК города Казани с выделением призового фонда и арендой сцены.",
+      feedback: "Правильно! Локальные культурно-массовые мероприятия городского значения профинансируют местные власти через муниципальные конкурсы."
+    },
+    {
+      id: 7,
+      level: "regional",
+      text: "Запуск долгосрочной программы «Ямальское долголетие» на территории Ямало-Ненецкого автономного округа с подключением десятков ДК и спорткомплексов региона.",
+      feedback: "Верно! Системные региональные программы разворачиваются силами правительств конкретных субъектов РФ."
+    },
+    {
+      id: 8,
+      level: "federal",
+      text: "Подача заявки в фонд на реализацию межпоколенческого театрального проекта «Связь веков» с привлечением экспертов из Москвы для ДК в Екатеринбурге.",
+      feedback: "Абсолютно верно! Привлечение именитых федеральных экспертов и масштабные творческие коллаборации поддерживают грантовые операторы федерального уровня ."
+    },
+    {
+      id: 9,
+      level: "municipal",
+      text: "Запрос на софинансирование ремонта пандуса и входной группы ДК в пос. Пятиморск (Волгоградская область), чтобы маломобильные пенсионеры могли посещать местный хор.",
+      feedback: "Верно! Решение локальной инфраструктурной проблемы конкретного ДК в поселке финансируется по линии муниципалитета с привлечением местного бюджета."
+    }
+  ];
+
+  const carousel     = document.getElementById("carousel");
+  const cardSlot     = document.getElementById("cardSlot");
+  const prevBtn      = document.getElementById("prevBtn");
+  const nextBtn      = document.getElementById("nextBtn");
+  const cols         = document.querySelectorAll(".col");
+  const modalOverlay = document.getElementById("modalOverlay");
+  const modalText    = document.getElementById("modalText");
+  const modalClose   = document.getElementById("modalClose");
+
+  const placed = {};
+  let currentIndex = 0;
+  let gameFinished = false;
+
+  /* ---------- отрисовка карточки в карусели ---------- */
+  function renderCard() {
+    cardSlot.innerHTML = "";
+
+    const item = DATA[currentIndex];
+    const isPlaced = !!placed[item.id];
+
+    const card = document.createElement("div");
+    card.className = "card" + (isPlaced ? " placed" : "");
+    card.textContent = item.text;
+    card.draggable = !isPlaced;
+
+    if (!isPlaced) {
+      card.addEventListener("dragstart", function (e) {
+        e.dataTransfer.setData("text/plain", String(item.id));
+        e.dataTransfer.effectAllowed = "move";
+        card.classList.add("dragging");
+      });
+
+      card.addEventListener("dragend", function () {
+        card.classList.remove("dragging");
+      });
+    }
+
+    cardSlot.appendChild(card);
+
+    cols.forEach(function (col) {
+      const lvl = col.dataset.level;
+      const total = DATA.filter(function (d) { return d.level === lvl; }).length;
+      const done  = DATA.filter(function (d) { return d.level === lvl && placed[d.id]; }).length;
+      if (total > 0 && total === done) col.classList.add("done");
+    });
+  }
+
+  /* ---------- листание в карусели ---------- */
+  function go(delta) {
+    if (gameFinished) return;
+    currentIndex = (currentIndex + delta + DATA.length) % DATA.length;
+    renderCard();
+  }
+
+  prevBtn.addEventListener("click", function () { go(-1); });
+  nextBtn.addEventListener("click", function () { go(1); });
+
+  /* ---------- всплывающая плашка ---------- */
+  function showModal(text) {
+    modalText.textContent = text;
+    modalOverlay.classList.add("show");
+  }
+
+  function hideModal() {
+    modalOverlay.classList.remove("show");
+    if (allPlaced()) {
+      renderFinal();
+    } else {
+      advanceToNextUnplaced();
+    }
+  }
+
+  modalClose.addEventListener("click", hideModal);
+  modalOverlay.addEventListener("click", function (e) {
+    if (e.target === modalOverlay) hideModal();
+  });
+
+  function allPlaced() {
+    return DATA.every(function (d) { return placed[d.id]; });
+  }
+
+  function advanceToNextUnplaced() {
+    for (let i = 1; i <= DATA.length; i++) {
+      const idx = (currentIndex + i) % DATA.length;
+      if (!placed[DATA[idx].id]) {
+        currentIndex = idx;
+        renderCard();
+        return;
+      }
+    }
+    renderCard();
+  }
+
+  /* ---------- проверка попадания ---------- */
+  function tryPlace(level) {
+    if (gameFinished) return;
+    const item = DATA[currentIndex];
+    if (placed[item.id]) return;
+
+    const card = cardSlot.querySelector(".card");
+
+    if (item.level === level) {
+      placed[item.id] = true;
+      renderCard();
+      showModal(item.feedback);
+    } else if (card) {
+      card.classList.add("wrong");
+      setTimeout(function () { card.classList.remove("wrong"); }, 450);
+    }
+  }
+
+  /* ---------- drag & drop ---------- */
+  cols.forEach(function (col) {
+    col.addEventListener("dragover", function (e) {
+      if (gameFinished) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      col.classList.add("over");
+    });
+
+    col.addEventListener("dragleave", function () {
+      col.classList.remove("over");
+    });
+
+    col.addEventListener("drop", function (e) {
+      e.preventDefault();
+      col.classList.remove("over");
+      tryPlace(col.dataset.level);
+    });
+
+    col.addEventListener("click", function () {
+      tryPlace(col.dataset.level);
+    });
+  });
+
+  /* ---------- финальный режим ---------- */
+  const colIndex = {};
+
+  function renderFinal() {
+    gameFinished = true;
+    carousel.style.display = "none";
+
+    cols.forEach(function (col) {
+      const level = col.dataset.level;
+      const items = DATA.filter(function (d) { return d.level === level; });
+      colIndex[level] = 0;
+
+      col.querySelectorAll(".col-card-area, .col-nav").forEach(function (el) {
+        el.remove();
+      });
+
+      const area = document.createElement("div");
+      area.className = "col-card-area";
+
+      const nav = document.createElement("div");
+      nav.className = "col-nav";
+
+      const prev = document.createElement("button");
+      prev.type = "button";
+      prev.className = "col-arrow";
+      prev.setAttribute("aria-label", "Предыдущая карточка");
+      prev.innerHTML = "&#8592;";
+
+      const next = document.createElement("button");
+      next.type = "button";
+      next.className = "col-arrow";
+      next.setAttribute("aria-label", "Следующая карточка");
+      next.innerHTML = "&#8594;";
+
+      nav.appendChild(prev);
+      nav.appendChild(next);
+
+      col.appendChild(area);
+      col.appendChild(nav);
+
+      function renderColCard() {
+        area.innerHTML = "";
+        const item = items[colIndex[level]];
+        const c = document.createElement("div");
+        c.className = "col-card";
+        c.textContent = item.text;
+        area.appendChild(c);
+      }
+
+      prev.addEventListener("click", function (e) {
+        e.stopPropagation();
+        colIndex[level] = (colIndex[level] - 1 + items.length) % items.length;
+        renderColCard();
+      });
+
+      next.addEventListener("click", function (e) {
+        e.stopPropagation();
+        colIndex[level] = (colIndex[level] + 1) % items.length;
+        renderColCard();
+      });
+
+      renderColCard();
+    });
+  }
+
+  /* ---------- старт ---------- */
+  renderCard();
+</script>
+
+</body>
+</html>

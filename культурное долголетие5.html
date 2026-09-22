@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конструктор паспорта проекта долголетия</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #ffffff;
+            padding: 24px 16px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            align-items: flex-start;
+        }
+
+        .container {
+            max-width: 960px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 102, 204, 0.12);
+            padding: 28px 24px;
+            border: 1px solid #c2d9f0;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1a2a3a;
+            letter-spacing: -0.01em;
+        }
+
+        .header .sub {
+            font-size: 14px;
+            color: #0066cc;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .btn-pdf {
+            background: #0b8a2f;
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            padding: 10px 22px;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .btn-pdf:hover {
+            background: #096b24;
+        }
+
+        .btn-pdf svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        /* ---------- ТРИ ЗАКРЕПЛЁННЫЕ КОЛОНКИ ---------- */
+        .selector-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-auto-rows: 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+            align-items: stretch;
+        }
+
+        .selector-group {
+            display: flex;
+            flex-direction: column;
+            background: #f6faff;
+            border-radius: 10px;
+            padding: 14px 16px;
+            border: 1px solid #c2d9f0;
+            min-height: 180px;
+            height: 100%;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .selector-group label {
+            display: block;
+            font-weight: 700;
+            font-size: 14px;
+            color: #8b0000;
+            margin-bottom: 8px;
+            flex: 0 0 auto;
+            text-align: center;
+        }
+
+        .selector-group .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            align-content: flex-start;
+            align-items: flex-start;
+            flex: 1 1 auto;
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        .selector-group .options button {
+            background: #ffffff;
+            border: 1.5px solid #c2d9f0;
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #1a2a3a;
+            cursor: pointer;
+            transition: all 0.15s;
+            flex: 0 1 auto;
+            min-width: 0;
+            max-width: 100%;
+            white-space: normal;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            text-align: left;
+            line-height: 1.3;
+            box-sizing: border-box;
+        }
+
+        .selector-group .options button:hover {
+            border-color: #0066cc;
+            background: #e6f0fa;
+        }
+
+        .selector-group .options button.selected {
+            border-color: #0066cc;
+            background: #0066cc;
+            color: #ffffff;
+        }
+
+        .result-block {
+            display: none;
+            border: 2px solid #0066cc;
+            border-radius: 12px;
+            padding: 20px 22px;
+            background: #f6faff;
+            margin-top: 16px;
+        }
+
+        .result-block.visible {
+            display: block;
+        }
+
+        .result-block h3 {
+            font-size: 18px;
+            color: #0066cc;
+            margin-bottom: 12px;
+        }
+
+        .result-block .section {
+            margin-bottom: 12px;
+        }
+
+        .result-block .section h4 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a2a3a;
+            border-bottom: 1px solid #c2d9f0;
+            padding-bottom: 4px;
+            margin-bottom: 6px;
+        }
+
+        .result-block .section p,
+        .result-block .section li {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #1a2a3a;
+        }
+
+        .result-block .section ul {
+            padding-left: 20px;
+        }
+
+        .result-block .section ul li {
+            margin-bottom: 3px;
+        }
+
+        .result-block .section strong {
+            color: #0066cc;
+        }
+
+        /* Строка для вписывания названия */
+        .fill-line {
+            display: inline-block;
+            min-width: 520px;
+            max-width: 100%;
+            border-bottom: 2px solid #1a2a3a;
+            vertical-align: bottom;
+            height: 1.2em;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                border: 1px solid #ccc;
+                border-radius: 0;
+            }
+            .btn-pdf {
+                display: none;
+            }
+            .selector-grid {
+                display: none;
+            }
+            .result-block {
+                display: block !important;
+                border: 1px solid #000;
+                background: #fff;
+            }
+            .result-block .section h4 {
+                border-bottom-color: #ccc;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .container {
+                padding: 16px 12px;
+            }
+            .header h1 {
+                font-size: 19px;
+            }
+            .selector-grid {
+                grid-template-columns: 1fr;
+                grid-auto-rows: auto;
+            }
+            .selector-group {
+                min-height: auto;
+            }
+            .selector-group .options button {
+                font-size: 12px;
+                padding: 5px 10px;
+            }
+            .result-block {
+                padding: 16px;
+            }
+            .result-block .section p,
+            .result-block .section li {
+                font-size: 13px;
+            }
+            .fill-line {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="constructorContainer">
+
+        <!-- Шапка -->
+        <div class="header">
+            <div>
+                <h1>🧩 Конструктор паспорта проекта долголетия</h1>
+                <div class="sub">Выберите три параметра → получите паспорт</div>
+            </div>
+            <button class="btn-pdf" id="pdfButton">
+                <svg viewBox="0 0 24 24"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z"/></svg>
+                Скачать PDF
+            </button>
+        </div>
+
+        <!-- Выбор параметров -->
+        <div class="selector-grid">
+
+            <!-- Формат -->
+            <div class="selector-group" data-group="format">
+                <label>Формат проекта</label>
+                <div class="options">
+                    <button data-value="dance">Танцевальные программы</button>
+                    <button data-value="master">Мастер-классы</button>
+                    <button data-value="excursion">Экскурсии</button>
+                    <button data-value="lab">Творческие лаборатории</button>
+                    <button data-value="club">Клубы по интересам</button>
+                </div>
+            </div>
+
+            <!-- Учреждение -->
+            <div class="selector-group" data-group="institution">
+                <label>Тип учреждения</label>
+                <div class="options">
+                    <button data-value="dk">Клубно-досуговое учреждение</button>
+                    <button data-value="library">Библиотека</button>
+                    <button data-value="theater">Театр</button>
+                    <button data-value="museum">Музей</button>
+                    <button data-value="park">Парк</button>
+                </div>
+            </div>
+
+            <!-- Возраст -->
+            <div class="selector-group" data-group="age">
+                <label>Возрастная группа</label>
+                <div class="options">
+                    <button data-value="60">60+</button>
+                    <button data-value="70">70+</button>
+                    <button data-value="80">80+</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Результат -->
+        <div class="result-block" id="resultBlock">
+            <h3>Паспорт проекта</h3>
+            <div id="templateContent"></div>
+        </div>
+
+    </div>
+
+    <script>
+        (function() {
+            const groups = document.querySelectorAll('.selector-group');
+            const resultBlock = document.getElementById('resultBlock');
+            const templateContent = document.getElementById('templateContent');
+
+            const state = {
+                format: null,
+                institution: null,
+                age: null
+            };
+
+            // Данные для шаблонов
+            const templates = {
+                dance: {
+                    desc: 'Танцевальные вечера с разными стилями, мастер-классы от ведущих, концертные вставки.',
+                    activities: 'Провести 12 танцевальных программ в течение сезона. Организовать мастер-классы по вальсу, танго, народным и современным танцам. Привлечь любительские коллективы для концертных номеров.',
+                    result: 'Охватить не менее 2000 участников. Сформировать сообщество серебряных волонтёров. Подготовить медиапакет для продвижения. Зафиксировать рост посещаемости учреждения среди аудитории 55+.'
+                },
+                master: {
+                    desc: 'Цикл занятий по рукоделию, живописи, керамике, цифровой грамотности.',
+                    activities: 'Провести 20 мастер-классов. Адаптировать задания под физические возможности участников. Организовать итоговую выставку работ.',
+                    result: 'Охватить не менее 500 участников. Провести выставку с участием не менее 100 посетителей. Собрать методические материалы для тиражирования.'
+                },
+                excursion: {
+                    desc: 'Пешеходные и автобусные экскурсии по музеям и историческим местам.',
+                    activities: 'Провести 15 экскурсий с адаптированными маршрутами. Обеспечить транспорт, аудиогиды, места для отдыха.',
+                    result: 'Охватить не менее 800 участников. Создать фотоархив экскурсий. Сформировать сообщество экскурсантов для регулярных выездов.'
+                },
+                lab: {
+                    desc: 'Регулярные занятия по фотографии, работе с архивами, арт-медиациям.',
+                    activities: 'Провести 30 занятий. Привлечь экспертов из музеев и архивов. Организовать итоговую выставку или презентацию.',
+                    result: 'Охватить не менее 300 участников. Создать методические материалы. Сформировать сообщество постоянных участников.'
+                },
+                club: {
+                    desc: 'Литературные гостиные, шахматные клубы, хоровые занятия, дискуссионные клубы.',
+                    activities: 'Организовать регулярные встречи не реже раза в неделю. Привлечь серебряных волонтёров для соорганизации.',
+                    result: 'Сформировать постоянную группу не менее 30 участников. Добиться регулярных повторных посещений. Зафиксировать рост вовлечённости в жизнь учреждения.'
+                }
+            };
+
+            // Предложный падеж с прилагательным (для фразы "В ... нет доступных форматов")
+            const institutionLocative = {
+                dk: 'нашем клубно-досуговом учреждении',
+                library: 'нашей библиотеке',
+                theater: 'нашем театре',
+                museum: 'нашем музее',
+                park: 'нашем парке'
+            };
+
+            // Именительный падеж (для фразы "Площадка — ...")
+            const institutionNominative = {
+                dk: 'клубно-досуговое учреждение',
+                library: 'библиотека',
+                theater: 'театр',
+                museum: 'музей',
+                park: 'парк'
+            };
+
+            const ageLabels = {
+                '60': '60+',
+                '70': '70+',
+                '80': '80+'
+            };
+
+            function generateTemplate() {
+                const formatData = templates[state.format];
+                if (!formatData) return null;
+
+                const institutionLoc = institutionLocative[state.institution] || 'учреждении культуры';
+                const institutionNom = institutionNominative[state.institution] || 'учреждение культуры';
+                const ageLabel = ageLabels[state.age] || '60+';
+
+                return `
+                    <div class="section">
+                        <h4>Название проекта</h4>
+                        <p><span class="fill-line"></span> (впишите название)</p>
+                    </div>
+                    <div class="section">
+                        <h4>Актуальность и проблема</h4>
+                        <p>В ${institutionLoc} нет доступных форматов для людей ${ageLabel}. При этом старшее поколение активно ищет возможности для досуга, общения и физической активности. Мы восполняем этот пробел и создаём пространство, где пожилые люди чувствуют себя нужными.</p>
+                    </div>
+                    <div class="section">
+                        <h4>Целевая аудитория</h4>
+                        <p>Жители города ${ageLabel}. Планируемый охват — не менее 300 участников за проект.</p>
+                    </div>
+                    <div class="section">
+                        <h4>Цель и задачи</h4>
+                        <p><strong>Цель:</strong> Создать доступную и востребованную площадку для досуга и социализации людей ${ageLabel}.</p>
+                        <p><strong>Задачи:</strong> ${formatData.activities}</p>
+                    </div>
+                    <div class="section">
+                        <h4>Форматы и адаптация</h4>
+                        <p>${formatData.desc}</p>
+                        <p>Адаптация под ${ageLabel}: места для отдыха, крупные шрифты, дружелюбная подача, возможность участвовать с любым уровнем подготовки.</p>
+                    </div>
+                    <div class="section">
+                        <h4>Ресурсное обеспечение</h4>
+                        <p>Площадка — ${institutionNom}. Организатор — учреждение культуры. Партнёры — социальные службы, ветеранские организации, волонтёры.</p>
+                    </div>
+                    <div class="section">
+                        <h4>Планируемые результаты</h4>
+                        <p>${formatData.result}</p>
+                    </div>
+                    <div class="section">
+                        <h4>Устойчивость</h4>
+                        <p>После завершения проекта останутся методические материалы, сообщество участников и серебряных волонтёров, медиапакет. Проект станет регулярной частью работы учреждения.</p>
+                    </div>
+                    <div class="section">
+                        <h4>Софинансирование</h4>
+                        <p>Учреждение предоставляет помещение, оборудование и труд сотрудников. Планируем привлечь партнёров для покрытия расходных материалов. Соотношение суммы запроса и суммы софинансирования — 60:40.</p>
+                    </div>
+                `;
+            }
+
+            function updateResult() {
+                const allSelected = state.format && state.institution && state.age;
+
+                if (allSelected) {
+                    const html = generateTemplate();
+                    if (html) {
+                        templateContent.innerHTML = html;
+                        resultBlock.classList.add('visible');
+                    }
+                } else {
+                    resultBlock.classList.remove('visible');
+                }
+            }
+
+            // Обработка выбора
+            groups.forEach(group => {
+                const groupName = group.dataset.group;
+                const buttons = group.querySelectorAll('.options button');
+
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        buttons.forEach(b => b.classList.remove('selected'));
+                        this.classList.add('selected');
+
+                        state[groupName] = this.dataset.value;
+
+                        updateResult();
+                    });
+                });
+            });
+
+            // PDF через print
+            document.getElementById('pdfButton').addEventListener('click', function() {
+                window.print();
+            });
+
+            // Инициализация
+            updateResult();
+        })();
+    </script>
+
+</body>
+</html>
