@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Проверка устава для заявки в ПФКИ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #eef3fb 0%, #e3ecf7 100%);
+    min-height: 100vh;
+    padding: 30px 16px;
+    color: #1a2233;
+  }
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(23, 55, 110, 0.12);
+    padding: 36px 32px 32px;
+  }
+  .lead {
+    font-size: 20px;
+    line-height: 1.45;
+    color: #6b3f1d;
+    font-weight: 700;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  .doc-title {
+    font-weight: 700;
+    color: #d94848;
+    margin: 0 0 4px;
+    font-size: 15px;
+    text-align: left;
+  }
+  .doc-sub {
+    font-size: 13px;
+    color: #6b7793;
+    margin-bottom: 18px;
+    text-align: left;
+  }
+  .points {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .point {
+    position: relative;
+    padding: 16px 18px;
+    border: 2px solid #dbe3f0;
+    background: #f9fbff;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all .2s ease;
+    user-select: none;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: #22304a;
+  }
+  .point:hover {
+    border-color: #b7c8e8;
+    background: #f2f7ff;
+    transform: translateY(-1px);
+  }
+  .point .num {
+    display: block;
+    font-weight: 700;
+    color: #3a5fa8;
+    margin-bottom: 4px;
+    font-size: 13.5px;
+  }
+  .point .text { display: block; }
+
+  /* Правильно найденная ошибка — фиолетовый */
+  .point.correct {
+    border-color: #7c3aed;
+    background: #f3ecfe;
+  }
+  .point.correct .num { color: #7c3aed; }
+  .point.correct::after {
+    content: "✓";
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    width: 24px;
+    height: 24px;
+    background: #7c3aed;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  /* Ошибочный выбор (пункт без ошибки) — красный */
+  .point.wrong {
+    border-color: #d94848;
+    background: #fdecec;
+  }
+  .point.wrong .num { color: #d94848; }
+  .point.wrong::after {
+    content: "✕";
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    width: 24px;
+    height: 24px;
+    background: #d94848;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  /* Заблокированные (некликабельные) пункты после ошибки */
+  .points.locked .point:not(.correct):not(.wrong) {
+    opacity: .5;
+    cursor: not-allowed;
+  }
+  .points.locked .point:not(.correct):not(.wrong):hover {
+    border-color: #dbe3f0;
+    background: #f9fbff;
+    transform: none;
+  }
+
+  .bottom {
+    margin-top: 26px;
+    display: flex;
+    justify-content: center;
+  }
+  .btn-reset {
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    padding: 13px 30px;
+    cursor: pointer;
+    background: #143a7a;
+    color: #fff;
+    transition: all .2s ease;
+  }
+  .btn-reset:hover {
+    background: #1e4f9c;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(20, 58, 122, .3);
+  }
+
+  /* Модальное окно */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 28, 55, 0.55);
+    backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+    z-index: 100;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .modal {
+    position: relative;
+    background: #fff;
+    border-radius: 18px;
+    max-width: 520px;
+    width: 100%;
+    padding: 30px 30px 26px;
+    box-shadow: 0 20px 60px rgba(10, 25, 55, .35);
+    transform: translateY(12px) scale(.97);
+    transition: transform .25s ease;
+  }
+  .modal-overlay.open .modal {
+    transform: translateY(0) scale(1);
+  }
+  .modal .title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #143a7a;
+    line-height: 1.35;
+    padding-right: 30px;
+  }
+  .modal.good .title { color: #5b21b6; }
+  .modal.bad .title { color: #8f2a2a; }
+  .modal .desc {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: #3a4663;
+  }
+  .modal .close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: #eef3fb;
+    color: #3a5fa8;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .18s ease, transform .18s ease;
+  }
+  .modal .close:hover {
+    background: #dde7f6;
+    transform: rotate(90deg);
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <p class="lead">Кликните по двум пунктам, из-за которых фонд отклонит заявку или обнулит баллы</p>
+
+    <p class="doc-title">Устав НКО-партнёра</p>
+    <p class="doc-sub">Раздел 2. Предмет и цели деятельности (фрагмент)</p>
+
+    <div class="points" id="points">
+      <div class="point" data-key="2.1">
+        <span class="num">[Пункт 2.1]</span>
+        <span class="text">«Основной целью Организации является предоставление услуг в сфере культуры, искусства, сохранения исторического наследия и просвещения граждан».</span>
+      </div>
+
+      <div class="point" data-key="2.2">
+        <span class="num">[Пункт 2.2]</span>
+        <span class="text">«Организация имеет право осуществлять предпринимательскую деятельность для достижения уставных целей через продажу билетов на мероприятия и реализацию сувенирной продукции».</span>
+      </div>
+
+      <div class="point" data-key="2.3">
+        <span class="num">[Пункт 2.3]</span>
+        <span class="text">«Для реализации уставных задач Организация осуществляет информационные услуги, консультационную деятельность, проведение выставок, фестивалей и мастер-классов».</span>
+      </div>
+
+      <div class="point" data-key="2.4">
+        <span class="num">[Пункт 2.4]</span>
+        <span class="text">«Дополнительно Организация осуществляет коммерческое риелторское обслуживание, оказание юридических услуг населению и оптовую торговлю строительными материалами».</span>
+      </div>
+    </div>
+
+    <div class="bottom">
+      <button class="btn-reset" id="resetBtn">Начать заново</button>
+    </div>
+  </div>
+
+  <!-- Модальное окно -->
+  <div class="modal-overlay" id="overlay">
+    <div class="modal" id="modal">
+      <button class="close" id="closeBtn" aria-label="Закрыть">✕</button>
+      <div class="title" id="modalTitle"></div>
+      <div class="desc" id="modalDesc"></div>
+    </div>
+  </div>
+
+<script>
+  const DATA = {
+    "2.1": {
+      good: true,
+      title: "Здесь ошибки нет",
+      desc: "Уставные цели организации напрямую связаны с культурой и просвещением. Это позволит легко обосновать соответствие традиционным ценностям."
+    },
+    "2.2": {
+      good: false,
+      title: "Правильно, здесь ошибка!",
+      desc: "С 3 марта 2026 года действует Федеральный закон № 30-ФЗ. Формулировку «предпринимательская деятельность» необходимо заменить на «приносящая доход деятельность». С этой ошибкой юристы фонда не допустят заявку."
+    },
+    "2.3": {
+      good: true,
+      title: "Здесь ошибки нет",
+      desc: "Перечень видов деятельности соответствует грантовой практике и культурным проектам."
+    },
+    "2.4": {
+      good: false,
+      title: "Правильно, здесь ошибка!",
+      desc: "Если виды деятельности НКО уходят в коммерческую торговлю и риелторские услуги, юристы фонда усомнятся в некоммерческом характере организации. Обосновать соответствие проекта 17 традиционным ценностям с таким уставом крайне сложно."
+    }
+  };
+
+  const pointsWrap = document.getElementById('points');
+  const points = document.querySelectorAll('.point');
+  const overlay = document.getElementById('overlay');
+  const modal = document.getElementById('modal');
+  const titleEl = document.getElementById('modalTitle');
+  const descEl = document.getElementById('modalDesc');
+  const closeBtn = document.getElementById('closeBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  let locked = false;
+
+  function lockAll() {
+    locked = true;
+    pointsWrap.classList.add('locked');
+  }
+
+  function closeModal() {
+    overlay.classList.remove('open');
+  }
+
+  points.forEach(p => {
+    p.addEventListener('click', () => {
+      if (locked) return;
+      if (p.classList.contains('correct') || p.classList.contains('wrong')) return;
+
+      const key = p.dataset.key;
+      const info = DATA[key];
+      if (!info) return;
+
+      const isRealError = !info.good;
+
+      p.classList.add(isRealError ? 'correct' : 'wrong');
+
+      modal.classList.remove('good', 'bad');
+      modal.classList.add(isRealError ? 'good' : 'bad');
+      titleEl.textContent = info.title;
+      descEl.textContent = info.desc;
+      overlay.classList.add('open');
+
+      // Если игрок ошибся — блокируем всё до «Начать заново»
+      if (!isRealError) {
+        lockAll();
+      }
+    });
+  });
+
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    closeModal();
+    locked = false;
+    pointsWrap.classList.remove('locked');
+    points.forEach(p => p.classList.remove('correct', 'wrong'));
+  });
+</script>
+</body>
+</html>

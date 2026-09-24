@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Смета: оставить или удалить</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #eef3fb 0%, #e3ecf7 100%);
+    min-height: 100vh;
+    padding: 30px 16px;
+    color: #1a2233;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .container {
+    width: 100%;
+    max-width: 820px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(23, 55, 110, 0.12);
+    padding: 34px 32px 32px;
+  }
+
+  .lead {
+    font-size: 19px;
+    font-weight: 700;
+    color: #6b3f1d;
+    text-align: center;
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+  .sub {
+    font-size: 15px;
+    color: #6b7793;
+    text-align: center;
+    margin-bottom: 22px;
+    line-height: 1.5;
+  }
+
+  .card-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .nav-btn {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 2px solid #c9d5e8;
+    background: #fff;
+    color: #143a7a;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .2s ease;
+    user-select: none;
+  }
+  .nav-btn:hover:not(:disabled) {
+    background: #143a7a;
+    color: #fff;
+    border-color: #143a7a;
+    transform: translateY(-1px);
+  }
+  .nav-btn:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+  }
+
+  .slide-wrap {
+    flex: 1;
+    position: relative;
+    min-height: 130px;
+  }
+  .slide {
+    display: none;
+    animation: fade .3s ease;
+  }
+  .slide.active { display: block; }
+  .slide.back { animation: fadeBack .3s ease; }
+  @keyframes fade {
+    from { opacity: 0; transform: translateX(16px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes fadeBack {
+    from { opacity: 0; transform: translateX(-16px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .card {
+    position: relative;
+    border: 2px solid #dbe3f0;
+    background: #f9fbff;
+    border-radius: 16px;
+    padding: 22px 22px 20px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #22304a;
+    cursor: grab;
+    transition: border-color .25s ease, background .25s ease, transform .18s ease;
+  }
+  .card:hover { border-color: #b7c8e8; }
+  .card.dragging { opacity: .4; cursor: grabbing; }
+  .card .text { display: block; }
+
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+  .column {
+    border: 2px dashed #c9d5e8;
+    border-radius: 16px;
+    background: #f9fbff;
+    min-height: 130px;
+    display: flex;
+    flex-direction: column;
+    transition: border-color .2s ease, background .2s ease, opacity .2s ease;
+  }
+  .column.drag-over {
+    border-color: #7c3aed;
+    background: #f6f1fe;
+  }
+  .column.deny {
+    border-color: #d94848;
+    background: #fdecec;
+    opacity: .7;
+  }
+  .column-head {
+    padding: 12px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    border-bottom: 2px dashed #c9d5e8;
+    text-align: center;
+    border-radius: 14px 14px 0 0;
+  }
+  .column.keep .column-head { color: #1f9e5c; }
+  .column.drop .column-head { color: #d94848; }
+  .column-body {
+    flex: 1;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .column-body:empty::after {
+    content: "Перетащите карточку сюда";
+    display: block;
+    text-align: center;
+    font-size: 13px;
+    color: #9aa7c2;
+    padding: 20px 8px;
+  }
+
+  .column .card {
+    cursor: default;
+    margin: 0;
+    font-size: 14px;
+    padding: 12px 14px;
+    border-color: #1f9e5c;
+    background: #eafaf1;
+  }
+  .column.drop .card {
+    border-color: #d94848;
+    background: #fdecec;
+  }
+
+  .bottom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .btn-reset {
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    padding: 13px 28px;
+    cursor: pointer;
+    background: #7c3aed;
+    color: #fff;
+    transition: all .2s ease;
+  }
+  .btn-reset:hover {
+    background: #6a2fd6;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(124, 58, 237, .35);
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 28, 55, 0.55);
+    backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+    z-index: 100;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .modal {
+    position: relative;
+    background: #fff;
+    border-radius: 18px;
+    max-width: 540px;
+    width: 100%;
+    padding: 30px 30px 26px;
+    box-shadow: 0 20px 60px rgba(10, 25, 55, .35);
+    transform: translateY(12px) scale(.97);
+    transition: transform .25s ease;
+  }
+  .modal-overlay.open .modal {
+    transform: translateY(0) scale(1);
+  }
+  .modal .title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #12663a;
+    line-height: 1.35;
+    padding-right: 30px;
+  }
+  .modal .desc {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: #3a4663;
+  }
+  .modal .close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: #eef3fb;
+    color: #3a5fa8;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .18s ease, transform .18s ease;
+  }
+  .modal .close:hover {
+    background: #dde7f6;
+    transform: rotate(90deg);
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <p class="lead">Распределите позиции по двум колонкам — перетащите карточки</p>
+    <p class="sub">Что нужно оставить в смете, а что — удалить из нее?</p>
+
+    <div class="card-row">
+      <button class="nav-btn" id="prevBtn" aria-label="Предыдущая">‹</button>
+      <div class="slide-wrap" id="slides"></div>
+      <button class="nav-btn" id="nextBtn" aria-label="Следующая">›</button>
+    </div>
+
+    <div class="columns" id="columns">
+      <div class="column keep" data-zone="keep">
+        <div class="column-head">✅ Оставить в смете</div>
+        <div class="column-body" id="keepBody"></div>
+      </div>
+      <div class="column drop" data-zone="drop">
+        <div class="column-head">❌ Удалить из сметы</div>
+        <div class="column-body" id="dropBody"></div>
+      </div>
+    </div>
+
+    <div class="bottom">
+      <button class="btn-reset" id="resetBtn">Начать заново</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="overlay">
+    <div class="modal" id="modal">
+      <button class="close" id="closeBtn" aria-label="Закрыть">✕</button>
+      <div class="title" id="modalTitle">Позиция определена правильно!</div>
+      <div class="desc" id="modalDesc"></div>
+    </div>
+  </div>
+
+<script>
+  const ITEMS = [
+    { id: 1,
+      text: "Покупка профессиональной видеокамеры за 120 000 руб. для съемки 1 итогового 10-минутного ролика проекта",
+      zone: "drop",
+      explain: "Покупка дорогой техники ради разовой краткосрочной задачи считается необоснованной. Эксперты фонда заставят заменить покупку на аренду аналогичной камеры на 2–3 дня." },
+    { id: 2,
+      text: "Организация двухразового питания участников выездной 3-дневной лаборатории по расчету 800 руб./чел. в день",
+      zone: "keep",
+      explain: "Питание иногородних участников многодневных интенсивов разрешено, если сумма не превышает стандартные нормативы и подкреплена коммерческим предложением от общепита." },
+    { id: 3,
+      text: "Размещение анонсов в местной газете по коммерческому предложению без указания тиража и охвата аудитории",
+      zone: "drop",
+      explain: "Для медийных расходов недостаточно одного коммерческого предложения. Эксперты требуют указывать конкретные метрики: тираж издания, частоту выходов и охват читателей." },
+    { id: 4,
+      text: "Разработка авторского фирменного стиля и персонажей проекта художником по договору ГПХ с техническим заданием",
+      zone: "keep",
+      explain: "В отличие от закупки готовых стоковых картинок, оплата работы дизайнера над уникальным визуал-контентом по договору ГПХ полностью одобрена фондом." },
+    { id: 5,
+      text: "Приобретение подарочных сертификатов и сувениров для зрителей на 100 000 руб. (18% от всей суммы гранта)",
+      zone: "drop",
+      explain: "Призовой фонд не должен превышать 5–10% от бюджета заявки. Раздутый подарочный фонд снижает баллы по критерию «Реалистичность бюджета»." },
+    { id: 6,
+      text: "Оплата таргетированной рекламы с расчетом стоимости клика и показа по тарифной сетке агентства",
+      zone: "keep",
+      explain: "Маркетинговый расход прозрачен: статья подкреплена расчетом стоимости клика, прогнозом охвата и прайс-листом рекламного агентства." },
+    { id: 7,
+      text: "Аренда светового оборудования у организации-партнера по рыночной стоимости с представлением прайс-листа",
+      zone: "keep",
+      explain: "Аренда техники у партнеров по рыночным ценам с подтверждающими документами не запрещена и признается чистой сделкой." },
+    { id: 8,
+      text: "Оплата командировочных расходов эксперта с включением личных поездок на такси по городу без маршрутного листа",
+      zone: "drop",
+      explain: "Проезд экспертов междугородом заложить можно, но абстрактные чеки на городское такси без обоснования маршрута юристы фонда признают нецелевыми." }
+  ];
+
+  const slidesWrap = document.getElementById('slides');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const keepBody = document.getElementById('keepBody');
+  const dropBody = document.getElementById('dropBody');
+  const keepCol = keepBody.parentElement;
+  const dropCol = dropBody.parentElement;
+  const resetBtn = document.getElementById('resetBtn');
+  const overlay = document.getElementById('overlay');
+  const modal = document.getElementById('modal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalDesc = document.getElementById('modalDesc');
+  const closeBtn = document.getElementById('closeBtn');
+
+  const TOTAL = ITEMS.length;
+  let current = 0;
+  let order = [];
+
+  function build() {
+    // Очищаем
+    slidesWrap.innerHTML = '';
+    keepBody.innerHTML = '';
+    dropBody.innerHTML = '';
+    overlay.classList.remove('open');
+
+    // Перемешанный порядок
+    order = [...ITEMS].sort(() => Math.random() - 0.5);
+
+    order.forEach((item, i) => {
+      const slide = document.createElement('div');
+      slide.className = 'slide' + (i === 0 ? ' active' : '');
+      slide.dataset.index = i;
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.id = item.id;
+      card.dataset.zone = item.zone;
+      card.draggable = true;
+      card.innerHTML = `<span class="text">${item.text}</span>`;
+      slide.appendChild(card);
+      slidesWrap.appendChild(slide);
+    });
+
+    current = 0;
+    render();
+  }
+
+  function getSlides() {
+    return slidesWrap.querySelectorAll('.slide');
+  }
+
+  function render() {
+    const slides = getSlides();
+    slides.forEach((s, i) => {
+      s.classList.remove('active', 'back');
+      if (i === current) s.classList.add('active');
+    });
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === TOTAL - 1;
+
+    // Автопереход, если на текущем слайде нет карточки
+    if (!slides[current].querySelector('.card')) {
+      const nextFree = [...slides].findIndex(s => s.querySelector('.card'));
+      if (nextFree !== -1) {
+        current = nextFree;
+        render();
+      }
+    }
+  }
+
+  function go(dir) {
+    const slides = getSlides();
+    let next = current + dir;
+    while (next >= 0 && next < TOTAL && !slides[next].querySelector('.card')) {
+      next += dir;
+    }
+    if (next < 0 || next >= TOTAL) return;
+    current = next;
+    render();
+    if (dir < 0) getSlides()[current].classList.add('back');
+  }
+
+  prevBtn.addEventListener('click', () => go(-1));
+  nextBtn.addEventListener('click', () => go(1));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') go(-1);
+    if (e.key === 'ArrowRight') go(1);
+  });
+
+  let draggedCard = null;
+
+  slidesWrap.addEventListener('dragstart', (e) => {
+    const card = e.target.closest('.card');
+    if (!card) return;
+    draggedCard = card;
+    e.dataTransfer.setData('text/plain', card.dataset.id);
+    e.dataTransfer.effectAllowed = 'move';
+    card.classList.add('dragging');
+  });
+  slidesWrap.addEventListener('dragend', () => {
+    if (draggedCard) draggedCard.classList.remove('dragging');
+    draggedCard = null;
+    keepCol.classList.remove('drag-over', 'deny');
+    dropCol.classList.remove('drag-over', 'deny');
+  });
+
+  function handleDragOver(colEl, zone) {
+    if (!draggedCard) return;
+    const correctZone = draggedCard.dataset.zone;
+    if (zone === correctZone) {
+      colEl.classList.add('drag-over');
+      colEl.classList.remove('deny');
+    } else {
+      colEl.classList.add('deny');
+      colEl.classList.remove('drag-over');
+    }
+  }
+
+  function handleDragLeave(colEl) {
+    colEl.classList.remove('drag-over', 'deny');
+  }
+
+  function handleDrop(colEl, zone, bodyEl) {
+    colEl.classList.remove('drag-over', 'deny');
+    if (!draggedCard) return;
+
+    const correctZone = draggedCard.dataset.zone;
+    if (zone !== correctZone) return;
+
+    const card = draggedCard;
+    const item = ITEMS.find(it => String(it.id) === String(card.dataset.id));
+
+    card.classList.remove('dragging');
+    card.draggable = false;
+    bodyEl.appendChild(card);
+
+    openModal(item);
+
+    draggedCard = null;
+    render();
+
+    setTimeout(() => {
+      const slides = getSlides();
+      const nextFree = [...slides].findIndex(s => s.querySelector('.card'));
+      if (nextFree !== -1) {
+        current = nextFree;
+        render();
+      } else {
+        render();
+      }
+    }, 60);
+  }
+
+  keepCol.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    handleDragOver(keepCol, 'keep');
+  });
+  dropCol.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    handleDragOver(dropCol, 'drop');
+  });
+  keepCol.addEventListener('dragleave', () => handleDragLeave(keepCol));
+  dropCol.addEventListener('dragleave', () => handleDragLeave(dropCol));
+  keepCol.addEventListener('drop', (e) => {
+    e.preventDefault();
+    handleDrop(keepCol, 'keep', keepBody);
+  });
+  dropCol.addEventListener('drop', (e) => {
+    e.preventDefault();
+    handleDrop(dropCol, 'drop', dropBody);
+  });
+
+  function openModal(item) {
+    modalTitle.textContent = "Позиция определена правильно!";
+    modalDesc.textContent = item.explain;
+    overlay.classList.add('open');
+  }
+
+  function closeModal() {
+    overlay.classList.remove('open');
+  }
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    closeModal();
+    build();
+  });
+
+  build();
+</script>
+</body>
+</html>

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Чек-лист: проверяем заявку на грант</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #ffffff;
+    min-height: 100vh;
+    padding: 30px 16px;
+    color: #1a2233;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .container {
+    width: 100%;
+    max-width: 1600px;
+    background: #ffffff;
+    padding: 20px 8px 32px;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #d94848;
+    line-height: 1.35;
+    text-align: center;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  h1 .green-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #1f9e5c;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .sub {
+    font-size: 20px;
+    font-weight: 700;
+    color: #d94848;
+    text-align: center;
+    margin-bottom: 22px;
+    line-height: 1.35;
+  }
+
+  /* 6 колонок в один ряд */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    align-items: start;
+  }
+
+  .section {
+    border: 2px solid #dbe3f0;
+    border-radius: 14px;
+    background: #ffffff;
+    overflow: hidden;
+    transition: border-color .25s ease;
+  }
+  .section.all-done {
+    border-color: #1f9e5c;
+  }
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #143a7a;
+    background: #ffffff;
+    user-select: none;
+    line-height: 1.3;
+  }
+  .section-head .num {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #143a7a;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .section.all-done .section-head .num { background: #1f9e5c; }
+
+  .section-body {
+    padding: 2px 12px 12px;
+    background: #ffffff;
+  }
+
+  .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 7px 0;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px dashed #e2e9f5;
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: #22304a;
+    transition: color .15s ease;
+    background: #ffffff;
+  }
+  .item:last-child { border-bottom: none; }
+  .item:hover { color: #143a7a; }
+
+  .checkbox {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #1a2233;
+    border-radius: 5px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+    transition: all .18s ease;
+  }
+  .checkbox::after {
+    content: "✓";
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+    opacity: 0;
+    transform: scale(.4);
+    transition: all .18s ease;
+  }
+  .item.checked .checkbox {
+    background: #1f9e5c;
+    border-color: #1f9e5c;
+  }
+  .item.checked .checkbox::after {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .item.checked {
+    color: #6b7793;
+    text-decoration: line-through;
+    text-decoration-color: #b7c8e8;
+    text-decoration-thickness: 1px;
+  }
+
+  .bottom {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    padding: 13px 28px;
+    cursor: pointer;
+    transition: all .2s ease;
+  }
+  .btn-pdf {
+    background: #1f9e5c;
+    color: #fff;
+  }
+  .btn-pdf:hover {
+    background: #178a4e;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(31, 158, 92, .35);
+  }
+  .btn-reset {
+    background: #7c3aed;
+    color: #fff;
+  }
+  .btn-reset:hover {
+    background: #6a2fd6;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(124, 58, 237, .35);
+  }
+
+  @media (max-width: 1200px) {
+    .grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 700px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  @media print {
+    @page { size: A4 landscape; margin: 8mm; }
+    body {
+      background: #fff;
+      padding: 0;
+      display: block;
+      font-size: 9px;
+    }
+    .container {
+      box-shadow: none;
+      padding: 0;
+      max-width: 100%;
+    }
+    h1 { font-size: 13px; margin-bottom: 2px; gap: 6px; }
+    h1 .green-check {
+      width: 18px;
+      height: 18px;
+      font-size: 11px;
+      background: #1f9e5c !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .sub { font-size: 13px; margin-bottom: 8px; }
+    .bottom { display: none !important; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+    }
+    .section {
+      border: 1px solid #999;
+      border-radius: 5px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    .section-head {
+      background: #fff !important;
+      color: #000 !important;
+      padding: 5px 6px;
+      font-size: 9.5px;
+      gap: 5px;
+    }
+    .section-head .num {
+      width: 14px;
+      height: 14px;
+      font-size: 8.5px;
+      background: #333 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .section-body {
+      padding: 2px 6px 6px;
+    }
+    .item {
+      color: #000 !important;
+      text-decoration: none !important;
+      font-size: 8px;
+      line-height: 1.3;
+      padding: 3px 0;
+      gap: 4px;
+    }
+    .checkbox {
+      width: 10px;
+      height: 10px;
+      border-width: 1px;
+      border-radius: 3px;
+    }
+    .checkbox::after { font-size: 7.5px; }
+    .item.checked .checkbox {
+      background: #1f9e5c !important;
+      border-color: #1f9e5c !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .item.checked {
+      color: #555 !important;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>
+      <span class="green-check">✓</span>
+      Чек-лист
+    </h1>
+    <p class="sub">Проверяем заявку учреждения культуры на грант</p>
+
+    <div class="grid" id="checklist"></div>
+
+    <div class="bottom">
+      <button class="btn btn-pdf" id="pdfBtn">💾 Сохранить в PDF</button>
+      <button class="btn btn-reset" id="resetBtn">Сбросить</button>
+    </div>
+  </div>
+
+<script>
+  const CHECKLIST = [
+    {
+      title: "Юридическая база и возраст организации",
+      items: [
+        "Устав НКО-партнера приведен в соответствие с ФЗ № 30-ФЗ: термин «предпринимательская деятельность» заменен на «приносящая доход деятельность».",
+        "Возраст НКО-партнера учтен по правилам выбранного фонда: для Фонда президентских грантов — строго от 6 месяцев (до 1 млн руб.) или от 1 года (свыше 1 млн руб.); для ПФКИ возрастной ценз не установлен, но молодым НКО срезают баллы за опыт.",
+        "Оформлен внутренний пакет документов: приказ о назначении ответственного и учетная политика с кодом КФО 5.",
+        "Получено официальное согласие учредителя с указанием точных объемов софинансирования (обязательно с 2027 года)."
+      ]
+    },
+    {
+      title: "Содержательные разделы и традиционные ценности",
+      items: [
+        "Заполнено отдельное обязательное поле: выбрана минимум 1 из 17 традиционных духовно-нравственных ценностей и прописана механика работы с ней.",
+        "В поле «Уникальность» указаны 2–3 проекта-аналога и прописаны отличия. Фраза «аналогов нет» отсутствует.",
+        "Приложена заранее рассчитанная оценка восприятия аудиторией (для проектов свыше 20 млн рублей — обязательно, для остальных — рекомендовано)."
+      ]
+    },
+    {
+      title: "Смета и обоснование расходов",
+      items: [
+        "На каждую позицию грантовой части приложено коммерческое предложение с рыночной ценой, прайс-лист или справка о тарифах.",
+        "Из сметы удалены стоковые фотографии, премиальные фонды без расчета часов и размытые «непредвиденные расходы»."
+      ]
+    },
+    {
+      title: "Расчет софинансирования",
+      items: [
+        "К заявке приложен детализированный расчет собственного вклада.",
+        "Труд волонтеров пересчитан по средней зарплате региона, а труд штатных сотрудников — от оклада по формулам фонда.",
+        "Собственный вклад доведен до 50% и более за счет балансового имущества и залов для получения высших 9–10 баллов."
+      ]
+    },
+    {
+      title: "Медийные активы и соцсети",
+      items: [
+        "Официальная страница НКО в соцсети привязана к Госуслугам, на сайте организации опубликованы годовые отчеты за прошлые периоды.",
+        "Статистика охватов и вовлеченности паблика переведена в рубли по рекламным тарифам и подкреплена скриншотами."
+      ]
+    },
+    {
+      title: "Партнеры и тайминг подачи",
+      items: [
+        "Письма поддержки оформлены на бланках с печатью, имеют дату не старше 6 месяцев и содержат перечень конкретных предоставляемых ресурсов.",
+        "Заявка отправлена за 10 рабочих дней до дедлайна, итоговый PDF-файл полностью перепроверен."
+      ]
+    }
+  ];
+
+  const checklistWrap = document.getElementById('checklist');
+  const resetBtn = document.getElementById('resetBtn');
+  const pdfBtn = document.getElementById('pdfBtn');
+
+  function build() {
+    checklistWrap.innerHTML = '';
+
+    CHECKLIST.forEach((section, sIdx) => {
+      const secEl = document.createElement('div');
+      secEl.className = 'section';
+      secEl.dataset.sectionIndex = sIdx;
+
+      const head = document.createElement('div');
+      head.className = 'section-head';
+      head.innerHTML = `
+        <span class="num">${sIdx + 1}</span>
+        <span class="title">${section.title}</span>
+      `;
+      secEl.appendChild(head);
+
+      const body = document.createElement('div');
+      body.className = 'section-body';
+
+      section.items.forEach((text, iIdx) => {
+        const item = document.createElement('div');
+        item.className = 'item';
+        item.dataset.sectionIndex = sIdx;
+        item.dataset.itemIndex = iIdx;
+        item.innerHTML = `
+          <span class="checkbox"></span>
+          <span class="text">${text}</span>
+        `;
+        item.addEventListener('click', () => {
+          item.classList.toggle('checked');
+          updateCounts();
+        });
+        body.appendChild(item);
+      });
+
+      secEl.appendChild(body);
+      checklistWrap.appendChild(secEl);
+    });
+
+    updateCounts();
+  }
+
+  function updateCounts() {
+    checklistWrap.querySelectorAll('.section').forEach(secEl => {
+      const secItems = secEl.querySelectorAll('.item');
+      const secChecked = secEl.querySelectorAll('.item.checked').length;
+      secEl.classList.toggle('all-done', secChecked === secItems.length && secItems.length > 0);
+    });
+  }
+
+  resetBtn.addEventListener('click', () => {
+    checklistWrap.querySelectorAll('.item.checked').forEach(el => el.classList.remove('checked'));
+    updateCounts();
+  });
+
+  pdfBtn.addEventListener('click', () => {
+    setTimeout(() => window.print(), 100);
+  });
+
+  build();
+</script>
+</body>
+</html>

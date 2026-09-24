@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Квест: путь заявки в ПФКИ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #eef3fb 0%, #e3ecf7 100%);
+    min-height: 100vh;
+    padding: 30px 16px;
+    color: #1a2233;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .container {
+    width: 100%;
+    max-width: 860px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(23, 55, 110, 0.12);
+    padding: 34px 32px 32px;
+  }
+
+  .steps {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .step-dot {
+    flex: 1;
+    max-width: 90px;
+    height: 8px;
+    border-radius: 4px;
+    background: #dbe3f0;
+    transition: background .25s ease;
+  }
+  .step-dot.active { background: #143a7a; }
+  .step-dot.done { background: #1f9e5c; }
+  .step-dot.fail { background: #d94848; }
+
+  .slide {
+    display: none;
+    animation: fade .3s ease;
+  }
+  .slide.active { display: block; }
+  @keyframes fade {
+    from { opacity: 0; transform: translateX(16px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .step-title {
+    font-size: 19px;
+    font-weight: 700;
+    color: #143a7a;
+    line-height: 1.4;
+    margin-bottom: 12px;
+  }
+  .step-desc {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #3a4663;
+    margin-bottom: 20px;
+  }
+  .step-desc b { color: #143a7a; }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .option {
+    position: relative;
+    border: 2px solid #dbe3f0;
+    background: #f9fbff;
+    border-radius: 14px;
+    padding: 16px 18px;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: #22304a;
+    cursor: pointer;
+    transition: border-color .2s ease, background .2s ease, transform .18s ease;
+  }
+  .option:hover {
+    border-color: #b7c8e8;
+    background: #f2f7ff;
+    transform: translateY(-1px);
+  }
+  .option .text { display: block; }
+
+  .option.correct {
+    border-color: #1f9e5c;
+    background: #eafaf1;
+  }
+  .option.correct::after {
+    content: "✓";
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    width: 24px;
+    height: 24px;
+    background: #1f9e5c;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .option.wrong {
+    border-color: #d94848;
+    background: #fdecec;
+  }
+  .option.wrong::after {
+    content: "✕";
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    width: 24px;
+    height: 24px;
+    background: #d94848;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .bottom {
+    margin-top: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .btn-reset {
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 26px;
+    cursor: pointer;
+    background: #7c3aed;
+    color: #fff;
+    transition: all .2s ease;
+  }
+  .btn-reset:hover {
+    background: #6a2fd6;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(124, 58, 237, .35);
+  }
+  .btn-back {
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    border: 2px solid #7c3aed;
+    border-radius: 12px;
+    padding: 12px 24px;
+    cursor: pointer;
+    background: #fff;
+    color: #7c3aed;
+    transition: all .2s ease;
+  }
+  .btn-back:hover:not(:disabled) {
+    background: #f3ecfe;
+    transform: translateY(-1px);
+  }
+  .btn-back:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .btn-next {
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 34px;
+    cursor: pointer;
+    background: #f5c518;
+    color: #3a2c00;
+    transition: all .2s ease;
+    margin-left: auto;
+  }
+  .btn-next:hover:not(:disabled) {
+    background: #e8b800;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(245, 197, 24, .45);
+  }
+  .btn-next:disabled {
+    background: #ece0b0;
+    color: #8a7c50;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 28, 55, 0.55);
+    backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+    z-index: 100;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .modal {
+    position: relative;
+    background: #fff;
+    border-radius: 18px;
+    max-width: 560px;
+    width: 100%;
+    padding: 30px 30px 26px;
+    box-shadow: 0 20px 60px rgba(10, 25, 55, .35);
+    transform: translateY(12px) scale(.97);
+    transition: transform .25s ease;
+  }
+  .modal-overlay.open .modal {
+    transform: translateY(0) scale(1);
+  }
+  .modal .title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    line-height: 1.35;
+    padding-right: 30px;
+  }
+  .modal.good .title { color: #12663a; }
+  .modal.bad .title { color: #8f2a2a; }
+  .modal .desc {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: #3a4663;
+  }
+  .modal .close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: #eef3fb;
+    color: #3a5fa8;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .18s ease, transform .18s ease;
+  }
+  .modal .close:hover {
+    background: #dde7f6;
+    transform: rotate(90deg);
+  }
+
+  .options.locked .option:not(.correct):not(.wrong) {
+    opacity: .5;
+    cursor: not-allowed;
+  }
+  .options.locked .option:not(.correct):not(.wrong):hover {
+    border-color: #dbe3f0;
+    background: #f9fbff;
+    transform: none;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="steps" id="steps"></div>
+
+    <div id="slides"></div>
+
+    <div class="bottom">
+      <button class="btn-reset" id="resetBtn">Начать заново</button>
+      <button class="btn-back" id="backBtn">Вернуться назад</button>
+      <button class="btn-next" id="nextBtn">Далее</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="overlay">
+    <div class="modal" id="modal">
+      <button class="close" id="closeBtn" aria-label="Закрыть">✕</button>
+      <div class="title" id="modalTitle"></div>
+      <div class="desc" id="modalDesc"></div>
+    </div>
+  </div>
+
+<script>
+  const STEPS = [
+    {
+      title: "📍 Шаг 1. Проверяем визуал и письма партнеров",
+      desc: "В папке проекта лежат красивый стоковый клипарт из интернета и письмо поддержки от гильдии мастеров, полученное 7 месяцев назад. Ваши действия?",
+      options: [
+        {
+          text: "Заменить стоковые картинки на живые фото площадки, но оставить прежнее письмо гильдии, так как руководство и договоренности с ними не менялись.",
+          correct: false,
+          title: "🔴 Сбой!",
+          explain: "Письмо старше 6 месяцев снизит оценку за поддержку партнеров до 3–5 баллов. Для фонда важна актуальная дата документа, даже если партнер остался прежним. Квест провален. Вернитесь и измените решение."
+        },
+        {
+          text: "Запросить у гильдии свежее письмо с текущей датой, но попросить их указать просто общую фразу: «Оказываем финансовую и ресурсную поддержку на сумму 100 000 рублей» без детализации.",
+          correct: false,
+          title: "🔴 Сбой!",
+          explain: "Общая сумма без перечня конкретного оборудования или услуг признается экспертами формальной. Оценка за письмо составит всего 0–2 балла. Квест провален. Вернитесь и измените решение."
+        },
+        {
+          text: "Потратить 2 дня: провести съёмку реальной площадки и заказать у гильдии свежее письмо с детализацией (бесплатная аренда 5 верстаков на время фестиваля).",
+          correct: true,
+          title: "🟢 Успех!",
+          explain: "Вы получили живые кадры и актуальный документ с подтверждением материального софинансирования. Переходим к Шагу 2."
+        }
+      ]
+    },
+    {
+      title: "📍 Шаг 2. Оформляем раздел «Уникальность»",
+      desc: "В поле описания уникальности подготовлен текст. Какой вариант выберете перед отправкой?",
+      options: [
+        {
+          text: "Указать 2 похожих региональных фестиваля и прописать отличия: ваш проект включает интерактивные мастер-классы вместо сухих лекций.",
+          correct: true,
+          title: "🟢 Успех!",
+          explain: "Эксперт видит знание контекста и реальные отличительные черты. Переходим к Шагу 3."
+        },
+        {
+          text: "Написать, что проект уникален, так как ваше учреждение проводит подобный фестиваль впервые в истории своего района.",
+          correct: false,
+          title: "🔴 Сбой!",
+          explain: "Уникальность для конкретного ДК или района не считается уникальностью проекта. Эксперты фонда оценивают новизну в масштабе региона и сферы в целом. Квест провален. Вернитесь и измените решение."
+        },
+        {
+          text: "Привести в пример 3 крупных всероссийских фестиваля и указать, что ваш проект уникален, так как требует в 5 раз меньше бюджета.",
+          correct: false,
+          title: "🔴 Сбой!",
+          explain: "Сравнение с несопоставимыми по масштабу федеральными проектами и упор только на дешевизну не доказали содержательную уникальность методики. Квест провален. Вернитесь и измените решение."
+        }
+      ]
+    },
+    {
+      title: "📍 Шаг 3. Выбираем день отправки заявки",
+      desc: "До закрытия приема заявок на сайте фонда осталось 10 рабочих дней. Пакет документов полностью готов.",
+      options: [
+        {
+          text: "Подать заявку за 2 дня до дедлайна, но не открывать итоговый сгенерированный системой PDF-файл перед окончательным подтверждением.",
+          correct: false,
+          title: "🔴 Сбой!",
+          explain: "При автоматической сборке PDF-файла системой сбилась форматировка таблицы софинансирования и открепился устав. Вы не перепроверили итоговый файл и потеряли баллы. Квест провален. Вернитесь и измените решение."
+        },
+        {
+          text: "Нажать кнопку «Подать заявку» за 10 рабочих дней до дедлайна и скачать итоговый PDF-файл для финальной проверки всех страниц.",
+          correct: true,
+          title: "🟢 Победа!",
+          explain: "Документы прошли регистрацию без задержек. Вы лично убедились, что все файлы и таблицы отображаются корректно."
+        },
+        {
+          text: "Подержать заявку в черновиках до финального вечера дедлайна, чтобы сделать еще одну проверку опечаток в тексте.",
+          correct: false,
+          title: "🔴 Сбой!",
+          explain: "В финальные сутки сайт фонда завис от пиковой нагрузки. Из-за сбоя сеть не загрузила согласие учредителя, а техподдержка не успела ответить до закрытия таймера. Заявку отклонили. Квест провален. Вернитесь и измените решение."
+        }
+      ]
+    }
+  ];
+
+  const stepsWrap = document.getElementById('steps');
+  const slidesWrap = document.getElementById('slides');
+  const nextBtn = document.getElementById('nextBtn');
+  const backBtn = document.getElementById('backBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const overlay = document.getElementById('overlay');
+  const modal = document.getElementById('modal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalDesc = document.getElementById('modalDesc');
+  const closeBtn = document.getElementById('closeBtn');
+
+  const TOTAL = STEPS.length;
+  let current = 0;
+  let answered = new Array(TOTAL).fill(null);
+
+  function buildSteps() {
+    stepsWrap.innerHTML = '';
+    for (let i = 0; i < TOTAL; i++) {
+      const d = document.createElement('div');
+      d.className = 'step-dot';
+      stepsWrap.appendChild(d);
+    }
+  }
+
+  function build() {
+    buildSteps();
+    slidesWrap.innerHTML = '';
+    answered = new Array(TOTAL).fill(null);
+    current = 0;
+    overlay.classList.remove('open');
+
+    STEPS.forEach((step, i) => {
+      const slide = document.createElement('div');
+      slide.className = 'slide' + (i === 0 ? ' active' : '');
+      slide.dataset.index = i;
+
+      const title = document.createElement('div');
+      title.className = 'step-title';
+      title.textContent = step.title;
+      slide.appendChild(title);
+
+      const desc = document.createElement('div');
+      desc.className = 'step-desc';
+      desc.textContent = step.desc;
+      slide.appendChild(desc);
+
+      const opts = document.createElement('div');
+      opts.className = 'options';
+      step.options.forEach((opt, j) => {
+        const el = document.createElement('div');
+        el.className = 'option';
+        el.dataset.correct = opt.correct ? '1' : '0';
+        el.dataset.stepIndex = i;
+        el.dataset.oIndex = j;
+        el.innerHTML = `<span class="text">${opt.text}</span>`;
+        opts.appendChild(el);
+      });
+      slide.appendChild(opts);
+      slidesWrap.appendChild(slide);
+    });
+
+    render();
+  }
+
+  function getSlides() { return slidesWrap.querySelectorAll('.slide'); }
+  function getDots() { return stepsWrap.querySelectorAll('.step-dot'); }
+
+  function render() {
+    const slides = getSlides();
+    const dots = getDots();
+    slides.forEach((s, i) => {
+      s.classList.remove('active');
+      if (i === current) s.classList.add('active');
+    });
+    dots.forEach((d, i) => {
+      d.classList.remove('active', 'done', 'fail');
+      if (answered[i] === 'ok') d.classList.add('done');
+      else if (answered[i] === 'fail') d.classList.add('fail');
+      else if (i === current) d.classList.add('active');
+    });
+
+    // «Вернуться назад» — активна, только если на текущем шаге УЖЕ дан ответ
+    backBtn.disabled = answered[current] === null;
+
+    const canAdvance = answered[current] === 'ok' && current < TOTAL - 1;
+    nextBtn.disabled = !canAdvance;
+  }
+
+  nextBtn.addEventListener('click', () => {
+    if (answered[current] === 'ok' && current < TOTAL - 1) {
+      current++;
+      render();
+    }
+  });
+
+  // «Вернуться назад» — переиграть текущий шаг: сброс ответа
+  backBtn.addEventListener('click', () => {
+    if (answered[current] === null) return;
+    answered[current] = null;
+
+    const slide = getSlides()[current];
+    const optsWrap = slide.querySelector('.options');
+    const allOpts = optsWrap.querySelectorAll('.option');
+    allOpts.forEach(el => el.classList.remove('correct', 'wrong'));
+    optsWrap.classList.remove('locked');
+
+    render();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  slidesWrap.addEventListener('click', (e) => {
+    const opt = e.target.closest('.option');
+    if (!opt) return;
+    const stepIndex = parseInt(opt.dataset.stepIndex, 10);
+    const oIndex = parseInt(opt.dataset.oIndex, 10);
+    if (answered[stepIndex] !== null) return;
+
+    const slides = getSlides();
+    const slide = slides[stepIndex];
+    const optsWrap = slide.querySelector('.options');
+    const allOpts = optsWrap.querySelectorAll('.option');
+
+    const chosen = STEPS[stepIndex].options[oIndex];
+    const isCorrect = chosen.correct;
+
+    answered[stepIndex] = isCorrect ? 'ok' : 'fail';
+
+    opt.classList.add(isCorrect ? 'correct' : 'wrong');
+
+    if (!isCorrect) {
+      allOpts.forEach((el, j) => {
+        if (STEPS[stepIndex].options[j].correct) {
+          el.classList.add('correct');
+        }
+      });
+    }
+
+    optsWrap.classList.add('locked');
+
+    modal.classList.remove('good', 'bad');
+    modal.classList.add(isCorrect ? 'good' : 'bad');
+    modalTitle.textContent = chosen.title;
+    modalDesc.textContent = chosen.explain;
+    overlay.classList.add('open');
+
+    render();
+  });
+
+  function closeModal() {
+    overlay.classList.remove('open');
+  }
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    closeModal();
+    build();
+  });
+
+  build();
+</script>
+</body>
+</html>
