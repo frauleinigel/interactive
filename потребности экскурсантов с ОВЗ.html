@@ -175,14 +175,21 @@
             flex-wrap: wrap;
         }
 
+        .nav-right {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* кнопка «Попробовать снова» — желтая */
         .reset-btn {
             background: linear-gradient(145deg, #fdf6e3, #f5e6c8);
-            border: 2px solid #000000;
+            border: 2px solid #b8860b;
             border-radius: 30px;
             padding: 10px 28px;
             font-size: 0.95rem;
             font-weight: 600;
-            color: #000000;
+            color: #6b4a00;
             cursor: pointer;
             transition: all 0.15s;
             letter-spacing: 0.3px;
@@ -191,7 +198,7 @@
 
         .reset-btn:hover {
             background: linear-gradient(145deg, #faf0da, #f0dbb8);
-            border-color: #000000;
+            border-color: #8a6508;
             transform: scale(1.02);
         }
 
@@ -199,9 +206,35 @@
             transform: scale(0.97);
         }
 
-        .next-btn {
-            background: linear-gradient(145deg, #003d99, #002b80);
+        /* кнопка «Вернуться к началу» — синяя */
+        .home-btn {
+            background: linear-gradient(145deg, #e6f0ff, #cfe0ff);
             border: 2px solid #002b80;
+            border-radius: 30px;
+            padding: 10px 28px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #002b80;
+            cursor: pointer;
+            transition: all 0.15s;
+            letter-spacing: 0.3px;
+            font-family: inherit;
+        }
+
+        .home-btn:hover {
+            background: linear-gradient(145deg, #d6e6ff, #b8d2ff);
+            border-color: #001a4d;
+            transform: scale(1.02);
+        }
+
+        .home-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* кнопка «Следующий кейс» — зеленая */
+        .next-btn {
+            background: linear-gradient(145deg, #1a8c4a, #14703a);
+            border: 2px solid #1a8c4a;
             border-radius: 30px;
             padding: 10px 28px;
             font-size: 0.95rem;
@@ -214,7 +247,7 @@
         }
 
         .next-btn:hover {
-            background: linear-gradient(145deg, #0047b3, #003399);
+            background: linear-gradient(145deg, #1fa055, #178244);
             transform: scale(1.02);
         }
 
@@ -321,7 +354,6 @@
                 max-height: 160px;
                 object-fit: contain;
             }
-            /* на мобильных — одна колонка */
             .answers-grid {
                 grid-template-columns: 1fr;
                 gap: 12px;
@@ -358,7 +390,12 @@
                 flex-direction: column-reverse;
                 align-items: stretch;
             }
+            .nav-right {
+                flex-direction: column;
+                width: 100%;
+            }
             .reset-btn,
+            .home-btn,
             .next-btn {
                 width: 100%;
                 text-align: center;
@@ -412,7 +449,10 @@
         <!-- навигация -->
         <div class="nav-wrap">
             <button class="reset-btn" id="resetBtn" type="button" aria-label="Сбросить и попробовать снова">⟳ Попробовать снова</button>
-            <button class="next-btn" id="nextBtn" type="button" hidden>Следующий кейс →</button>
+            <div class="nav-right">
+                <button class="home-btn" id="homeBtn" type="button" aria-label="Вернуться к началу">⌂ Вернуться к началу</button>
+                <button class="next-btn" id="nextBtn" type="button" hidden>Следующий кейс →</button>
+            </div>
         </div>
 
     </div>
@@ -654,6 +694,7 @@
             /* ─────────── ЭЛЕМЕНТЫ ─────────── */
             const grid = document.getElementById('answersGrid');
             const resetBtn = document.getElementById('resetBtn');
+            const homeBtn = document.getElementById('homeBtn');
             const nextBtn = document.getElementById('nextBtn');
             const situationTitle = document.getElementById('situationTitle');
             const situationText = document.getElementById('situationText');
@@ -709,10 +750,8 @@
                     grid.appendChild(btn);
                 });
 
+                /* «Следующий кейс» скрыт до ответа, и отсутствует на последнем кейсе */
                 nextBtn.hidden = true;
-                nextBtn.textContent = (currentIndex === CASES.length - 1)
-                    ? '↺ Вернуться к началу'
-                    : 'Следующий кейс →';
 
                 modalOverlay.classList.remove('active');
                 modalMessage.innerHTML = 'Выберите вариант ответа, чтобы проверить себя.';
@@ -740,7 +779,10 @@
 
                 showModal(option);
 
-                nextBtn.hidden = false;
+                /* показываем «Следующий кейс» после ответа, если это не последний кейс */
+                if (currentIndex < CASES.length - 1) {
+                    nextBtn.hidden = false;
+                }
             }
 
             function showModal(option) {
@@ -756,14 +798,18 @@
             function goNext() {
                 if (currentIndex < CASES.length - 1) {
                     currentIndex += 1;
-                } else {
-                    currentIndex = 0;   // «Вернуться к началу»
+                    renderCase();
                 }
+            }
+
+            function goHome() {
+                currentIndex = 0;
                 renderCase();
             }
 
             /* ─────────── СОБЫТИЯ ─────────── */
             nextBtn.addEventListener('click', goNext);
+            homeBtn.addEventListener('click', goHome);
 
             resetBtn.addEventListener('click', function() {
                 renderCase();
