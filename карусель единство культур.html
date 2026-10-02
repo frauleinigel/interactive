@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Карусель изображений</title>
+<style>
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#f7f7f8;margin:0;padding:40px 20px;display:flex;justify-content:center;align-items:center;min-height:100vh}
+.carousel{position:relative;max-width:700px;width:100%;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 12px 40px rgba(30,58,138,.15);background:#000}
+.slides{display:flex;transition:transform .5s ease}
+.slides img{width:100%;flex:0 0 100%;display:block;aspect-ratio:1/1;object-fit:cover}
+.nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(30,58,138,.7);color:#fff;border:none;width:44px;height:44px;border-radius:50%;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:.2s}
+.nav:hover{background:#1e3a8a}
+.prev{left:14px}.next{right:14px}
+.dots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
+.dots span{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.55);cursor:pointer;transition:.2s}
+.dots span.active{background:#fff;transform:scale(1.25)}
+@media(max-width:720px){.nav{width:36px;height:36px;font-size:18px}}
+</style>
+</head>
+<body>
+
+<div class="carousel" id="car">
+  <div class="slides" id="slides">
+    <img src="https://www.cultmanager.ru/images/Vibecoding/e6273ccbe9411f1b5e8768cfd41a853_3.jpeg" alt="">
+    <img src="https://www.cultmanager.ru/images/Vibecoding/3e3cba2be9e11f18482aa2c488aa611_1.jpeg" alt="">
+    <img src="https://www.cultmanager.ru/images/Vibecoding/501c2c9be9e11f182653a10f2be6ff5_1.jpeg" alt="">
+    <img src="https://www.cultmanager.ru/images/Vibecoding/50f746cbe9f11f18ef6a69ee4cb7e7d_1.jpeg" alt="">
+  </div>
+  <button class="nav prev" onclick="go(-1)">‹</button>
+  <button class="nav next" onclick="go(1)">›</button>
+  <div class="dots" id="dots"></div>
+</div>
+
+<script>
+let i=0;
+const slides=document.getElementById('slides');
+const dotsBox=document.getElementById('dots');
+const total=slides.children.length;
+
+for(let k=0;k<total;k++){
+  const s=document.createElement('span');
+  s.onclick=()=>set(k);
+  dotsBox.appendChild(s);
+}
+
+function set(n){
+  i=(n+total)%total;
+  slides.style.transform=`translateX(-${i*100}%)`;
+  document.querySelectorAll('.dots span').forEach((d,k)=>d.classList.toggle('active',k===i));
+}
+
+function go(n){set(i+n)}
+set(0);
+</script>
+
+</body>
+</html>
