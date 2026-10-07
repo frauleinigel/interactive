@@ -575,7 +575,12 @@
                 input.value = '';
                 isAnswered = false;
                 statusHint.innerHTML = '&nbsp;';
-                input.focus();
+                // preventScroll — чтобы страница не «прыгала» к полю ввода
+                try {
+                    input.focus({ preventScroll: true });
+                } catch (e) {
+                    input.focus();
+                }
             }
 
             checkBtn.addEventListener('click', handleCheck);
@@ -602,9 +607,8 @@
                 }
             });
 
-            window.addEventListener('load', function() {
-                input.focus();
-            });
+            // Автофокус при загрузке убран намеренно:
+            // страница открывается с самого начала, курсор в поле не мигает.
 
         })();
     </script>
