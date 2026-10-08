@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Тест</title>
+<style>
+  *{box-sizing:border-box}
+  body{
+    font-family:'Segoe UI',Arial,sans-serif;
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:40px 20px;
+    background:linear-gradient(135deg,#0b1e3f 0%,#1a3a6b 50%,#7a0f1e 100%);
+  }
+  .quiz{
+    max-width:640px;
+    width:100%;
+    background:#ffffff;
+    padding:40px 35px;
+    border-radius:20px;
+    box-shadow:0 20px 50px rgba(0,0,0,.45), 0 0 0 4px rgba(255,255,255,.05);
+    position:relative;
+    overflow:hidden;
+  }
+  .quiz::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:6px;
+    background:linear-gradient(90deg,#1a3a6b 0%,#1a3a6b 50%,#c0182f 50%,#c0182f 100%);
+  }
+  h2{
+    font-size:20px;
+    font-weight:600;
+    color:#0b1e3f;
+    margin:0 0 30px;
+    letter-spacing:.3px;
+  }
+  .options{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+    margin-bottom:30px;
+  }
+  .options button{
+    height:80px;
+    font-size:30px;
+    font-weight:700;
+    color:#1a3a6b;
+    border:3px solid #1a3a6b;
+    background:#fff;
+    border-radius:16px;
+    cursor:pointer;
+    transition:all .25s ease;
+    position:relative;
+    font-family:inherit;
+  }
+  .options button:hover:not(:disabled){
+    background:#1a3a6b;
+    color:#fff;
+    transform:translateY(-4px);
+    box-shadow:0 10px 20px rgba(26,58,107,.35);
+  }
+  .options button:active:not(:disabled){
+    transform:translateY(-1px);
+  }
+  .options button.correct{
+    background:linear-gradient(135deg,#1a3a6b,#2e6fd4);
+    color:#fff;
+    border-color:#1a3a6b;
+    box-shadow:0 10px 25px rgba(26,58,107,.5);
+  }
+  .options button.wrong{
+    background:linear-gradient(135deg,#c0182f,#e8455c);
+    color:#fff;
+    border-color:#c0182f;
+    box-shadow:0 10px 25px rgba(192,24,47,.5);
+  }
+  .options button:disabled{
+    cursor:default;
+  }
+  .options button:disabled:not(.correct):not(.wrong){
+    opacity:.4;
+  }
+  .restart{
+    width:100%;
+    padding:16px 20px;
+    font-size:17px;
+    font-weight:600;
+    letter-spacing:.5px;
+    border:none;
+    border-radius:14px;
+    background:linear-gradient(135deg,#1a3a6b,#0b1e3f);
+    color:#fff;
+    cursor:pointer;
+    transition:all .25s ease;
+    font-family:inherit;
+  }
+  .restart:hover{
+    background:linear-gradient(135deg,#c0182f,#7a0f1e);
+    transform:translateY(-2px);
+    box-shadow:0 12px 25px rgba(192,24,47,.4);
+  }
+  .overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(11,30,63,.75);
+    backdrop-filter:blur(4px);
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    z-index:10;
+  }
+  .overlay.active{
+    display:flex;
+    animation:fadeIn .25s ease;
+  }
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .modal{
+    background:#fff;
+    max-width:620px;
+    width:100%;
+    padding:45px 40px 40px;
+    border-radius:20px;
+    position:relative;
+    line-height:1.6;
+    box-shadow:0 25px 60px rgba(0,0,0,.5);
+    animation:slideUp .3s ease;
+    border-top:6px solid #c0182f;
+  }
+  @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+  .modal::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:6px;
+    background:linear-gradient(90deg,#1a3a6b 0%,#1a3a6b 50%,#c0182f 50%,#c0182f 100%);
+    border-radius:20px 20px 0 0;
+  }
+  #modalText{
+    font-size:22px;
+    color:#0b1e3f;
+    font-weight:500;
+    line-height:1.65;
+    padding-right:10px;
+  }
+  #modalText b{
+    font-weight:800;
+  }
+  .close{
+    position:absolute;
+    top:14px;
+    right:18px;
+    font-size:32px;
+    line-height:1;
+    background:none;
+    border:none;
+    cursor:pointer;
+    color:#1a3a6b;
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    transition:all .2s ease;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:inherit;
+  }
+  .close:hover{
+    background:#c0182f;
+    color:#fff;
+    transform:rotate(90deg);
+  }
+</style>
+</head>
+<body>
+<div class="quiz">
+  <h2>Выберите один из четырех вариантов ответа:</h2>
+  <div class="options" id="options">
+    <button data-answer="1">1</button>
+    <button data-answer="2">2</button>
+    <button data-answer="3">3</button>
+    <button data-answer="4">4</button>
+  </div>
+  <button class="restart" id="restart">Начать заново</button>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <button class="close" id="close">×</button>
+    <div id="modalText"></div>
+  </div>
+</div>
+
+<script>
+  const texts = {
+    "1": "❌ <b>Неверно.</b> Собака-поводырь — это «глаза» незрячего человека. Оставить её у входа — значит лишить посетителя возможности ориентироваться и чувствовать себя в безопасности. Кроме того, это нарушение законодательства о доступной среде.",
+    "2": "❌ <b>Неверно.</b> Разделение пары «хозяин — собака» недопустимо. Собака-поводырь специально обучена находиться рядом в любой обстановке. В отдельном помещении животное будет испытывать стресс, а хозяин — дискомфорт.",
+    "3": "❌ <b>Неверно.</b> Никогда не берите собаку-поводыря за поводок или шлейку. Она работает только в связке со своим хозяином. Ваше вмешательство дезориентирует собаку и может быть опасным для незрячего человека.",
+    "4": "✅ <b>Верно.</b> Это единственно верный способ проявить уважение и соблюсти правила. Собака-поводырь имеет право беспрепятственного доступа в любое общественное место. Она должна находиться максимально близко к хозяину."
+  };
+
+  const buttons = document.querySelectorAll('#options button');
+  const overlay = document.getElementById('overlay');
+  const modalText = document.getElementById('modalText');
+  const closeBtn = document.getElementById('close');
+  const restartBtn = document.getElementById('restart');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ans = btn.dataset.answer;
+      btn.classList.add(ans === "4" ? 'correct' : 'wrong');
+      buttons.forEach(b => b.disabled = true);
+      modalText.innerHTML = texts[ans];
+      overlay.classList.add('active');
+    });
+  });
+
+  closeBtn.addEventListener('click', () => {
+    overlay.classList.remove('active');
+  });
+
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('active');
+  });
+
+  restartBtn.addEventListener('click', () => {
+    buttons.forEach(b => {
+      b.disabled = false;
+      b.classList.remove('correct','wrong');
+    });
+    overlay.classList.remove('active');
+  });
+</script>
+</body>
+</html>

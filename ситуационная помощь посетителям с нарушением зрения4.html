@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Диалоговый тренажёр 2</title>
+<style>
+  *{box-sizing:border-box}
+  body{
+    font-family:'Segoe UI',Arial,sans-serif;
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:30px 20px;
+    background:linear-gradient(135deg,#0b1e3f 0%,#1a3a6b 50%,#7a0f1e 100%);
+    color:#fff;
+  }
+  .trainer{
+    max-width:760px;
+    width:100%;
+    background:#fff;
+    border-radius:22px;
+    overflow:hidden;
+    box-shadow:0 25px 70px rgba(0,0,0,.55), 0 0 0 4px rgba(255,255,255,.05);
+    color:#0b1e3f;
+  }
+  .header{
+    background:linear-gradient(135deg,#1a3a6b 0%,#0b1e3f 100%);
+    padding:24px 30px;
+    color:#fff;
+    position:relative;
+  }
+  .header::after{
+    content:"";
+    position:absolute;
+    bottom:0;left:0;right:0;
+    height:5px;
+    background:linear-gradient(90deg,#1a3a6b 0%,#1a3a6b 50%,#c0182f 50%,#c0182f 100%);
+  }
+  .header-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+  }
+  .scene-label{
+    font-size:13px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:#ffd166;
+    font-weight:700;
+  }
+  .progress{
+    display:flex;
+    gap:6px;
+  }
+  .dot{
+    width:10px;height:10px;border-radius:50%;
+    background:rgba(255,255,255,.25);
+    transition:all .3s ease;
+  }
+  .dot.active{background:#ffd166;transform:scale(1.3)}
+  .dot.done{background:#2e6fd4}
+  .body{
+    padding:32px 30px;
+  }
+  .visitor{
+    display:flex;
+    gap:16px;
+    margin-bottom:26px;
+    animation:fadeIn .4s ease;
+  }
+  .avatar{
+    flex-shrink:0;
+    width:64px;height:64px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#f5ecd9 0%,#e6d5b3 100%);
+    border:3px solid #c9b48a;
+    color:#5a4a2a;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:34px;
+    line-height:1;
+    box-shadow:0 6px 16px rgba(201,180,138,.5), inset 0 -3px 6px rgba(160,140,100,.25);
+    overflow:hidden;
+  }
+  .bubble{
+    background:#eef3fb;
+    border-left:4px solid #2e6fd4;
+    padding:16px 20px;
+    border-radius:14px;
+    font-size:17px;
+    line-height:1.6;
+    color:#0b1e3f;
+    position:relative;
+    flex:1;
+  }
+  .bubble .name{
+    display:block;
+    font-size:13px;
+    font-weight:700;
+    color:#2e6fd4;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:6px;
+  }
+  .stage-note{
+    font-style:italic;
+    color:#6b7a90;
+    font-size:15px;
+    margin:0 0 20px;
+    padding-left:80px;
+    animation:fadeIn .4s ease;
+  }
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .question{
+    font-weight:700;
+    font-size:15px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    color:#c0182f;
+    margin:0 0 14px;
+    animation:fadeIn .4s ease;
+  }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    animation:fadeIn .5s ease;
+  }
+  .option{
+    text-align:left;
+    padding:18px 22px;
+    font-size:16px;
+    line-height:1.5;
+    font-family:inherit;
+    color:#0b1e3f;
+    background:#fff;
+    border:2px solid #d3dce8;
+    border-radius:14px;
+    cursor:pointer;
+    transition:all .22s ease;
+    position:relative;
+    padding-left:60px;
+  }
+  .option::before{
+    content:"";
+    position:absolute;
+    left:22px;
+    top:50%;
+    transform:translateY(-50%);
+    width:22px;height:22px;
+    border-radius:50%;
+    border:2px solid #c0182f;
+    background:#fff;
+    transition:all .2s ease;
+  }
+  .option:hover:not(:disabled){
+    border-color:#1a3a6b;
+    background:#eef3fb;
+    transform:translateX(4px);
+    box-shadow:0 8px 20px rgba(26,58,107,.15);
+  }
+  .option:hover:not(:disabled)::before{
+    background:#c0182f;
+    box-shadow:0 0 0 4px rgba(192,24,47,.2);
+  }
+  .option:disabled{cursor:default}
+  .option.correct{
+    border-color:#2e6fd4;
+    background:#e6efff;
+    box-shadow:0 6px 20px rgba(46,111,212,.25);
+    cursor:default;
+  }
+  .option.correct::before{
+    background:#2e6fd4;
+    border-color:#2e6fd4;
+    content:"✓";
+    color:#fff;
+    font-size:14px;
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .option.wrong{
+    border-color:#c0182f;
+    background:#fdecef;
+    box-shadow:0 6px 20px rgba(192,24,47,.2);
+    opacity:.6;
+  }
+  .option.wrong::before{
+    background:#c0182f;
+    border-color:#c0182f;
+    content:"✕";
+    color:#fff;
+    font-size:13px;
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .footer{
+    padding:0 30px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .next-btn{
+    padding:14px 34px;
+    font-size:16px;
+    font-weight:700;
+    letter-spacing:.4px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(135deg,#ffd166,#f4a300);
+    color:#0b1e3f;
+    cursor:pointer;
+    transition:all .25s ease;
+    font-family:inherit;
+    box-shadow:0 8px 20px rgba(0,0,0,.2);
+    display:none;
+    animation:fadeIn .3s ease;
+  }
+  .next-btn.show{display:inline-block}
+  .next-btn:hover{
+    background:linear-gradient(135deg,#ffe08a,#ffb700);
+    transform:translateY(-2px);
+    box-shadow:0 12px 25px rgba(244,163,0,.5);
+  }
+  .restart-btn{
+    padding:13px 26px;
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:.4px;
+    border:2px solid #1a3a6b;
+    border-radius:12px;
+    background:#fff;
+    color:#1a3a6b;
+    cursor:pointer;
+    transition:all .25s ease;
+    font-family:inherit;
+    margin-left:auto;
+  }
+  .restart-btn:hover{
+    background:#1a3a6b;
+    color:#fff;
+    transform:translateY(-2px);
+    box-shadow:0 10px 22px rgba(26,58,107,.4);
+  }
+
+  .overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(11,30,63,.78);
+    backdrop-filter:blur(5px);
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    z-index:100;
+  }
+  .overlay.active{display:flex;animation:fadeIn2 .25s ease}
+  @keyframes fadeIn2{from{opacity:0}to{opacity:1}}
+  .modal{
+    background:#fff;
+    max-width:640px;
+    width:100%;
+    padding:48px 40px 40px;
+    border-radius:20px;
+    position:relative;
+    line-height:1.7;
+    box-shadow:0 25px 60px rgba(0,0,0,.55);
+    animation:slideUp .3s ease;
+    color:#0b1e3f;
+  }
+  @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+  .modal::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:6px;
+    border-radius:20px 20px 0 0;
+  }
+  .modal.success::before{background:linear-gradient(90deg,#1a3a6b,#2e6fd4)}
+  .modal.error::before{background:linear-gradient(90deg,#c0182f,#e8455c)}
+  .modal-title{
+    font-size:22px;
+    font-weight:800;
+    margin:0 0 14px;
+    letter-spacing:.3px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .modal.success .modal-title{color:#1a3a6b}
+  .modal.error .modal-title{color:#c0182f}
+  .modal-text{
+    font-size:20px;
+    font-weight:500;
+    line-height:1.7;
+    padding-right:10px;
+  }
+  .close{
+    position:absolute;
+    top:12px;
+    right:16px;
+    font-size:34px;
+    line-height:1;
+    background:none;
+    border:none;
+    cursor:pointer;
+    color:#1a3a6b;
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    transition:all .2s ease;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:inherit;
+  }
+  .close:hover{background:#c0182f;color:#fff;transform:rotate(90deg)}
+
+  .final{
+    display:none;
+    padding:50px 40px;
+    text-align:center;
+    animation:fadeIn .4s ease;
+  }
+  .final.show{display:block}
+  .final .emoji{font-size:70px;margin-bottom:10px}
+  .final h2{
+    font-size:28px;
+    color:#0b1e3f;
+    margin:8px 0 16px;
+    font-weight:800;
+    letter-spacing:.3px;
+  }
+  .final p{
+    font-size:17px;
+    color:#4a5b73;
+    line-height:1.65;
+    margin:0 auto 30px;
+    max-width:480px;
+  }
+  .final .score{
+    display:inline-flex;
+    gap:10px;
+    margin-bottom:30px;
+  }
+  .score-badge{
+    padding:10px 20px;
+    border-radius:12px;
+    font-weight:700;
+    font-size:15px;
+  }
+  .score-badge.good{background:#e6efff;color:#1a3a6b;border:2px solid #2e6fd4}
+  .score-badge.bad{background:#fdecef;color:#c0182f;border:2px solid #c0182f}
+  .restart-final{
+    padding:14px 34px;
+    font-size:16px;
+    font-weight:700;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(135deg,#1a3a6b,#0b1e3f);
+    color:#fff;
+    cursor:pointer;
+    transition:all .25s ease;
+    font-family:inherit;
+    box-shadow:0 8px 20px rgba(0,0,0,.2);
+  }
+  .restart-final:hover{
+    background:linear-gradient(135deg,#c0182f,#7a0f1e);
+    transform:translateY(-2px);
+    box-shadow:0 12px 25px rgba(192,24,47,.4);
+  }
+
+  @media (max-width:520px){
+    .body{padding:24px 20px}
+    .footer{padding:0 20px 24px}
+    .bubble{font-size:15px}
+    .option{font-size:15px;padding-left:54px}
+    .avatar{width:56px;height:56px;font-size:30px}
+    .stage-note{padding-left:72px}
+    .final{padding:40px 24px}
+    .modal{padding:44px 26px 30px}
+    .modal-text{font-size:18px}
+  }
+</style>
+</head>
+<body>
+
+<div class="trainer">
+  <div class="header">
+    <div class="header-top">
+      <span class="scene-label" id="sceneLabel">Сцена 1 из 2</span>
+      <div class="progress" id="progress">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="body" id="body"></div>
+
+  <div class="footer">
+    <button class="restart-btn" id="restartBtn">🔄 Начать заново</button>
+    <button class="next-btn" id="nextBtn">Далее →</button>
+  </div>
+
+  <div class="final" id="final">
+    <div class="emoji">🎉</div>
+    <h2>Тренажёр пройден!</h2>
+    <p>Вы разобрали обе сцены общения с незрячим посетителем.</p>
+    <div class="score" id="scoreBox"></div>
+    <br>
+    <button class="restart-final" id="restartFinal">Пройти заново</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal">
+    <button class="close" id="close">×</button>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-text" id="modalText"></div>
+  </div>
+</div>
+
+<script>
+  const scenes = [
+    {
+      dialog: {
+        name: "Посетитель с нарушением зрения",
+        text: "«Я слышал, у вас на стенде висит новое объявление и какое-то графическое изображение к выставке? К сожалению, на них нет дублирования шрифтом Брайля, а мне очень интересно узнать, что там»."
+      },
+      stage: null,
+      question: "Ваш ответ:",
+      options: [
+        {
+          text: "«Конечно! Если вы хотите, я с удовольствием познакомлю вас со всеми надписями и объявлениями на этом стенде».",
+          correct: true,
+          feedback: "Верно! Если читатель вас попросил, то сотрудник библиотеки должен знакомить его с любыми надписями и объявлениями, которые не имеют дублирования в специальных форматах."
+        },
+        {
+          text: "«Да, там висит информация о выставке. Но вы не переживайте: всё это подробно продублировано у нас на сайте. Вы можете зайти туда дома и прослушать информацию через программу экранного доступа».",
+          correct: false,
+          feedback: "Неверно. Ситуационная помощь оказывается непосредственно в учреждении. Отправляя посетителя на сайт, вы оставляете его без помощи в текущий момент."
+        }
+      ]
+    },
+    {
+      dialog: {
+        name: "Посетитель с нарушением зрения",
+        text: "«Спасибо! А что это за изображение рядом с текстом объявления? Я чувствую руками только гладкую бумагу плаката»."
+      },
+      stage: "Вы знакомите посетителя со стендом.",
+      question: "Ваш ответ:",
+      options: [
+        {
+          text: "«Рядом с текстом расположено графическое изображение. Позвольте я подробно опишу вам, что на нем нарисовано, чтобы у вас сложилась полная картина».",
+          correct: true,
+          feedback: "Верно! Если у читателя нет возможности воспринять надписи, объявления или изображения в специальных форматах, сотрудник библиотеки должен полностью озвучить и визуальный ряд, и текстовую часть."
+        },
+        {
+          text: "«Это картинка для красоты, она не связана с темой объявления. Давайте я лучше прочитаю вам текст, чтобы не забивать голову».",
+          correct: false,
+          feedback: "Неверно. Нельзя игнорировать визуальные элементы. Если они не продублированы в специальных форматах, незрячий человек полностью лишается этой информации. Мы должны озвучивать графику."
+        }
+      ]
+    }
+  ];
+
+  const bodyEl = document.getElementById('body');
+  const sceneLabel = document.getElementById('sceneLabel');
+  const dots = document.querySelectorAll('.dot');
+  const nextBtn = document.getElementById('nextBtn');
+  const restartBtn = document.getElementById('restartBtn');
+  const finalEl = document.getElementById('final');
+  const scoreBox = document.getElementById('scoreBox');
+  const restartFinal = document.getElementById('restartFinal');
+  const overlay = document.getElementById('overlay');
+  const modal = document.getElementById('modal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalText = document.getElementById('modalText');
+  const closeBtn = document.getElementById('close');
+  const footer = document.querySelector('.footer');
+
+  let current = 0;
+  let correctCount = 0;
+  let solved = false;
+
+  function renderScene(){
+    const s = scenes[current];
+    solved = false;
+
+    sceneLabel.textContent = `Сцена ${current+1} из ${scenes.length}`;
+
+    dots.forEach((d,i) => {
+      d.classList.toggle('active', i === current);
+      d.classList.toggle('done', i < current);
+    });
+
+    let html = `
+      <div class="visitor">
+        <div class="avatar">🧑</div>
+        <div class="bubble">
+          <span class="name">${s.dialog.name}</span>
+          ${s.dialog.text}
+        </div>
+      </div>
+    `;
+
+    if (s.stage){
+      html += `<p class="stage-note">${s.stage}</p>`;
+    }
+
+    html += `<p class="question">${s.question}</p>`;
+    html += `<div class="options" id="options">`;
+    s.options.forEach((o,i) => {
+      html += `<button class="option" data-index="${i}">${o.text}</button>`;
+    });
+    html += `</div>`;
+
+    bodyEl.innerHTML = html;
+
+    const optionBtns = bodyEl.querySelectorAll('.option');
+    optionBtns.forEach(btn => {
+      btn.addEventListener('click', () => handleAnswer(btn, optionBtns));
+    });
+
+    nextBtn.classList.remove('show');
+    nextBtn.textContent = (current === scenes.length - 1) ? "Завершить →" : "Далее →";
+  }
+
+  function handleAnswer(btn, optionBtns){
+    if (btn.disabled) return;
+
+    const idx = parseInt(btn.dataset.index, 10);
+    const opt = scenes[current].options[idx];
+
+    if (opt.correct){
+      solved = true;
+      correctCount++;
+
+      optionBtns.forEach((b,i) => {
+        b.disabled = true;
+        if (scenes[current].options[i].correct){
+          b.classList.add('correct');
+        } else {
+          b.classList.remove('wrong');
+          b.style.opacity = '.4';
+        }
+      });
+
+      modal.classList.remove('error');
+      modal.classList.add('success');
+      modalTitle.textContent = '✓ Верно';
+      modalText.textContent = opt.feedback;
+      overlay.classList.add('active');
+
+      nextBtn.classList.add('show');
+    } else {
+      btn.disabled = true;
+      btn.classList.add('wrong');
+
+      modal.classList.remove('success');
+      modal.classList.add('error');
+      modalTitle.textContent = '✕ Неверно';
+      modalText.textContent = opt.feedback;
+      overlay.classList.add('active');
+    }
+  }
+
+  function closeModal(){
+    overlay.classList.remove('active');
+  }
+
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+
+  nextBtn.addEventListener('click', () => {
+    if (!solved) return;
+    closeModal();
+    if (current < scenes.length - 1){
+      current++;
+      renderScene();
+    } else {
+      showFinal();
+    }
+  });
+
+  function showFinal(){
+    bodyEl.style.display = 'none';
+    footer.style.display = 'none';
+    finalEl.classList.add('show');
+
+    const wrong = scenes.length - correctCount;
+    scoreBox.innerHTML = `
+      <span class="score-badge good">Верно: ${correctCount}</span>
+      <span class="score-badge bad">Неверно: ${wrong}</span>
+    `;
+  }
+
+  function resetAll(){
+    current = 0;
+    correctCount = 0;
+    solved = false;
+    finalEl.classList.remove('show');
+    bodyEl.style.display = '';
+    footer.style.display = 'flex';
+    overlay.classList.remove('active');
+    renderScene();
+  }
+
+  restartBtn.addEventListener('click', resetAll);
+  restartFinal.addEventListener('click', resetAll);
+
+  renderScene();
+</script>
+</body>
+</html>

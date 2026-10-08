@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Тренажёр · Эвакуация при пожаре</title>
+<style>
+  *{box-sizing:border-box}
+  html{font-size:16px}
+  body{
+    font-family:'Segoe UI',Arial,sans-serif;
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    background:linear-gradient(135deg,#0b1e3f 0%,#1a3a6b 50%,#7a0f1e 100%);
+    color:#fff;
+  }
+  .trainer{
+    max-width:900px;
+    width:100%;
+    background:#fff;
+    border-radius:22px;
+    overflow:hidden;
+    box-shadow:0 25px 70px rgba(0,0,0,.55), 0 0 0 4px rgba(255,255,255,.05);
+    color:#0b1e3f;
+  }
+  .header{
+    background:linear-gradient(135deg,#1a3a6b 0%,#0b1e3f 100%);
+    padding:24px 30px;
+    color:#fff;
+    position:relative;
+  }
+  .header::after{
+    content:"";
+    position:absolute;
+    bottom:0;left:0;right:0;
+    height:5px;
+    background:linear-gradient(90deg,#1a3a6b 0%,#1a3a6b 50%,#c0182f 50%,#c0182f 100%);
+  }
+  .header-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+  }
+  .scene-label{
+    font-size:13px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:#ffd166;
+    font-weight:700;
+  }
+  .progress{
+    display:flex;
+    gap:6px;
+  }
+  .dot{
+    width:10px;height:10px;border-radius:50%;
+    background:rgba(255,255,255,.25);
+    transition:all .3s ease;
+  }
+  .dot.active{background:#ffd166;transform:scale(1.3)}
+  .dot.done{background:#2e6fd4}
+  .body{
+    padding:36px 32px 40px;
+  }
+  .question-title{
+    font-size:1.3rem;
+    font-weight:800;
+    color:#1a3a6b;
+    margin:0 0 20px;
+    line-height:1.4;
+  }
+  .answers-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+    margin-bottom:22px;
+  }
+  .option{
+    text-align:left;
+    padding:16px 20px 16px 56px;
+    font-size:0.95rem;
+    line-height:1.45;
+    font-weight:500;
+    font-family:inherit;
+    color:#001a4d;
+    background:linear-gradient(145deg,#f7f7f7,#e8e8e8);
+    border:2px solid #002b80;
+    border-radius:16px;
+    cursor:pointer;
+    transition:all .15s ease;
+    position:relative;
+    min-height:90px;
+    box-shadow:0 2px 6px rgba(0,43,128,.03);
+  }
+  .option::before{
+    content:"";
+    position:absolute;
+    left:18px;
+    top:22px;
+    width:20px;height:20px;
+    border-radius:50%;
+    border:2px solid #002b80;
+    background:#fff;
+    transition:all .2s ease;
+  }
+  .option:hover:not(:disabled){
+    border-color:#001a4d;
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(0,43,128,.1);
+    background:linear-gradient(145deg,#f0f0f0,#e0e0e0);
+  }
+  .option:hover:not(:disabled)::before{
+    background:#002b80;
+    box-shadow:0 0 0 4px rgba(0,43,128,.15);
+  }
+  .option:disabled{cursor:default}
+  .option.correct{
+    border-color:#1a8c4a;
+    background:#e6f5ed;
+    box-shadow:0 0 0 3px rgba(26,140,74,.2);
+  }
+  .option.correct::before{
+    background:#1a8c4a;
+    border-color:#1a8c4a;
+    content:"✓";
+    color:#fff;
+    font-size:13px;
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .option.wrong{
+    border-color:#b3002d;
+    background:#fce8eb;
+    box-shadow:0 0 0 3px rgba(204,51,68,.2);
+    opacity:.7;
+  }
+  .option.wrong::before{
+    background:#b3002d;
+    border-color:#b3002d;
+    content:"✕";
+    color:#fff;
+    font-size:12px;
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .option.dim{opacity:.5}
+
+  .footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .restart-btn{
+    background:linear-gradient(145deg,#fdf6e3,#f5e6c8);
+    border:2px solid #000;
+    border-radius:30px;
+    padding:10px 28px;
+    font-size:0.9rem;
+    font-weight:600;
+    color:#000;
+    cursor:pointer;
+    transition:all .15s ease;
+    letter-spacing:.3px;
+    font-family:inherit;
+    box-shadow:0 2px 6px rgba(0,0,0,.05);
+  }
+  .restart-btn:hover{
+    background:linear-gradient(145deg,#faf0da,#f0dbb8);
+    transform:scale(1.02);
+  }
+  .restart-btn:active{transform:scale(.97)}
+  .next-btn{
+    background:linear-gradient(145deg,#002b80,#001a4d);
+    border:2px solid #002b80;
+    border-radius:30px;
+    padding:10px 30px;
+    font-size:0.9rem;
+    font-weight:700;
+    color:#fff;
+    cursor:pointer;
+    transition:all .15s ease;
+    letter-spacing:.3px;
+    font-family:inherit;
+    box-shadow:0 4px 12px rgba(0,43,128,.3);
+    display:none;
+    margin-left:auto;
+  }
+  .next-btn.show{display:inline-block}
+  .next-btn:hover{
+    background:linear-gradient(145deg,#003399,#002266);
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(0,43,128,.45);
+  }
+
+  .overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,20,50,.6);
+    backdrop-filter:blur(3px);
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    z-index:1000;
+  }
+  .overlay.active{display:flex}
+  .modal{
+    background:#fff;
+    max-width:620px;
+    width:100%;
+    padding:36px 32px 30px;
+    border-radius:24px;
+    position:relative;
+    box-shadow:0 24px 60px rgba(0,0,0,.25);
+    animation:fadeSlide .25s ease;
+    border:2px solid #002b80;
+    color:#002b80;
+  }
+  @keyframes fadeSlide{
+    from{opacity:0;transform:translateY(20px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  .modal::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:6px;
+    border-radius:24px 24px 0 0;
+  }
+  .modal.success::before{background:linear-gradient(90deg,#1a3a6b,#1a8c4a)}
+  .modal.error::before{background:linear-gradient(90deg,#c0182f,#b3002d)}
+  .close{
+    position:absolute;
+    top:14px;
+    right:18px;
+    font-size:2rem;
+    line-height:1;
+    background:none;
+    border:none;
+    cursor:pointer;
+    color:#002b80;
+    padding:4px 10px;
+    border-radius:30px;
+    transition:background .15s;
+    font-weight:300;
+    font-family:inherit;
+  }
+  .close:hover{background:#f0f4fc}
+
+  .modal-title{
+    font-size:1.1rem;
+    font-weight:800;
+    margin:0 0 12px;
+    letter-spacing:.3px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .modal.success .modal-title{color:#1a8c4a}
+  .modal.error .modal-title{color:#b3002d}
+  .modal-text{
+    font-size:1.05rem;
+    line-height:1.65;
+    color:#002b80;
+    padding-right:20px;
+  }
+  .modal-text strong{color:#001f5e;font-weight:800}
+
+  .final{
+    display:none;
+    padding:60px 40px;
+    text-align:center;
+    animation:fadeSlide .4s ease;
+  }
+  .final.show{display:block}
+  .final .emoji{font-size:80px;margin-bottom:14px}
+  .final h2{
+    font-size:1.8rem;
+    color:#1a3a6b;
+    margin:8px 0 34px;
+    font-weight:800;
+  }
+  .restart-final{
+    padding:14px 36px;
+    font-size:1rem;
+    font-weight:700;
+    border:none;
+    border-radius:30px;
+    background:linear-gradient(145deg,#002b80,#001a4d);
+    color:#fff;
+    cursor:pointer;
+    transition:all .2s ease;
+    font-family:inherit;
+    box-shadow:0 4px 12px rgba(0,43,128,.3);
+  }
+  .restart-final:hover{
+    background:linear-gradient(145deg,#003399,#002266);
+    transform:translateY(-2px);
+  }
+
+  @media (max-width:640px){
+    .body{padding:24px 16px 28px}
+    .question-title{font-size:1.1rem}
+    .answers-grid{grid-template-columns:1fr}
+    .option{font-size:.92rem;padding:14px 16px 14px 50px;min-height:70px}
+    .option::before{left:16px;top:18px;width:18px;height:18px}
+    .modal{padding:28px 20px 22px;margin:10px}
+    .modal-text{font-size:.95rem}
+    .close{font-size:1.8rem;top:10px;right:12px}
+    .final{padding:40px 24px}
+  }
+</style>
+</head>
+<body>
+
+<div class="trainer">
+  <div class="header">
+    <div class="header-top">
+      <span class="scene-label" id="sceneLabel">Вопрос 1 из 3</span>
+      <div class="progress" id="progress">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="body" id="body"></div>
+
+  <div class="final" id="final">
+    <div class="emoji">👍</div>
+    <h2>Тест пройден!</h2>
+    <button class="restart-final" id="restartFinal">Пройти заново</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal">
+    <button class="close" id="close">✕</button>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-text" id="modalText"></div>
+  </div>
+</div>
+
+<script>
+  const scenes = [
+    {
+      title: "Как будете сообщать о пожаре незрячему или слабовидящему человеку?",
+      options: [
+        {
+          text: "Буду громко кричать: «Пожар! Бежим быстрее!», чтобы он сразу понял всю опасность ситуации.",
+          correct: false,
+          feedback: "Крик дезориентирует человека и навеет дополнительную панику. В экстренной ситуации она лишает возможности здраво мыслить и двигаться скоординированно."
+        },
+        {
+          text: "Буду говорить тихо, практически шепотом, чтобы не вызвать сильной эмоциональной реакции.",
+          correct: false,
+          feedback: "В условиях шума сирены пожарной тревоги шепот человек не услышит, и вы потеряете драгоценное время на эвакуацию."
+        },
+        {
+          text: "Произнесу сообщение четко и спокойно, без какого-либо повышения голоса.",
+          correct: true,
+          feedback: "Ваш спокойный тон — залог того, что посетитель доверится вам и будет следовать указаниям."
+        },
+        {
+          text: "Буду молча тянуть его к выходу, ведь в экстренной ситуации разговоры не нужны.",
+          correct: false,
+          feedback: "Тянуть незрячего человека молча, без предупреждения — грубое нарушение его личных границ, которое вызовет у него сильный испуг и защитную реакцию сопротивления."
+        }
+      ]
+    },
+    {
+      title: "Какую фразу вы произнесете в первую очередь?",
+      options: [
+        {
+          text: "«Быстрее вставайте, у нас пожар, надо бежать, а то сгорим!»",
+          correct: false,
+          feedback: "Такие панические фразы провоцируют стресс. Не навевайте дополнительную панику на человека."
+        },
+        {
+          text: "«У нас произошло возгорание. Разрешите мне взять вас за руку для того, чтобы мы смогли покинуть помещение».",
+          correct: true,
+          feedback: "Вы подошли, спокойно сказали о происшествии и обязательно спросили разрешения взять за руку. Четкий алгоритм действий дает человеку чувство контроля над ситуацией."
+        },
+        {
+          text: "«Вы чувствуете запах гари? Идите на мой голос, я у выхода!»",
+          correct: false,
+          feedback: "Оставлять незрячего человека одного в задымленном помещении и предлагать ему идти на голос в условиях паники и шума — крайне опасно. Помощь должна быть физическим сопровождением."
+        },
+        {
+          text: "«Пожалуйста, оставайтесь на месте, я сейчас побегу искать спасателей».",
+          correct: false,
+          feedback: "Оставить незрячего человека одного в опасной зоне — значит подвергнуть его жизнь огромному риску. Ваша задача как сотрудника библиотеки — лично сопроводить его к выходу."
+        }
+      ]
+    },
+    {
+      title: "Как вы будете координировать человека в процессе движения при пожаре?",
+      options: [
+        {
+          text: "Буду подробно описывать масштаб пожара: «Тут все в дыму, огонь буквально в пяти-десяти метрах от нас, мы еле успеваем!»",
+          correct: false,
+          feedback: "Если вы выводите посетителя при пожаре, не нагнетайте обстановку рассказами о том, что огонь в 5 или 10 метрах. Пользы от этого нет, только парализующий страх."
+        },
+        {
+          text: "Буду двигаться молча, чтобы не тратить силы на разговоры.",
+          correct: false,
+          feedback: "Полная тишина при движении в опасности пугает, так как лишенный зрения человек вообще перестает понимать, куда его ведут и безопасно ли это."
+        },
+        {
+          text: "Буду вести человека и сообщать ему только необходимую информацию, избегая фраз, которые навевают панику.",
+          correct: true,
+          feedback: "Давайте конструктивные комментарии по ходу движения, чтобы человек сохранял спокойствие при взаимодействии с вами."
+        },
+        {
+          text: "Скажу, что произошла учебная тревога и беспокоиться не о чем, даже если кругом огонь.",
+          correct: false,
+          feedback: "Обманывать человека в кризисной ситуации нельзя. Если задымление реальное, посетитель должен понимать необходимость быстрого движения, но без лишней паники. Обман может привести к недооценке опасности."
+        }
+      ]
+    }
+  ];
+
+  const bodyEl = document.getElementById('body');
+  const sceneLabel = document.getElementById('sceneLabel');
+  const dots = document.querySelectorAll('.dot');
+  const finalEl = document.getElementById('final');
+  const restartFinal = document.getElementById('restartFinal');
+  const overlay = document.getElementById('overlay');
+  const modal = document.getElementById('modal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalText = document.getElementById('modalText');
+  const closeBtn = document.getElementById('close');
+
+  let current = 0;
+  let solved = false;
+
+  function renderScene(){
+    const s = scenes[current];
+    solved = false;
+
+    sceneLabel.textContent = `Вопрос ${current+1} из ${scenes.length}`;
+
+    dots.forEach((d,i) => {
+      d.classList.toggle('active', i === current);
+      d.classList.toggle('done', i < current);
+    });
+
+    let html = `<h2 class="question-title">${s.title}</h2>`;
+    html += `<div class="answers-grid" id="options">`;
+    s.options.forEach((o,i) => {
+      html += `<button class="option" data-index="${i}">${o.text}</button>`;
+    });
+    html += `</div>`;
+    html += `<div class="footer">
+      <button class="restart-btn" id="restartBtnInner">⟳ Начать заново</button>
+      <button class="next-btn" id="nextBtn">Далее →</button>
+    </div>`;
+
+    bodyEl.innerHTML = html;
+
+    const optionBtns = bodyEl.querySelectorAll('.option');
+    optionBtns.forEach(btn => {
+      btn.addEventListener('click', () => handleAnswer(btn, optionBtns));
+    });
+
+    document.getElementById('restartBtnInner').addEventListener('click', resetAll);
+    document.getElementById('nextBtn').addEventListener('click', onNext);
+  }
+
+  function handleAnswer(btn, optionBtns){
+    if (btn.disabled) return;
+
+    const idx = parseInt(btn.dataset.index, 10);
+    const opt = scenes[current].options[idx];
+    const nextBtn = document.getElementById('nextBtn');
+
+    if (opt.correct){
+      solved = true;
+
+      optionBtns.forEach((b,i) => {
+        b.disabled = true;
+        if (scenes[current].options[i].correct){
+          b.classList.add('correct');
+        } else {
+          b.classList.add('dim');
+        }
+      });
+
+      modal.classList.remove('error');
+      modal.classList.add('success');
+      modalTitle.textContent = '✓ Правильно';
+      modalText.innerHTML = opt.feedback;
+      overlay.classList.add('active');
+
+      nextBtn.classList.add('show');
+    } else {
+      btn.disabled = true;
+      btn.classList.add('wrong');
+
+      modal.classList.remove('success');
+      modal.classList.add('error');
+      modalTitle.textContent = '✕ Неверно';
+      modalText.innerHTML = opt.feedback;
+      overlay.classList.add('active');
+    }
+  }
+
+  function closeModal(){
+    overlay.classList.remove('active');
+  }
+
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+
+  function onNext(){
+    if (!solved) return;
+    closeModal();
+    if (current < scenes.length - 1){
+      current++;
+      renderScene();
+    } else {
+      showFinal();
+    }
+  }
+
+  function showFinal(){
+    bodyEl.style.display = 'none';
+    finalEl.classList.add('show');
+  }
+
+  function resetAll(){
+    current = 0;
+    solved = false;
+    finalEl.classList.remove('show');
+    bodyEl.style.display = '';
+    overlay.classList.remove('active');
+    renderScene();
+  }
+
+  restartFinal.addEventListener('click', resetAll);
+
+  renderScene();
+</script>
+</body>
+</html>

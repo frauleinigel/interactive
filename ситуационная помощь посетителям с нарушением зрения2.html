@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Опасные объекты</title>
+<style>
+  *{box-sizing:border-box}
+  body{
+    font-family:'Segoe UI',Arial,sans-serif;
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:30px 20px 60px;
+    background:linear-gradient(135deg,#0b1e3f 0%,#1a3a6b 50%,#7a0f1e 100%);
+    color:#fff;
+  }
+  .title{
+    max-width:1100px;
+    width:100%;
+    text-align:center;
+    font-size:34px;
+    font-weight:800;
+    letter-spacing:.5px;
+    margin:0 0 22px;
+    color:#fff;
+    text-shadow:0 4px 20px rgba(0,0,0,.5);
+  }
+  .poster-wrap{
+    max-width:1100px;
+    width:100%;
+    position:relative;
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 25px 60px rgba(0,0,0,.5);
+    border:4px solid rgba(255,255,255,.08);
+    line-height:0;
+  }
+  .poster-wrap img{
+    display:block;
+    width:100%;
+    height:auto;
+    user-select:none;
+    pointer-events:none;
+  }
+  .marker{
+    position:absolute;
+    transform:translate(-50%,-50%);
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    border:3px solid #fff;
+    background:linear-gradient(135deg,#2e6fd4,#1a3a6b);
+    color:#fff;
+    font-size:22px;
+    font-weight:800;
+    font-family:inherit;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 6px 20px rgba(0,0,0,.55), 0 0 0 6px rgba(46,111,212,.35);
+    transition:transform .2s ease, box-shadow .2s ease, background .3s ease;
+    animation:pulse 2s ease-in-out infinite;
+    z-index:5;
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:0 6px 20px rgba(0,0,0,.55), 0 0 0 6px rgba(46,111,212,.35)}
+    50%{box-shadow:0 6px 20px rgba(0,0,0,.55), 0 0 0 14px rgba(46,111,212,.15)}
+  }
+  .marker:hover:not(.done){
+    transform:translate(-50%,-50%) scale(1.15);
+    background:linear-gradient(135deg,#c0182f,#7a0f1e);
+    animation:none;
+  }
+  .marker.done{
+    cursor:default;
+    animation:none;
+  }
+  .marker.correct-done{
+    background:linear-gradient(135deg,#2e6fd4,#0b1e3f);
+    box-shadow:0 6px 20px rgba(46,111,212,.7), 0 0 0 4px rgba(46,111,212,.4);
+  }
+  .marker.correct-done::after{
+    content:"✓";
+    position:absolute;
+    bottom:-4px;
+    right:-4px;
+    width:24px;
+    height:24px;
+    background:#2e6fd4;
+    color:#fff;
+    border-radius:50%;
+    border:2px solid #fff;
+    font-size:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .marker.wrong-done{
+    background:linear-gradient(135deg,#e8455c,#7a0f1e);
+    box-shadow:0 6px 20px rgba(192,24,47,.7), 0 0 0 4px rgba(192,24,47,.4);
+  }
+  .marker.wrong-done::after{
+    content:"✕";
+    position:absolute;
+    bottom:-4px;
+    right:-4px;
+    width:24px;
+    height:24px;
+    background:#c0182f;
+    color:#fff;
+    border-radius:50%;
+    border:2px solid #fff;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .controls{
+    max-width:1100px;
+    width:100%;
+    display:flex;
+    justify-content:center;
+    margin-top:18px;
+  }
+  .btn{
+    padding:14px 30px;
+    font-size:16px;
+    font-weight:700;
+    letter-spacing:.4px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(135deg,#ffd166,#f4a300);
+    color:#0b1e3f;
+    cursor:pointer;
+    transition:all .25s ease;
+    font-family:inherit;
+    box-shadow:0 8px 20px rgba(0,0,0,.45);
+  }
+  .btn:hover{
+    background:linear-gradient(135deg,#ffe08a,#ffb700);
+    transform:translateY(-2px);
+    box-shadow:0 12px 25px rgba(244,163,0,.6);
+  }
+  .overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(11,30,63,.78);
+    backdrop-filter:blur(5px);
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    z-index:100;
+  }
+  .overlay.active{display:flex;animation:fadeIn .25s ease}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .modal{
+    background:#fff;
+    max-width:640px;
+    width:100%;
+    padding:45px 40px 40px;
+    border-radius:20px;
+    position:relative;
+    line-height:1.65;
+    box-shadow:0 25px 60px rgba(0,0,0,.55);
+    animation:slideUp .3s ease;
+    color:#0b1e3f;
+  }
+  @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+  .modal::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:6px;
+    background:linear-gradient(90deg,#1a3a6b 0%,#1a3a6b 50%,#c0182f 50%,#c0182f 100%);
+    border-radius:20px 20px 0 0;
+  }
+  #modalText{
+    font-size:20px;
+    font-weight:500;
+    line-height:1.7;
+    padding-right:10px;
+  }
+  #modalText b{font-weight:800}
+  .close{
+    position:absolute;
+    top:12px;
+    right:16px;
+    font-size:34px;
+    line-height:1;
+    background:none;
+    border:none;
+    cursor:pointer;
+    color:#1a3a6b;
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    transition:all .2s ease;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:inherit;
+  }
+  .close:hover{background:#c0182f;color:#fff;transform:rotate(90deg)}
+
+  /* Финальное окно */
+  .final-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(11,30,63,.85);
+    backdrop-filter:blur(6px);
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    z-index:200;
+  }
+  .final-overlay.active{display:flex;animation:fadeIn .35s ease}
+  .final-box{
+    background:linear-gradient(135deg,#1a3a6b 0%,#0b1e3f 100%);
+    color:#fff;
+    padding:60px 50px;
+    border-radius:24px;
+    text-align:center;
+    box-shadow:0 30px 80px rgba(0,0,0,.7), 0 0 0 4px rgba(255,209,102,.3);
+    animation:zoomIn .4s cubic-bezier(.2,1.2,.4,1);
+    border:3px solid #ffd166;
+    max-width:520px;
+    width:100%;
+  }
+  @keyframes zoomIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+  .final-icon{
+    font-size:70px;
+    margin-bottom:10px;
+    line-height:1;
+  }
+  .final-box h2{
+    font-size:32px;
+    margin:10px 0 20px;
+    font-weight:800;
+    letter-spacing:.5px;
+    color:#ffd166;
+    text-shadow:0 4px 15px rgba(255,209,102,.4);
+  }
+  .final-box p{
+    font-size:17px;
+    margin:0 0 30px;
+    line-height:1.6;
+    color:rgba(255,255,255,.9);
+  }
+  .final-btn{
+    padding:14px 34px;
+    font-size:16px;
+    font-weight:700;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(135deg,#ffd166,#f4a300);
+    color:#0b1e3f;
+    cursor:pointer;
+    transition:all .25s ease;
+    font-family:inherit;
+    box-shadow:0 8px 20px rgba(0,0,0,.4);
+  }
+  .final-btn:hover{
+    background:linear-gradient(135deg,#ffe08a,#ffb700);
+    transform:translateY(-2px);
+    box-shadow:0 12px 25px rgba(244,163,0,.6);
+  }
+</style>
+</head>
+<body>
+
+<h1 class="title">Выберите три опасные зоны</h1>
+
+<div class="poster-wrap" id="posterWrap">
+  <img src="https://www.cultmanager.ru/images/Vibecoding/opasnosti.jpg" alt="Плакат с объектами">
+
+  <button class="marker" data-id="1" style="left:31.4%; top:17.93%;" title="Вращающаяся дверь">1</button>
+  <button class="marker" data-id="2" style="left:86.88%; top:48.68%;" title="Приоткрытая дверца шкафа">2</button>
+  <button class="marker" data-id="3" style="left:20.54%; top:40.83%;" title="Подвесное кашпо">3</button>
+  <button class="marker" data-id="4" style="left:53.01%; top:15.03%;" title="Колонна">4</button>
+  <button class="marker" data-id="5" style="left:12.04%; top:88.04%;" title="Мягкий пуф">5</button>
+  <button class="marker" data-id="6" style="left:61.61%; top:86.75%;" title="Ковровая дорожка">6</button>
+</div>
+
+<div class="controls">
+  <button class="btn" id="restart">🔄 Начать заново</button>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <button class="close" id="close">×</button>
+    <div id="modalText"></div>
+  </div>
+</div>
+
+<div class="final-overlay" id="finalOverlay">
+  <div class="final-box">
+    <div class="final-icon">🎉</div>
+    <h2>Задание выполнено</h2>
+    <p>Вы верно определили все три скрытые опасности для незрячих посетителей.</p>
+    <button class="final-btn" id="finalRestart">Начать заново</button>
+  </div>
+</div>
+
+<script>
+  const data = {
+    "1": { status: "danger", text: "✅ <b>ОПАСНО.</b> Абсолютно верно! Если дверь постоянно движется, незрячему человеку очень сложно определить момент, когда в неё необходимо зайти или выйти. Вспомните себя: даже будучи зрячими, заходя в торговый центр с вращающимися дверями, вы можете замешкаться. Стоит зайти чуть позже или быстрее — и дверь начинает прижимать, что очень некомфортно. Если человек не видит совсем, проходить через такие двери становится в разы сложнее и опаснее." },
+    "2": { status: "danger", text: "✅ <b>ОПАСНО.</b> Правильно! Полуоткрытые шкафы представляют серьёзную угрозу. Если шкаф открыт полностью, это легко заметить. Но если дверь приоткрыта не до конца, незрячий или слабовидящий человек может просто не различить этот угол наклона и на ходу врезаться в неё лицом или плечом." },
+    "3": { status: "danger", text: "✅ <b>ОПАСНО.</b> Да, это так! Свисающие растения, настенные лампы и любые другие предметы, выступающие на уровне головы, представляют наибольшую опасность. Тактильная трость незрячего человека сканирует только пространство на уровне пола, поэтому такие «высокие» препятствия она обнаружить не может. Именно о них необходимо предупреждать посетителя в первую очередь." },
+    "4": { status: "safe", text: "❌ <b>Неверно.</b> Колонна — крупный, статичный архитектурный элемент, который монолитно стоит на полу. Незрячий человек легко обнаружит её основание благодаря тактильной трости задолго до того, как приблизится вплотную, и сможет безопасно обойти." },
+    "5": { status: "safe", text: "❌ <b>Неверно.</b> Пуф стоит на полу, он достаточно объемный и не имеет выступающих острых частей. Незрячий человек без труда обнаружит его с помощью тактильной трости и аккуратно обойдет. Он не представляет скрытой опасности." },
+    "6": { status: "safe", text: "❌ <b>Неверно.</b> Ковровая дорожка плотно лежит на полу и не мешает движению. Более того, смена покрытия (например, переход с гладкой плитки на мягкий ковролин) часто служит для незрячих людей отличным тактильным ориентиром, помогающим координировать направление движения в учреждении." }
+  };
+
+  const markers = document.querySelectorAll('.marker');
+  const overlay = document.getElementById('overlay');
+  const modalText = document.getElementById('modalText');
+  const closeBtn = document.getElementById('close');
+  const restartBtn = document.getElementById('restart');
+  const finalOverlay = document.getElementById('finalOverlay');
+  const finalRestart = document.getElementById('finalRestart');
+
+  let correctFound = 0;
+  let lastWasCorrect = false;
+
+  markers.forEach(marker => {
+    marker.addEventListener('click', () => {
+      if (marker.classList.contains('done')) return;
+      const id = marker.dataset.id;
+      const item = data[id];
+      if (!item) return;
+
+      marker.classList.add('done');
+      const isDanger = item.status === 'danger';
+      marker.classList.add(isDanger ? 'correct-done' : 'wrong-done');
+
+      if (isDanger) correctFound++;
+      lastWasCorrect = isDanger;
+
+      modalText.innerHTML = item.text;
+      overlay.classList.add('active');
+    });
+  });
+
+  function closeModal(){
+    overlay.classList.remove('active');
+    if (correctFound === 3 && lastWasCorrect){
+      setTimeout(() => finalOverlay.classList.add('active'), 250);
+    }
+  }
+
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+
+  function resetAll(){
+    markers.forEach(m => m.classList.remove('done', 'correct-done', 'wrong-done'));
+    overlay.classList.remove('active');
+    finalOverlay.classList.remove('active');
+    correctFound = 0;
+    lastWasCorrect = false;
+  }
+
+  restartBtn.addEventListener('click', resetAll);
+  finalRestart.addEventListener('click', resetAll);
+</script>
+</body>
+</html>

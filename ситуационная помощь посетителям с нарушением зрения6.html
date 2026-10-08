@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Памятка · Ситуационная помощь посетителям с нарушением зрения</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: white;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            padding: 30px 40px 40px;
+            border: 1px solid #eaeaea;
+        }
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #cc0000;
+            text-align: center;
+            margin: 0 0 28px 0;
+            letter-spacing: -0.2px;
+            line-height: 1.25;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .memo-label {
+            display: block;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: #0b2b4a;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .step-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .step-list li {
+            margin-bottom: 22px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #000000;
+        }
+        .step-list li:last-child {
+            margin-bottom: 0;
+        }
+        .step-content {
+            flex: 1;
+        }
+        .step-title {
+            font-weight: 700;
+            color: #0b2b4a;
+            font-size: 17px;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .step-text {
+            margin-bottom: 4px;
+        }
+        .sub-item {
+            padding-left: 0;
+            margin-top: 3px;
+            position: relative;
+        }
+        .diamond {
+            color: #0b2b4a;
+            font-weight: 400;
+            margin-right: 6px;
+        }
+        .rule-block {
+            margin: 8px 0 4px 0;
+            padding: 16px 20px;
+            background: #f7f9fb;
+            border-radius: 6px;
+            border-left: 4px solid #0b2b4a;
+            color: #0b2b4a;
+            font-weight: 700;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .pdf-btn-wrap {
+            margin-top: 35px;
+            text-align: right;
+            border-top: 1px solid #ddd;
+            padding-top: 24px;
+        }
+        .pdf-btn {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 10px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            letter-spacing: 0.3px;
+        }
+        .pdf-btn:hover {
+            background: #1b5e20;
+        }
+        .pdf-btn:focus {
+            outline: 2px solid #2e7d32;
+            outline-offset: 2px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+            .container {
+                border: none;
+                padding: 25px 30px;
+                max-width: 100%;
+            }
+            .pdf-btn-wrap {
+                display: none;
+            }
+            h1 {
+                color: #cc0000 !important;
+            }
+            .memo-label {
+                color: #0b2b4a !important;
+            }
+            .step-title {
+                color: #0b2b4a !important;
+            }
+            .diamond {
+                color: #0b2b4a !important;
+            }
+            .rule-block {
+                border-left-color: #0b2b4a !important;
+                color: #0b2b4a !important;
+                background: #f7f9fb !important;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 15px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            .step-list li {
+                font-size: 15px;
+                margin-bottom: 18px;
+            }
+            .pdf-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>
+        <span class="memo-label">Памятка</span>
+        СИТУАЦИОННАЯ ПОМОЩЬ ПОСЕТИТЕЛЯМ<br>С НАРУШЕНИЕМ ЗРЕНИЯ
+    </h1>
+
+    <ul class="step-list">
+
+        <li>
+            <div class="step-content">
+                <span class="step-title">🦮 Собака-поводырь:</span>
+                <div class="sub-item"><span class="diamond">◆</span> Обеспечьте животному беспрепятственный доступ во все залы.</div>
+                <div class="sub-item"><span class="diamond">◆</span> Не разлучайте хозяина и собаку.</div>
+                <div class="sub-item"><span class="diamond">◆</span> Не трогайте собаку, не беритесь за поводок и шлейку.</div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-content">
+                <span class="step-title">⚠️ Пространство:</span>
+                <div class="sub-item"><span class="diamond">◆</span> Всегда закрывайте дверцы шкафов и тумб до конца.</div>
+                <div class="sub-item"><span class="diamond">◆</span> Предлагайте распашную дверь вместо вращающейся.</div>
+                <div class="sub-item"><span class="diamond">◆</span> Предупреждайте о выступах на уровне головы.</div>
+                <div class="sub-item"><span class="diamond">◆</span> Сообщайте о любых перестановках мебели в залах.</div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-content">
+                <span class="step-title">✍️ Документы и информация:</span>
+                <div class="sub-item"><span class="diamond">◆</span> Предлагайте помощь в заполнении бланков с ваших слов.</div>
+                <div class="sub-item"><span class="diamond">◆</span> Читайте текст вслух перед тем, как человек поставит подпись.</div>
+                <div class="sub-item"><span class="diamond">◆</span> Озвучивайте содержание объявлений и описывайте изображения на плакатах.</div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-content">
+                <span class="step-title">🚨 Эвакуация:</span>
+                <div class="sub-item"><span class="diamond">◆</span> Сообщайте об экстренной ситуации четким и спокойным голосом.</div>
+                <div class="sub-item"><span class="diamond">◆</span> Спрашивайте разрешения взять за руку, чтобы сопроводить к выходу.</div>
+                <div class="sub-item"><span class="diamond">◆</span> Комментируйте только препятствия и маневры.</div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-content">
+                <div class="rule-block">🗣️ Сначала предложите помощь голосом — действуйте только после получения согласия.</div>
+            </div>
+        </li>
+
+    </ul>
+
+    <div class="pdf-btn-wrap">
+        <button class="pdf-btn" onclick="window.print()">Сохранить в PDF</button>
+    </div>
+
+</div>
+</body>
+</html>
