@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Типичные ошибки в штатном расписании и как их исправить</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: white;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            padding: 30px 40px 40px;
+            border: 1px solid #eaeaea;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #cc0000;
+            text-align: center;
+            margin: 0 0 28px 0;
+            letter-spacing: -0.2px;
+            line-height: 1.2;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .step-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .step-list li {
+            display: flex;
+            gap: 18px;
+            margin-bottom: 22px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #000000;
+            align-items: flex-start;
+        }
+        .step-list li:last-child {
+            margin-bottom: 0;
+        }
+        .step-number {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            background: #0b2b4a;
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2px;
+        }
+        .step-content {
+            flex: 1;
+        }
+        .step-title {
+            font-weight: 700;
+            color: #0b2b4a;
+            font-size: 17px;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .step-text {
+            margin-bottom: 4px;
+        }
+        .todo {
+            margin-top: 4px;
+        }
+        .todo-label {
+            color: #1b5e20;
+            font-weight: 700;
+        }
+        .law {
+            font-size: 13px;
+            color: #888;
+            margin-top: 6px;
+        }
+        .law::before {
+            content: "Основание: ";
+            color: #aaa;
+        }
+        .pdf-btn-wrap {
+            margin-top: 35px;
+            text-align: right;
+            border-top: 1px solid #ddd;
+            padding-top: 24px;
+        }
+        .pdf-btn {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 10px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            letter-spacing: 0.3px;
+        }
+        .pdf-btn:hover {
+            background: #1b5e20;
+        }
+        .pdf-btn:focus {
+            outline: 2px solid #2e7d32;
+            outline-offset: 2px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+            .container {
+                border: none;
+                padding: 25px 30px;
+                max-width: 100%;
+            }
+            .pdf-btn-wrap {
+                display: none;
+            }
+            h1 {
+                color: #cc0000 !important;
+            }
+            .step-number {
+                background: #0b2b4a !important;
+                color: white !important;
+            }
+            .step-title {
+                color: #0b2b4a !important;
+            }
+            .todo-label {
+                color: #1b5e20 !important;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 15px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+            .step-list li {
+                gap: 12px;
+                font-size: 15px;
+                margin-bottom: 18px;
+            }
+            .step-number {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+            .pdf-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>ТИПИЧНЫЕ ОШИБКИ В ШТАТНОМ РАСПИСАНИИ И КАК ИХ ИСПРАВИТЬ</h1>
+
+    <ul class="step-list">
+
+        <li>
+            <div class="step-number">1</div>
+            <div class="step-content">
+                <span class="step-title">Не переименовали должности под ОК 016-2025</span>
+                <div class="todo"><span class="todo-label">Что делать:</span> издайте приказ об изменении или утвердите новую редакцию. Обязательно — для должностей с льготами и ограничениями.</div>
+                <div class="law">Приказ Росстандарта № 423-ст</div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-number">2</div>
+            <div class="step-content">
+                <span class="step-title">Зарплата ниже МРОТ</span>
+                <div class="todo"><span class="todo-label">Что делать:</span> сверьте итоговую зарплату на полной ставке с действующим федеральным или региональным МРОТ. Если ниже — поднимите оклад или введите доплату.</div>
+                <div class="law">ст. 133 ТК РФ</div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-number">3</div>
+            <div class="step-content">
+                <span class="step-title">Лишние вакансии</span>
+                <div class="todo"><span class="todo-label">Что делать:</span> исключите должности, которые не планируете закрывать. Учтите, что при возврате должности потребуется новая спецоценка.</div>
+                <div class="law">ст. 22, 212 ТК РФ</div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-number">4</div>
+            <div class="step-content">
+                <span class="step-title">Нет обязательных должностей</span>
+                <div class="todo"><span class="todo-label">Что делать:</span> проверьте численность и категорию. Введите специалиста по охране труда от 50 человек, по воинскому учёту от 500, по гражданской обороне — по категории или от 200.</div>
+                <div class="law">ст. 217 ТК РФ; Постановления № 719, № 804</div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-number">5</div>
+            <div class="step-content">
+                <span class="step-title">Не прописали доплаты за вредность</span>
+                <div class="todo"><span class="todo-label">Что делать:</span> установите доплату не менее 4% оклада по итогам СОУТ и закрепите её в ЛНА с учётом мнения профсоюза.</div>
+                <div class="law">ст. 147, 372 ТК РФ</div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-number">6</div>
+            <div class="step-content">
+                <span class="step-title">Не индексировали оклады</span>
+                <div class="todo"><span class="todo-label">Что делать:</span> издайте приказ или утвердите новую редакцию, затем заключите дополнительные соглашения с работниками.</div>
+                <div class="law">ст. 134 ТК РФ</div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-number">7</div>
+            <div class="step-content">
+                <span class="step-title">Не учли перечень творческих должностей</span>
+                <div class="todo"><span class="todo-label">Что делать:</span> сверьте должности учреждения культуры с перечнем и внесите правки в штатное расписание.</div>
+                <div class="law">Приказ СФР № 389</div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-number">8</div>
+            <div class="step-content">
+                <span class="step-title">Дробные ставки указаны некорректно</span>
+                <div class="todo"><span class="todo-label">Что делать:</span> указывайте ставки в долях — 0,5; 0,25. Если работник принят на неполную ставку, должность считается заполненной: для приёма второго сотрудника нужно вносить изменения в штатное расписание.</div>
+                <div class="law">Разъяснения Роструда</div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-number">9</div>
+            <div class="step-content">
+                <span class="step-title">Отсутствуют обязательные реквизиты</span>
+                <div class="todo"><span class="todo-label">Что делать:</span> проверьте дату, номер, гриф утверждения, подпись и расшифровку.</div>
+                <div class="law">ГОСТ Р 7.0.97-2025</div>
+            </div>
+        </li>
+
+    </ul>
+
+    <div class="pdf-btn-wrap">
+        <button class="pdf-btn" onclick="window.print()">Сохранить в PDF</button>
+    </div>
+
+</div>
+</body>
+</html>
