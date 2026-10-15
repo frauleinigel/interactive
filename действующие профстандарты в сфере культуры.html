@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профстандарты в сфере культуры</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: white;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 820px;
+            width: 100%;
+            padding: 30px 40px 40px;
+            border: 1px solid #eaeaea;
+        }
+        h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #cc0000;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        thead th {
+            background: #0b2b4a;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            text-align: left;
+            padding: 10px 16px;
+        }
+        thead th:last-child {
+            text-align: right;
+            width: 180px;
+        }
+        tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+        }
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+        tbody td {
+            padding: 14px 16px;
+            vertical-align: top;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        tbody td:first-child {
+            font-weight: 600;
+            color: #111;
+        }
+        tbody td:last-child {
+            text-align: right;
+            color: #888;
+            font-size: 13px;
+            font-weight: 400;
+            white-space: nowrap;
+        }
+        .term {
+            display: block;
+            font-size: 12px;
+            color: #999;
+            font-weight: 400;
+            margin-top: 2px;
+        }
+        .pdf-btn-wrap {
+            margin-top: 35px;
+            text-align: right;
+            border-top: 1px solid #ddd;
+            padding-top: 24px;
+        }
+        .pdf-btn {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 10px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            letter-spacing: 0.3px;
+        }
+        .pdf-btn:hover {
+            background: #1b5e20;
+        }
+        .pdf-btn:focus {
+            outline: 2px solid #2e7d32;
+            outline-offset: 2px;
+        }
+
+        @media print {
+            body { padding: 0; }
+            .container { border: none; padding: 25px 30px; max-width: 100%; }
+            h1 {
+                color: #cc0000 !important;
+            }
+            thead th {
+                background: #0b2b4a !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .pdf-btn-wrap {
+                display: none;
+            }
+            tr { page-break-inside: avoid; }
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 20px 15px; }
+            h1 { font-size: 17px; }
+            tbody td { padding: 12px 10px; font-size: 13px; }
+            tbody td:last-child { width: auto; font-size: 12px; }
+            .pdf-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>Действующие профстандарты в сфере культуры</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Профессия</th>
+                <th>Приказ</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td>Продюсер в области кинематографии</td>
+                <td>№ 610н от 08.09.2014</td>
+            </tr>
+
+            <tr>
+                <td>Специалист по техническим процессам художественной деятельности</td>
+                <td>№ 611н от 08.09.2014</td>
+            </tr>
+
+            <tr>
+                <td>Хранитель музейных ценностей</td>
+                <td>№ 537н от 04.08.2014</td>
+            </tr>
+
+            <tr>
+                <td>Специалист по учету музейных предметов</td>
+                <td>№ 521н от 04.08.2014</td>
+            </tr>
+
+            <tr>
+                <td>
+                    Экскурсовод (гид)
+                    <span class="term">действует до 01.09.2028</span>
+                </td>
+                <td>№ 913н от 14.12.2021</td>
+            </tr>
+
+            <tr>
+                <td>Специалист по подготовке к производству анимационного кино</td>
+                <td>№ 843н от 25.12.2018</td>
+            </tr>
+
+            <tr>
+                <td>Специалист по визуализации в анимационном кино</td>
+                <td>№ 842н от 25.12.2018</td>
+            </tr>
+
+            <tr>
+                <td>Художник-аниматор</td>
+                <td>№ 844н от 25.12.2018</td>
+            </tr>
+
+            <tr>
+                <td>Специалист по созданию визуальных эффектов в анимационном кино и компьютерной графике</td>
+                <td>№ 457н от 31.07.2020</td>
+            </tr>
+
+            <tr>
+                <td>Специалист по технологиям производства анимационного кино</td>
+                <td>№ 459н от 31.07.2020</td>
+            </tr>
+
+            <tr>
+                <td>Специалист подготовительного периода анимационного кино</td>
+                <td>№ 458н от 31.07.2020</td>
+            </tr>
+
+            <tr>
+                <td>Инженер-конструктор кукол и персонажей</td>
+                <td>№ 573н от 07.09.2020</td>
+            </tr>
+
+            <tr>
+                <td>
+                    Специалист по работе с интерактивными системами движения
+                    <span class="term">действует до 01.09.2027</span>
+                </td>
+                <td>№ 139н от 18.03.2021</td>
+            </tr>
+
+            <tr>
+                <td>
+                    Специалист по организации производства анимационного кино
+                    <span class="term">действует до 01.09.2027</span>
+                </td>
+                <td>№ 141н от 18.03.2021</td>
+            </tr>
+
+            <tr>
+                <td>
+                    Специалист в области перевода
+                    <span class="term">действует до 01.09.2027</span>
+                </td>
+                <td>№ 134н от 18.03.2021</td>
+            </tr>
+
+            <tr>
+                <td>
+                    Специалист по библиотечно-информационной деятельности
+                    <span class="term">действует до 01.03.2029</span>
+                </td>
+                <td>№ 527н от 14.09.2022</td>
+            </tr>
+
+            <tr>
+                <td>
+                    Композитор
+                    <span class="term">действует до 01.03.2029</span>
+                </td>
+                <td>№ 691н от 25.10.2022</td>
+            </tr>
+
+            <tr>
+                <td>
+                    Писатель
+                    <span class="term">действует до 01.09.2032</span>
+                </td>
+                <td>№ 633н от 10.11.2025</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+    <div class="pdf-btn-wrap">
+        <button class="pdf-btn" onclick="window.print()">Сохранить в PDF</button>
+    </div>
+
+</div>
+</body>
+</html>
