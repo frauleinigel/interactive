@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажер: Полная бизнес-модель библиотеки (9 блоков)</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e74c3c;
+            --ok: #27ae60;
+            --bg: #dfe6e9;
+            --card-bg: #ffffff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #app {
+            width: 98vw;
+            max-width: 1300px;
+            height: 95vh;
+            min-height: 620px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 4px solid var(--primary);
+        }
+
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 100;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .nav-btn:hover:not(:disabled) { background: var(--accent); scale: 1.1; }
+        .nav-btn:disabled { background: #b2bec3; cursor: not-allowed; opacity: 0.5; }
+        #prevBtn { left: 10px; }
+        #nextBtn { right: 10px; }
+
+        .step {
+            display: none;
+            padding: 20px 70px;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .step.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 26px;
+            text-align: center;
+            margin: 0 0 8px 0;
+            flex-shrink: 0;
+        }
+        .instruction {
+            text-align: center;
+            color: #4b5c68;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 14px 0;
+            flex-shrink: 0;
+        }
+
+        /* ---------- ШАГ 1 ---------- */
+        #step1.active { justify-content: center; }
+        .scenarios {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .scenario-card {
+            background: #f1f2f6;
+            border: 3px solid #dfe4ea;
+            padding: 28px 18px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .scenario-card:hover { border-color: var(--accent); background: white; transform: translateY(-5px); }
+        .scenario-card h3 { margin: 0; font-size: 22px; color: var(--primary); }
+
+        /* ---------- ШАГ 2 ---------- */
+        .canvas-container {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: 1fr 1fr 0.75fr;
+            gap: 10px;
+        }
+
+        .dropzone {
+            position: relative;
+            background: #f9f9f9;
+            border: 2px dashed #95a5a6;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .dropzone.over { background: #e1f5fe; border-color: #3498db; }
+        .dropzone.wrong { animation: shake 0.4s; border-color: var(--accent); background: #ffeaea; }
+
+        .dropzone[data-type="partners"]   { grid-row: 1 / 3; grid-column: 1; }
+        .dropzone[data-type="activities"] { grid-row: 1;     grid-column: 2; }
+        .dropzone[data-type="resources"]  { grid-row: 2;     grid-column: 2; }
+        .dropzone[data-type="value"]      { grid-row: 1 / 3; grid-column: 3 / 5; }
+        .dropzone[data-type="relations"]  { grid-row: 1;     grid-column: 5; }
+        .dropzone[data-type="channels"]   { grid-row: 2;     grid-column: 5; }
+        .dropzone[data-type="segments"]   { grid-row: 1 / 3; grid-column: 6; }
+        .dropzone[data-type="costs"]      { grid-row: 3;     grid-column: 1 / 4; }
+        .dropzone[data-type="revenue"]    { grid-row: 3;     grid-column: 4 / 7; }
+
+        .dropzone-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 8px 8px;
+            background: #eef2f7;
+            border-bottom: 1px solid #cfd8e3;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .number-badge {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #1e3a8a, #1e40af);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 12px;
+            line-height: 1;
+            box-shadow:
+                0 3px 8px rgba(30, 58, 138, 0.45),
+                inset 0 -1px 3px rgba(0,0,0,0.2),
+                inset 0 1px 2px rgba(255,255,255,0.25);
+        }
+        .dropzone-name {
+            font-size: clamp(10px, 1.25vw, 15px);
+            font-weight: 800;
+            color: #1a2733;
+            line-height: 1.2;
+            letter-spacing: -0.25px;
+            width: 100%;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: clip;
+            word-break: keep-all;
+            overflow-wrap: normal;
+        }
+
+        /* Карточки в блоке: горизонтальный поток с переносом */
+        .dropzone-body {
+            flex: 1;
+            min-height: 0;
+            padding: 8px;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            justify-content: center;
+            gap: 6px;
+            overflow: hidden;
+        }
+
+        .bank {
+            margin-top: 14px;
+            padding: 14px;
+            background: #dfe6e9;
+            border-radius: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            min-height: 70px;
+            flex-shrink: 0;
+        }
+        .bank.over { background: #c8d6e0; }
+
+        .card {
+            background: var(--card-bg);
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: grab;
+            font-size: 14px;
+            font-weight: 700;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+            border: 2px solid #ced6e0;
+            user-select: none;
+            line-height: 1.25;
+            white-space: nowrap;
+            transition: transform 0.15s, background 0.2s, border-color 0.2s;
+        }
+        .card:hover { transform: translateY(-2px); }
+        .card:active { cursor: grabbing; }
+
+        .card.placed {
+            background: #e8f5e9;
+            border-color: var(--ok);
+            color: #1b5e20;
+            cursor: default;
+            white-space: normal;
+            text-align: center;
+            max-width: 100%;
+            overflow-wrap: break-word;
+            word-break: normal;
+        }
+        .card.placed:hover { transform: none; }
+        .card.placed::after { content: ' ✓'; color: var(--ok); font-weight: bold; }
+
+        .toolbar { display: flex; justify-content: center; margin-top: 10px; flex-shrink: 0; }
+        .reset-btn { background: var(--primary); color: #fff; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 14px; }
+        .reset-btn:hover { background: var(--accent); }
+
+        /* ---------- ШАГ 3 ---------- */
+        #step3.active { justify-content: center; align-items: stretch; }
+        .step3-inner {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+        .summary {
+            background: #f0f3f5;
+            padding: 32px 36px;
+            border-radius: 15px;
+            font-size: 19px;
+            line-height: 1.7;
+            color: var(--primary);
+            border-left: 8px solid var(--primary);
+        }
+        .summary p { margin: 0; }
+        .final-note {
+            margin: 0;
+            padding: 22px 20px;
+            font-size: 22px;
+            line-height: 1.55;
+            font-style: italic;
+            color: #2c3e50;
+            text-align: center;
+            border-top: 2px solid #cfd8e3;
+            border-bottom: 2px solid #cfd8e3;
+        }
+
+        #modal-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(44, 62, 80, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 450px;
+            width: 80%;
+            position: relative;
+            text-align: center;
+            border-top: 8px solid var(--ok);
+        }
+        .modal h4 { font-size: 22px; margin-top: 0; color: var(--primary); }
+        .modal p { font-size: 17px; line-height: 1.5; color: #2d3436; margin-bottom: 0; }
+        .close-modal { position: absolute; top: 10px; right: 15px; cursor: pointer; font-size: 30px; color: #b2bec3; line-height: 1; }
+        .close-modal:hover { color: var(--accent); }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @media (max-width: 900px) {
+            .step { padding: 15px 55px; }
+            h2 { font-size: 22px; }
+            .instruction { font-size: 14px; margin-bottom: 10px; }
+            .scenario-card { padding: 18px 10px; }
+            .scenario-card h3 { font-size: 17px; }
+
+            .canvas-container { gap: 6px; }
+            .dropzone-header { padding: 6px 6px; gap: 3px; }
+            .number-badge { width: 20px; height: 20px; font-size: 10px; }
+            .dropzone-body { padding: 5px; gap: 4px; }
+            .card { font-size: 13px; padding: 8px 12px; }
+            .bank { padding: 10px; gap: 7px; min-height: 60px; }
+            .reset-btn { padding: 6px 14px; font-size: 13px; }
+
+            .summary { padding: 22px 22px; font-size: 16px; }
+            .final-note { font-size: 17px; padding: 18px 14px; }
+            .step3-inner { gap: 20px; }
+        }
+
+        @media (max-width: 560px) {
+            .step { padding: 12px 45px; }
+            h2 { font-size: 18px; }
+            .instruction { font-size: 12px; }
+            .scenario-card { padding: 14px 8px; }
+            .scenario-card h3 { font-size: 15px; }
+            .dropzone-header { padding: 5px 5px; gap: 2px; }
+            .number-badge { width: 18px; height: 18px; font-size: 9px; }
+            .dropzone-body { padding: 3px; gap: 3px; }
+            .card { font-size: 12px; padding: 8px 12px; }
+            .nav-btn { width: 40px; height: 40px; font-size: 20px; }
+            #prevBtn { left: 6px; }
+            #nextBtn { right: 6px; }
+            .summary { padding: 18px 18px; font-size: 15px; }
+            .final-note { font-size: 15px; padding: 15px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <button class="nav-btn" id="prevBtn" onclick="changeStep(-1)">❮</button>
+    <button class="nav-btn" id="nextBtn" onclick="changeStep(1)">❯</button>
+
+    <!-- ШАГ 1 -->
+    <div class="step active" id="step1">
+        <h2>Шаг 1: Выберите модель</h2>
+        <p class="instruction">Для кого мы сегодня проектируем библиотеку?</p>
+        <div class="scenarios">
+            <div class="scenario-card" onclick="selectScenario('youth')"><h3>🚀 Молодежь</h3></div>
+            <div class="scenario-card" onclick="selectScenario('family')"><h3>👨‍👩‍👧‍👦 Семьи</h3></div>
+            <div class="scenario-card" onclick="selectScenario('seniors')"><h3>👵 Пенсионеры</h3></div>
+        </div>
+    </div>
+
+    <!-- ШАГ 2 -->
+    <div class="step" id="step2">
+        <h2 id="scenario-title">Бизнес-модель</h2>
+        <p class="instruction">Перетащите карточки снизу в соответствующие блоки</p>
+
+        <div class="canvas-container">
+            <div class="dropzone" data-type="partners" data-name="Ключевые партнеры"
+                 ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                <div class="dropzone-header">
+                    <span class="number-badge">8</span>
+                    <span class="dropzone-name" title="Ключевые партнеры">Партнеры</span>
+                </div>
+                <div class="dropzone-body"></div>
+            </div>
+            <div class="dropzone" data-type="activities" data-name="Ключевая деятельность"
+                 ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                <div class="dropzone-header">
+                    <span class="number-badge">6</span>
+                    <span class="dropzone-name" title="Ключевая деятельность">Деятельность</span>
+                </div>
+                <div class="dropzone-body"></div>
+            </div>
+            <div class="dropzone" data-type="value" data-name="Ценностное предложение"
+                 ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                <div class="dropzone-header">
+                    <span class="number-badge">1</span>
+                    <span class="dropzone-name" title="Ценностное предложение">Ценность (УТП)</span>
+                </div>
+                <div class="dropzone-body"></div>
+            </div>
+            <div class="dropzone" data-type="relations" data-name="Отношения с клиентами"
+                 ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                <div class="dropzone-header">
+                    <span class="number-badge">3</span>
+                    <span class="dropzone-name" title="Отношения с клиентами">Отношения</span>
+                </div>
+                <div class="dropzone-body"></div>
+            </div>
+            <div class="dropzone" data-type="segments" data-name="Сегменты пользователей"
+                 ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                <div class="dropzone-header">
+                    <span class="number-badge">2</span>
+                    <span class="dropzone-name" title="Сегменты пользователей">Сегменты</span>
+                </div>
+                <div class="dropzone-body"></div>
+            </div>
+            <div class="dropzone" data-type="resources" data-name="Ключевые ресурсы"
+                 ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                <div class="dropzone-header">
+                    <span class="number-badge">7</span>
+                    <span class="dropzone-name" title="Ключевые ресурсы">Ресурсы</span>
+                </div>
+                <div class="dropzone-body"></div>
+            </div>
+            <div class="dropzone" data-type="channels" data-name="Каналы связи"
+                 ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                <div class="dropzone-header">
+                    <span class="number-badge">4</span>
+                    <span class="dropzone-name" title="Каналы связи">Каналы</span>
+                </div>
+                <div class="dropzone-body"></div>
+            </div>
+            <div class="dropzone" data-type="costs" data-name="Структура затрат"
+                 ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                <div class="dropzone-header">
+                    <span class="number-badge">9</span>
+                    <span class="dropzone-name" title="Структура затрат">Структура затрат</span>
+                </div>
+                <div class="dropzone-body"></div>
+            </div>
+            <div class="dropzone" data-type="revenue" data-name="Потоки доходов"
+                 ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                <div class="dropzone-header">
+                    <span class="number-badge">5</span>
+                    <span class="dropzone-name" title="Потоки доходов">Потоки доходов</span>
+                </div>
+                <div class="dropzone-body"></div>
+            </div>
+        </div>
+
+        <div class="bank" id="bank" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)"></div>
+        <div class="toolbar"><button class="reset-btn" onclick="renderScenario()">↺ Сбросить</button></div>
+    </div>
+
+    <!-- ШАГ 3 -->
+    <div class="step" id="step3">
+        <div class="step3-inner">
+            <h2>Шаг 3: Модель готова</h2>
+            <div class="summary">
+                <p>Вы успешно собрали все <b>9 блоков</b> модели Остервальдера. Помните: блоки левой части (Партнеры, Деятельность, Ресурсы) отвечают за <b>эффективность</b>, а блоки правой части (Отношения, Сегменты, Каналы) — за <b>ценность</b> для людей.</p>
+            </div>
+            <p class="final-note">
+                Бизнес-модель Остервальдера — не статичная картинка, а конструктор.<br>
+                Меняете одну деталь — перестраивайте всю цепочку!
+            </p>
+        </div>
+    </div>
+
+    <div id="modal-overlay">
+        <div class="modal" id="modal-box">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h4 id="modal-title"></h4>
+            <p id="modal-text"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentStep = 1;
+    const totalSteps = 3;
+    let selectedScenario = 'youth';
+    let scenarioSelected = false;
+
+    const SCENARIOS = {
+        youth: {
+            name: 'Молодежь',
+            cards: [
+                { type:'partners',  text:'IT-компании города',   info:'Партнеры помогают ресурсами, спикерами или оборудованием для хакатонов.' },
+                { type:'activities',text:'Проведение хакатонов',  info:'Это ключевое действие, которое привлекает активную молодежь.' },
+                { type:'value',     text:'Креативный коворкинг',  info:'Ценность — современное пространство для работы и общения.' },
+                { type:'relations', text:'Система менторства',    info:'Отношения строятся на поддержке проектов молодых читателей.' },
+                { type:'segments',  text:'Студенты и фрилансеры', info:'Ваша основная аудитория, нуждающаяся в инфраструктуре.' },
+                { type:'resources', text:'Скоростной Wi-Fi',      info:'Критически важный ресурс для этой категории.' },
+                { type:'channels',  text:'Соцсети и мессенджеры', info:'Самый быстрый путь доставки информации до студентов.' },
+                { type:'costs',     text:'Обновление техники',    info:'Основные расходы — поддержка парка ноутбуков и ПО.' },
+                { type:'revenue',   text:'Посещаемость и гранты', info:'Ваши KPI — количество молодежи и привлеченные средства.' }
+            ]
+        },
+        family: {
+            name: 'Семьи',
+            cards: [
+                { type:'partners',  text:'Магазины игрушек',      info:'Могут выступать спонсорами детских праздников.' },
+                { type:'activities',text:'Чтения вслух 0+',       info:'Действие, формирующее привычку посещать библиотеку.' },
+                { type:'value',     text:'Безопасный досуг',      info:'Ценность для родителей — развитие ребенка в надежной среде.' },
+                { type:'relations', text:'Родительский клуб',     info:'Отношения через сообщество единомышленников.' },
+                { type:'segments',  text:'Молодые родители',      info:'Главный сегмент, принимающий решение о визите.' },
+                { type:'resources', text:'Игровая комната',       info:'Ресурс, превращающий библиотеку в место притяжения.' },
+                { type:'channels',  text:'Родительские чаты',     info:'Прямой канал связи с мамами района.' },
+                { type:'costs',     text:'Расходники для МК',     info:'Краски, бумага, клей — постоянная статья расходов.' },
+                { type:'revenue',   text:'Новые читатели',        info:'Ключевой показатель — охват семей микрорайона.' }
+            ]
+        },
+        seniors: {
+            name: 'Пенсионеры',
+            cards: [
+                { type:'partners',  text:'Совет ветеранов',       info:'Партнер для информирования и сбора аудитории.' },
+                { type:'activities',text:'Циклы лекций',          info:'Основная деятельность по просвещению и общению.' },
+                { type:'value',     text:'Социализация',          info:'Главная ценность — борьба с одиночеством через знания.' },
+                { type:'relations', text:'Личное внимание',       info:'Отношения строятся на чутком сервисе и помощи.' },
+                { type:'segments',  text:'Активные пенсионеры',   info:'Люди, желающие оставаться в курсе событий.' },
+                { type:'resources', text:'Уютный зал',            info:'Тихое и теплое место для комфортных встреч.' },
+                { type:'channels',  text:'Районная газета',       info:'Канал, которому доверяет старшее поколение.' },
+                { type:'costs',     text:'Чайные сборы',          info:'Небольшие, но важные расходы для атмосферы.' },
+                { type:'revenue',   text:'Лояльность власти',     info:'Показатель социальной значимости учреждения.' }
+            ]
+        }
+    };
+
+    function updateNav() {
+        document.getElementById('prevBtn').disabled = (currentStep === 1);
+        let disabled;
+        if (currentStep === 1) disabled = !scenarioSelected;
+        else if (currentStep === 2) disabled = document.querySelectorAll('.dropzone-body .card.placed').length < 9;
+        else disabled = true;
+        document.getElementById('nextBtn').disabled = disabled;
+    }
+
+    function changeStep(dir) {
+        const next = currentStep + dir;
+        if (next < 1 || next > totalSteps) return;
+        if (dir > 0 && document.getElementById('nextBtn').disabled) return;
+
+        document.getElementById(`step${currentStep}`).classList.remove('active');
+        currentStep = next;
+        document.getElementById(`step${currentStep}`).classList.add('active');
+        updateNav();
+    }
+
+    function selectScenario(key) {
+        selectedScenario = key;
+        scenarioSelected = true;
+        renderScenario();
+        changeStep(1);
+    }
+
+    function renderScenario() {
+        const data = SCENARIOS[selectedScenario];
+        document.getElementById('scenario-title').innerText = `Модель: ${data.name}`;
+        document.querySelectorAll('.dropzone-body').forEach(b => { b.innerHTML = ''; });
+        document.querySelectorAll('.dropzone').forEach(z => z.classList.remove('over', 'wrong'));
+        const bank = document.getElementById('bank');
+        bank.innerHTML = '';
+        bank.classList.remove('over');
+        [...data.cards].sort(() => Math.random() - 0.5).forEach((c, i) => {
+            const el = document.createElement('div');
+            el.className = 'card';
+            el.draggable = true;
+            el.id = `c-${i}`;
+            el.dataset.type = c.type;
+            el.dataset.info = c.info;
+            el.textContent = c.text;
+            el.addEventListener('dragstart', e => e.dataTransfer.setData("text", e.target.id));
+            bank.appendChild(el);
+        });
+        updateNav();
+    }
+
+    function allowDrop(ev) {
+        ev.preventDefault();
+        const zone = ev.target.closest('.dropzone') || ev.target.closest('.bank');
+        if (zone) zone.classList.add('over');
+    }
+
+    function dragLeave(ev) {
+        const zone = ev.target.closest('.dropzone') || ev.target.closest('.bank');
+        if (!zone) return;
+        if (zone.contains(ev.relatedTarget)) return;
+        zone.classList.remove('over');
+    }
+
+    function drop(ev) {
+        ev.preventDefault();
+        const zone = ev.target.closest('.dropzone') || ev.target.closest('.bank');
+        if (zone) zone.classList.remove('over');
+        const card = document.getElementById(ev.dataTransfer.getData("text"));
+        if (!zone || !card) return;
+
+        if (zone.classList.contains('bank')) {
+            zone.appendChild(card);
+            card.classList.remove('placed');
+            card.draggable = true;
+        } else if (card.dataset.type === zone.dataset.type) {
+            zone.querySelector('.dropzone-body').appendChild(card);
+            card.classList.add('placed');
+            card.draggable = false;
+            showModal('Верно!', card.dataset.info, false);
+        } else {
+            zone.classList.add('wrong');
+            setTimeout(() => zone.classList.remove('wrong'), 400);
+            showModal('Мимо', `Карточка «${card.textContent}» не подходит для блока «${zone.dataset.name}».`, true);
+        }
+        updateNav();
+    }
+
+    function showModal(title, text, err) {
+        const box = document.getElementById('modal-box');
+        box.style.borderTopColor = err ? '#e74c3c' : '#27ae60';
+        document.getElementById('modal-title').innerText = (err ? '❌ ' : '✅ ') + title;
+        document.getElementById('modal-text').innerText = text;
+        document.getElementById('modal-overlay').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('modal-overlay').style.display = 'none';
+    }
+
+    updateNav();
+</script>
+</body>
+</html>
