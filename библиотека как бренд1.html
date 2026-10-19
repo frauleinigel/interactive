@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Выберите три визуальных элемента</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    background: linear-gradient(160deg, #f8fafc 0%, #eef2ff 100%);
+    color: #111827;
+    line-height: 1.5;
+    padding: 40px 20px 60px;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; }
+
+  .title-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 20px;
+    margin-bottom: 8px;
+  }
+  .title {
+    font-size: 30px;
+    font-weight: 800;
+    color: #dc2626;
+    letter-spacing: -0.02em;
+    text-align: left;
+    line-height: 1.25;
+    flex: 0 1 auto;
+  }
+  .title-img {
+    flex-shrink: 0;
+    width: 180px;
+    height: 180px;
+    border-radius: 18px;
+    object-fit: cover;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
+  }
+  @media (max-width: 700px) {
+    .title { font-size: 22px; }
+    .title-img { width: 110px; height: 110px; }
+  }
+
+  .subtitle {
+    text-align: left;
+    font-size: 15px;
+    color: #6b7280;
+    margin-bottom: 32px;
+  }
+
+  .case-name {
+    font-size: 32px;
+    font-weight: 800;
+    color: #1d4ed8;
+    text-align: center;
+    margin-bottom: 28px;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    transition: opacity .35s ease, filter .35s ease;
+  }
+  @media (max-width: 700px) {
+    .grid { grid-template-columns: 1fr; }
+    .case-name { font-size: 24px; }
+  }
+
+  .card {
+    position: relative;
+    background: #ffffff;
+    border: 2px solid #e5e7eb;
+    border-radius: 18px;
+    padding: 22px 24px;
+    min-height: 96px;
+    cursor: pointer;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    user-select: none;
+    display: flex;
+    align-items: center;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.10);
+    border-color: #93c5fd;
+  }
+
+  .card .label {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.4;
+    padding-right: 36px;
+  }
+
+  .card::after {
+    content: "";
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid #d1d5db;
+    background: #fff;
+    transition: all .2s ease;
+  }
+
+  .card.correct {
+    border-color: #10b981;
+    background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%);
+    box-shadow: 0 10px 24px rgba(16, 185, 129, 0.18);
+  }
+  .card.correct::after {
+    background: #10b981;
+    border-color: #10b981;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 16px;
+  }
+
+  .card.wrong {
+    border-color: #ef4444;
+    background: linear-gradient(180deg, #fef2f2 0%, #ffffff 100%);
+    box-shadow: 0 10px 24px rgba(239, 68, 68, 0.15);
+  }
+  .card.wrong::after {
+    background: #ef4444;
+    border-color: #ef4444;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><line x1='18' y1='6' x2='6' y2='18'/><line x1='6' y1='6' x2='18' y2='18'/></svg>");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 14px;
+  }
+
+  body.locked .grid {
+    opacity: .25;
+    filter: grayscale(.6);
+    pointer-events: none;
+  }
+  body.locked .btn-next {
+    display: none !important;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 36px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    border: none;
+    border-radius: 12px;
+    padding: 13px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform .18s ease, box-shadow .18s ease, background .18s ease, opacity .18s ease;
+  }
+
+  .btn-restart {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: #78350f;
+    box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35);
+  }
+  .btn-restart:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(245, 158, 11, 0.45);
+  }
+
+  .btn-reset {
+    background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.35);
+    display: none;
+  }
+  .btn-reset.visible {
+    display: inline-block;
+  }
+  .btn-reset:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(124, 58, 237, 0.45);
+  }
+
+  .btn-next {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    box-shadow: 0 10px 24px rgba(16, 185, 129, 0.35);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .btn-next.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .btn-next:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(16, 185, 129, 0.45);
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+    z-index: 100;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .modal {
+    background: #ffffff;
+    border-radius: 22px;
+    max-width: 620px;
+    width: 100%;
+    padding: 48px 44px 44px;
+    position: relative;
+    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.3);
+    transform: translateY(14px) scale(0.97);
+    transition: transform .22s ease;
+  }
+  .modal-overlay.open .modal {
+    transform: translateY(0) scale(1);
+  }
+  .modal.correct { border-top: 8px solid #10b981; }
+  .modal.wrong { border-top: 8px solid #ef4444; }
+  .modal.done { border-top: 8px solid #10b981; text-align: center; }
+
+  .modal-text {
+    font-size: 20px;
+    line-height: 1.55;
+    color: #1f2937;
+    font-weight: 400;
+  }
+  .modal.correct .modal-text { color: #065f46; }
+  .modal.wrong .modal-text { color: #991b1b; }
+  .modal.done .modal-text {
+    font-size: 26px;
+    font-weight: 800;
+    color: #065f46;
+  }
+  .modal-text strong {
+    font-weight: 800;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: #f3f4f6;
+    color: #4b5563;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s ease, color .15s ease;
+  }
+  .modal-close:hover {
+    background: #e5e7eb;
+    color: #111827;
+  }
+
+  @media (max-width: 600px) {
+    .modal {
+      padding: 40px 26px 32px;
+    }
+    .modal-text {
+      font-size: 17px;
+    }
+    .modal.done .modal-text {
+      font-size: 20px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="title-row">
+    <h1 class="title">Выберите три визуальных элемента в библиотеке, которые подходят для конкретной аудитории</h1>
+    <img class="title-img" src="https://www.cultmanager.ru/images/Vibecoding/rukovoditel2.jpg" alt="">
+  </div>
+  <p class="subtitle">Нажмите на карточки, чтобы выбрать элементы</p>
+
+  <div id="case-container"></div>
+
+  <div class="controls">
+    <button class="btn btn-restart" id="restart">Начать заново</button>
+    <button class="btn btn-reset" id="reset">Сбросить выбор карточек</button>
+    <button class="btn btn-next" id="nextBtn">Перейти к следующей аудитории</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose" aria-label="Закрыть">×</button>
+    <div class="modal-text" id="modalText"></div>
+  </div>
+</div>
+
+<script>
+const data = [
+  {
+    title: 'Аудитория — дети',
+    options: [
+      { text: 'Низкие открытые стеллажи.', feedback: 'Верно. Открытые полки на уровне ребенка визуально приглашают к самостоятельному выбору.', correct: true },
+      { text: 'Мелкий шрифт на указателях.', feedback: 'Неверно. Мелкий шрифт визуально перегружает и плохо считывается ребенком.', correct: false },
+      { text: 'Стеклянные полки.', feedback: 'Неверно. Стекло визуально считывается как хрупкое и вызывает у родителей тревогу.', correct: false },
+      { text: 'Навигация в картинках и символах.', feedback: 'Верно. Картинки и символы визуально заменяют сложный текст и упрощают поиск.', correct: true },
+      { text: 'Мягкое покрытие пола.', feedback: 'Верно. Мягкая фактура визуально считывается как детская зона, где можно свободно двигаться.', correct: true },
+      { text: 'Антикварная мебель.', feedback: 'Неверно. Антикварный визуал считывается как «музей, где нельзя активно двигаться».', correct: false }
+    ]
+  },
+  {
+    title: 'Аудитория — молодежь',
+    options: [
+      { text: 'Портреты в золотых рамах.', feedback: 'Неверно. Золоченые рамы и портреты создают музейно-архивный образ.', correct: false },
+      { text: 'Зона для съемки видео.', feedback: 'Верно. Свет и фон воспринимаются как площадка для создания контента.', correct: true },
+      { text: 'Граффити-оформление стен.', feedback: 'Верно. Яркие изображения снимают ощущение «строгого места».', correct: true },
+      { text: 'Тяжелые бархатные шторы.', feedback: 'Неверно. Плотный темный текстиль визуально старит пространство.', correct: false },
+      { text: 'Массивные картотеки с рукописными карточками.', feedback: 'Неверно. Бумажные ящики и рукописные карточки создают образ технологической отсталости.', correct: false },
+      { text: 'Мебель-трансформер на колесиках.', feedback: 'Верно. Мобильные элементы создают образ гибкого, современного пространства.', correct: true }
+    ]
+  },
+  {
+    title: 'Аудитория — взрослые интеллектуалы',
+    options: [
+      { text: 'Плакаты с мультгероями.', feedback: 'Неверно. Яркий детский декор противоречит профессиональной атмосфере.', correct: false },
+      { text: 'Массивные деревянные столы.', feedback: 'Верно. Такая мебель задает ощущение основательности и качества.', correct: true },
+      { text: 'Неоновая подсветка.', feedback: 'Неверно. Динамичный неоновый свет мешает сосредоточиться.', correct: false },
+      { text: 'Пластиковые складные стулья.', feedback: 'Неверно. Пластик визуально удешевляет обстановку.', correct: false },
+      { text: 'Зеленые настольные лампы.', feedback: 'Верно. Лампы под абажуром настраивают на глубокую интеллектуальную работу.', correct: true },
+      { text: 'Глубокие древесные тона в отделке.', feedback: 'Верно. Темные древесные тона вызывают ассоциацию с престижным пространством.', correct: true }
+    ]
+  },
+  {
+    title: 'Аудитория — пенсионеры',
+    options: [
+      { text: 'Крупный шрифт на указателях.', feedback: 'Верно. Крупный шрифт — сигнал заботы о комфорте возрастного посетителя.', correct: true },
+      { text: 'Глянцевый металл в интерьере.', feedback: 'Неверно. Глянцевый металл выглядит холодно и неуютно.', correct: false },
+      { text: 'Прозрачная мебель из оргстекла.', feedback: 'Неверно. Прозрачные предметы сливаются с фоном и дезориентируют пожилых.', correct: false },
+      { text: 'Кресла с высокой спинкой и подлокотниками.', feedback: 'Верно. Привычная форма кресел располагает к отдыху.', correct: true },
+      { text: 'Абстрактные картины-инсталляции.', feedback: 'Неверно. Абстрактные образы пенсионеры воспринимают как чужеродные.', correct: false },
+      { text: 'Традиционная отделка.', feedback: 'Верно. Дерево, ткань и спокойные цвета вызывают доверие и ощущение стабильности.', correct: true }
+    ]
+  }
+];
+
+let currentIndex = 0;
+let failed = false;
+let doneShown = false;
+const container = document.getElementById('case-container');
+const nextBtn = document.getElementById('nextBtn');
+const restart = document.getElementById('restart');
+const reset = document.getElementById('reset');
+const overlay = document.getElementById('modalOverlay');
+const modal = document.getElementById('modal');
+const modalText = document.getElementById('modalText');
+const modalClose = document.getElementById('modalClose');
+
+function formatFeedback(text) {
+  return text.replace(/^(Верно|Неверно)\./, '<strong>$1.</strong>');
+}
+
+function openModal(type, content) {
+  modal.classList.remove('correct', 'wrong', 'done');
+  modal.classList.add(type);
+  if (type === 'done') {
+    modalText.innerHTML = content;
+  } else {
+    modalText.innerHTML = formatFeedback(content);
+  }
+  overlay.classList.add('open');
+}
+
+function closeModal() {
+  overlay.classList.remove('open');
+  if (modal.classList.contains('done')) {
+    modal.classList.remove('done');
+    return;
+  }
+  checkDone();
+}
+
+function render() {
+  container.innerHTML = '';
+  nextBtn.classList.remove('visible');
+  overlay.classList.remove('open');
+  document.body.classList.remove('locked');
+  failed = false;
+  doneShown = false;
+
+  if (currentIndex > 0) {
+    reset.classList.add('visible');
+  } else {
+    reset.classList.remove('visible');
+  }
+
+  const c = data[currentIndex];
+
+  const h2 = document.createElement('h2');
+  h2.className = 'case-name';
+  h2.textContent = c.title;
+  container.appendChild(h2);
+
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+
+  c.options.forEach(opt => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.correct = opt.correct ? 'true' : 'false';
+
+    const label = document.createElement('div');
+    label.className = 'label';
+    label.textContent = opt.text;
+    card.appendChild(label);
+
+    card.addEventListener('click', () => {
+      if (failed) return;
+      if (card.classList.contains('correct') || card.classList.contains('wrong')) {
+        card.classList.remove('correct', 'wrong');
+        checkDone();
+        return;
+      }
+      card.classList.add(opt.correct ? 'correct' : 'wrong');
+      if (!opt.correct) {
+        failed = true;
+        nextBtn.classList.remove('visible');
+      }
+      openModal(opt.correct ? 'correct' : 'wrong', opt.feedback);
+    });
+
+    grid.appendChild(card);
+  });
+
+  container.appendChild(grid);
+}
+
+function checkDone() {
+  if (failed) {
+    nextBtn.classList.remove('visible');
+    return;
+  }
+  const cards = Array.from(container.querySelectorAll('.card'));
+  const correctCards = cards.filter(c => c.dataset.correct === 'true');
+  const allCorrectGreen = correctCards.every(c => c.classList.contains('correct'));
+  const anyWrongRed = cards.some(c => c.classList.contains('wrong'));
+  const isLast = currentIndex === data.length - 1;
+
+  if (allCorrectGreen && !anyWrongRed) {
+    if (isLast) {
+      nextBtn.classList.remove('visible');
+      if (!doneShown) {
+        doneShown = true;
+        setTimeout(() => openModal('done', 'Упражнение выполнено!'), 250);
+      }
+    } else {
+      nextBtn.classList.add('visible');
+    }
+  } else {
+    nextBtn.classList.remove('visible');
+  }
+}
+
+modalClose.addEventListener('click', () => {
+  closeModal();
+  if (failed) {
+    document.body.classList.add('locked');
+  }
+});
+overlay.addEventListener('click', (e) => {
+  if (e.target === overlay) {
+    closeModal();
+    if (failed) {
+      document.body.classList.add('locked');
+    }
+  }
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && overlay.classList.contains('open')) {
+    closeModal();
+    if (failed) {
+      document.body.classList.add('locked');
+    }
+  }
+});
+
+nextBtn.addEventListener('click', () => {
+  if (currentIndex < data.length - 1) {
+    currentIndex++;
+    render();
+  }
+});
+
+restart.addEventListener('click', () => {
+  currentIndex = 0;
+  render();
+});
+
+reset.addEventListener('click', () => {
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
