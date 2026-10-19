@@ -11,202 +11,199 @@
     background: linear-gradient(160deg, #f8fafc 0%, #eef2ff 100%);
     color: #111827;
     line-height: 1.5;
-    padding: 40px 20px 60px;
+    padding: 32px 20px 50px;
     min-height: 100vh;
   }
-  .wrap { max-width: 1000px; margin: 0 auto; }
+  .auc-wrap { max-width: 820px; margin: 0 auto; }
 
-  .title {
-    font-size: 30px;
+  .auc-title {
+    font-size: 26px;
     font-weight: 800;
     color: #dc2626;
     letter-spacing: -0.02em;
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     line-height: 1.25;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
   }
-  .title .stars {
+  .auc-title .stars {
     font-size: 0.8em;
-    letter-spacing: 4px;
+    letter-spacing: 3px;
     white-space: nowrap;
   }
   @media (max-width: 700px) {
-    .title { font-size: 22px; }
+    .auc-title { font-size: 20px; }
   }
 
-  .subtitle {
+  .auc-subtitle {
     text-align: center;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
     color: #1d4ed8;
-    margin-bottom: 24px;
+    margin-bottom: 18px;
     line-height: 1.5;
   }
-  .subtitle span { display: block; }
-  @media (max-width: 700px) {
-    .subtitle { font-size: 14px; }
-  }
+  .auc-subtitle span { display: block; }
 
-  .budget {
+  .auc-budget {
     display: flex;
     justify-content: center;
-    gap: 28px;
+    gap: 22px;
     flex-wrap: wrap;
     background: #ffffff;
     border: 2px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 16px 22px;
-    margin-bottom: 32px;
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
-    font-size: 16px;
+    border-radius: 12px;
+    padding: 10px 18px;
+    margin-bottom: 22px;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
+    font-size: 14px;
   }
-  .budget-item { display: flex; align-items: baseline; gap: 6px; }
-  .budget-item span:first-child { color: #6b7280; font-size: 14px; }
-  .budget-item span:last-child { font-weight: 700; font-size: 20px; color: #111827; }
-  .budget-item.spent span:last-child { color: #7c3aed; }
-  .budget-item.left span:last-child { color: #059669; }
-  .budget-item.left.low span:last-child { color: #dc2626; }
+  .auc-budget-item { display: flex; align-items: baseline; gap: 6px; }
+  .auc-budget-item span:first-child { color: #6b7280; font-size: 12px; }
+  .auc-budget-item span:last-child { font-weight: 700; font-size: 17px; color: #111827; }
+  .auc-budget-item.spent span:last-child { color: #7c3aed; }
+  .auc-budget-item.left span:last-child { color: #059669; }
+  .auc-budget-item.left.low span:last-child { color: #dc2626; }
 
-  .lots-grid {
+  .auc-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    gap: 12px;
     width: 100%;
   }
-  @media (max-width: 700px) {
-    .lots-grid { grid-template-columns: minmax(0, 1fr); }
+  @media (max-width: 640px) {
+    .auc-grid { grid-template-columns: minmax(0, 1fr); }
   }
 
-  .lot-card {
+  .auc-card {
     position: relative;
     background: #ffffff;
     border: 2px solid #e5e7eb;
-    border-radius: 18px;
-    padding: 22px 24px;
-    min-height: 120px;
+    border-radius: 14px;
+    padding: 14px 16px;
+    min-height: 88px;
     cursor: pointer;
     transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease, opacity .18s ease;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
     user-select: none;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    min-width: 0;
   }
-  .lot-card:hover:not(.disabled):not(.correct):not(.wrong) {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.10);
+  .auc-card:hover:not(.disabled):not(.correct):not(.wrong) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.10);
     border-color: #93c5fd;
   }
 
-  .lot-card .name {
-    font-size: 16px;
+  .auc-card .name {
+    font-size: 14px;
     font-weight: 700;
     line-height: 1.35;
-    margin-bottom: 6px;
-    padding-right: 60px;
+    margin-bottom: 4px;
+    padding-right: 52px;
     color: #1f2937;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
-  .lot-card .desc {
-    font-size: 14px;
+  .auc-card .desc {
+    font-size: 12.5px;
     color: #4b5563;
-    line-height: 1.45;
-    padding-right: 60px;
+    line-height: 1.4;
+    padding-right: 52px;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
-  .lot-card .price {
+  .auc-card .price {
     position: absolute;
-    top: 18px;
-    right: 18px;
+    top: 12px;
+    right: 12px;
     background: #eef2ff;
     color: #1d4ed8;
     font-weight: 700;
-    font-size: 14px;
-    padding: 4px 10px;
-    border-radius: 8px;
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 7px;
     white-space: nowrap;
   }
 
-  .lot-card::after {
+  .auc-card::after {
     content: "";
     position: absolute;
-    bottom: 18px;
-    right: 18px;
-    width: 24px;
-    height: 24px;
+    bottom: 12px;
+    right: 12px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     border: 2px solid #d1d5db;
     background: #fff;
     transition: all .2s ease;
   }
 
-  .lot-card.correct {
+  .auc-card.correct {
     border-color: #10b981;
     background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%);
-    box-shadow: 0 10px 24px rgba(16, 185, 129, 0.18);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.18);
   }
-  .lot-card.correct::after {
+  .auc-card.correct::after {
     background: #10b981;
     border-color: #10b981;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>");
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 14px;
+    background-size: 12px;
   }
 
-  .lot-card.wrong {
+  .auc-card.wrong {
     border-color: #ef4444;
     background: linear-gradient(180deg, #fef2f2 0%, #ffffff 100%);
-    box-shadow: 0 10px 24px rgba(239, 68, 68, 0.15);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.15);
   }
-  .lot-card.wrong::after {
+  .auc-card.wrong::after {
     background: #ef4444;
     border-color: #ef4444;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><line x1='18' y1='6' x2='6' y2='18'/><line x1='6' y1='6' x2='18' y2='18'/></svg>");
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 12px;
+    background-size: 10px;
   }
 
-  .lot-card.disabled {
-    opacity: .4;
+  .auc-card.disabled {
+    opacity: .35;
     pointer-events: none;
   }
 
-  .controls {
+  .auc-controls {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 12px;
-    margin-top: 36px;
+    margin-top: 24px;
     flex-wrap: wrap;
   }
 
-  .btn {
+  .auc-btn {
     border: none;
     border-radius: 12px;
-    padding: 13px 26px;
-    font-size: 15px;
+    padding: 12px 22px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: transform .18s ease, box-shadow .18s ease;
   }
 
-  .btn-restart {
+  .auc-btn-restart {
     background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
     color: #78350f;
     box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35);
   }
-  .btn-restart:hover {
+  .auc-btn-restart:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 22px rgba(245, 158, 11, 0.45);
   }
 
-  .modal-overlay {
+  .auc-modal-overlay {
     position: fixed;
     inset: 0;
     background: rgba(15, 23, 42, 0.5);
@@ -219,55 +216,55 @@
     transition: opacity .2s ease;
     z-index: 100;
   }
-  .modal-overlay.open {
+  .auc-modal-overlay.open {
     opacity: 1;
     pointer-events: auto;
   }
-  .modal {
+  .auc-modal {
     background: #ffffff;
     border-radius: 22px;
-    max-width: 620px;
+    max-width: 560px;
     width: 100%;
-    padding: 48px 44px 44px;
+    padding: 42px 38px 38px;
     position: relative;
     box-shadow: 0 30px 80px rgba(15, 23, 42, 0.3);
     transform: translateY(14px) scale(0.97);
     transition: transform .22s ease;
   }
-  .modal-overlay.open .modal {
+  .auc-modal-overlay.open .auc-modal {
     transform: translateY(0) scale(1);
   }
-  .modal.correct { border-top: 8px solid #10b981; }
-  .modal.wrong { border-top: 8px solid #ef4444; }
-  .modal.done { border-top: 8px solid #10b981; text-align: center; }
-  .modal.summary { border-top: 8px solid #f59e0b; }
+  .auc-modal.correct { border-top: 8px solid #10b981; }
+  .auc-modal.wrong { border-top: 8px solid #ef4444; }
+  .auc-modal.done { border-top: 8px solid #10b981; text-align: center; }
+  .auc-modal.summary { border-top: 8px solid #f59e0b; }
 
-  .modal-text {
-    font-size: 20px;
+  .auc-modal-text {
+    font-size: 18px;
     line-height: 1.55;
     color: #1f2937;
   }
-  .modal.correct .modal-text { color: #065f46; }
-  .modal.wrong .modal-text { color: #991b1b; }
-  .modal.summary .modal-text { color: #92400e; }
-  .modal.done .modal-text {
-    font-size: 24px;
+  .auc-modal.correct .auc-modal-text { color: #065f46; }
+  .auc-modal.wrong .auc-modal-text { color: #991b1b; }
+  .auc-modal.summary .auc-modal-text { color: #92400e; }
+  .auc-modal.done .auc-modal-text {
+    font-size: 22px;
     font-weight: 800;
     color: #065f46;
   }
-  .modal-text strong { font-weight: 800; }
+  .auc-modal-text strong { font-weight: 800; }
 
-  .modal-close {
+  .auc-modal-close {
     position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 40px;
-    height: 40px;
+    top: 14px;
+    right: 14px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     border: none;
     background: #f3f4f6;
     color: #4b5563;
-    font-size: 24px;
+    font-size: 22px;
     line-height: 1;
     cursor: pointer;
     display: flex;
@@ -275,52 +272,52 @@
     justify-content: center;
     transition: background .15s ease, color .15s ease;
   }
-  .modal-close:hover {
+  .auc-modal-close:hover {
     background: #e5e7eb;
     color: #111827;
   }
 
   @media (max-width: 600px) {
-    .modal { padding: 40px 26px 32px; }
-    .modal-text { font-size: 17px; }
-    .modal.done .modal-text { font-size: 19px; }
-    .budget { gap: 14px; font-size: 14px; padding: 14px 16px; }
-    .budget-item span:last-child { font-size: 17px; }
-    .lot-card .name, .lot-card .desc { padding-right: 0; }
-    .lot-card .price { position: static; display: inline-block; margin-bottom: 8px; }
+    .auc-modal { padding: 36px 24px 28px; }
+    .auc-modal-text { font-size: 16px; }
+    .auc-modal.done .auc-modal-text { font-size: 19px; }
+    .auc-budget { gap: 12px; padding: 10px 14px; font-size: 13px; }
+    .auc-budget-item span:last-child { font-size: 15px; }
+    .auc-card .name, .auc-card .desc { padding-right: 0; }
+    .auc-card .price { position: static; display: inline-block; margin-bottom: 6px; align-self: flex-start; }
   }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1 class="title"><span class="stars">⭐⭐⭐</span><span>Аукцион ценностей</span><span class="stars">⭐⭐⭐</span></h1>
-  <p class="subtitle">
+<div class="auc-wrap">
+  <h1 class="auc-title"><span class="stars">⭐⭐⭐</span> Аукцион ценностей <span class="stars">⭐⭐⭐</span></h1>
+  <p class="auc-subtitle">
     <span>Соберите набор лотов, который максимально поднимет статус читателя.</span>
     <span>Бюджет — 120 токенов.</span>
   </p>
 
-  <div class="budget">
-    <div class="budget-item"><span>Бюджет</span><span>120</span></div>
-    <div class="budget-item spent"><span>Потрачено</span><span id="spent">0</span></div>
-    <div class="budget-item left" id="leftBox"><span>Осталось</span><span id="left">120</span></div>
+  <div class="auc-budget">
+    <div class="auc-budget-item"><span>Бюджет</span><span>120</span></div>
+    <div class="auc-budget-item spent"><span>Потрачено</span><span id="aucSpent">0</span></div>
+    <div class="auc-budget-item left" id="aucLeftBox"><span>Осталось</span><span id="aucLeft">120</span></div>
   </div>
 
-  <div id="lots" class="lots-grid"></div>
+  <div id="aucLots" class="auc-grid"></div>
 
-  <div class="controls">
-    <button class="btn btn-restart" id="restart">Начать заново</button>
+  <div class="auc-controls">
+    <button class="auc-btn auc-btn-restart" id="aucRestart">Начать заново</button>
   </div>
 </div>
 
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal" id="modal">
-    <button class="modal-close" id="modalClose" aria-label="Закрыть">×</button>
-    <div class="modal-text" id="modalText"></div>
+<div class="auc-modal-overlay" id="aucModalOverlay">
+  <div class="auc-modal" id="aucModal">
+    <button class="auc-modal-close" id="aucModalClose" aria-label="Закрыть">×</button>
+    <div class="auc-modal-text" id="aucModalText"></div>
   </div>
 </div>
 
 <script>
-const lots = [
+const aucLots = [
   { name: '«Истории успеха»', desc: 'Стенд с биографиями известных людей, которые начинали путь в вашей библиотеке.', cost: 40, correct: true, feedback: 'Верно. Это создает образ учреждения как мощного социального лифта.' },
   { name: '«Бульварная пресса»', desc: 'Подписка на 100 наименований дешевых развлекательных газет и журналов.', cost: 40, correct: false, feedback: 'Неверно. Обилие таких изданий привлекает массу людей, но снижает статусность библиотеки.' },
   { name: '«Личный эксперт»', desc: 'Служба по индивидуальному поиску сложной отраслевой информации.', cost: 30, correct: true, feedback: 'Верно. Персонализация — признак высокого уровня обслуживания.' },
@@ -331,23 +328,23 @@ const lots = [
   { name: '«Брендированные закладки»', desc: 'Книжные вкладыши, на которых читатель сможет фиксировать цитаты или инсайты из книги.', cost: 20, correct: true, feedback: 'Верно. Библиотека показывает, что она — инструмент для личностного роста гостя. Внимание к деталям и целям читателя — признак премиального сервиса.' }
 ];
 
-const BUDGET = 120;
-const REQUIRED_SPENT = 110;
-const MIN_LOT = 20;
-let spent = 0;
-let doneShown = false;
+const AUC_BUDGET = 120;
+const AUC_REQUIRED = 110;
+const AUC_MIN = 20;
+let aucSpent = 0;
+let aucDoneShown = false;
 
-const lotsContainer = document.getElementById('lots');
-const spentEl = document.getElementById('spent');
-const leftEl = document.getElementById('left');
-const leftBox = document.getElementById('leftBox');
-const overlay = document.getElementById('modalOverlay');
-const modal = document.getElementById('modal');
-const modalText = document.getElementById('modalText');
-const modalClose = document.getElementById('modalClose');
-const restart = document.getElementById('restart');
+const aucContainer = document.getElementById('aucLots');
+const aucSpentEl = document.getElementById('aucSpent');
+const aucLeftEl = document.getElementById('aucLeft');
+const aucLeftBox = document.getElementById('aucLeftBox');
+const aucOverlay = document.getElementById('aucModalOverlay');
+const aucModal = document.getElementById('aucModal');
+const aucModalText = document.getElementById('aucModalText');
+const aucModalClose = document.getElementById('aucModalClose');
+const aucRestart = document.getElementById('aucRestart');
 
-function pluralize(n, one, few, many) {
+function aucPlural(n, one, few, many) {
   n = Math.abs(n) % 100;
   if (n >= 11 && n <= 14) return many;
   const n1 = n % 10;
@@ -356,49 +353,49 @@ function pluralize(n, one, few, many) {
   return many;
 }
 
-function formatFeedback(text) {
+function aucFormat(text) {
   return text.replace(/^(Верно|Неверно)\./, '<strong>$1.</strong>');
 }
 
-function openModal(type, content) {
-  modal.classList.remove('correct', 'wrong', 'done', 'summary');
-  modal.classList.add(type);
+function aucOpenModal(type, content) {
+  aucModal.classList.remove('correct', 'wrong', 'done', 'summary');
+  aucModal.classList.add(type);
   if (type === 'correct' || type === 'wrong') {
-    modalText.innerHTML = formatFeedback(content);
+    aucModalText.innerHTML = aucFormat(content);
   } else {
-    modalText.innerHTML = content;
+    aucModalText.innerHTML = content;
   }
-  overlay.classList.add('open');
+  aucOverlay.classList.add('open');
 }
 
-function closeModal() {
-  const isTerminal = modal.classList.contains('done') || modal.classList.contains('summary');
-  overlay.classList.remove('open');
-  modal.classList.remove('correct', 'wrong', 'done', 'summary');
+function aucCloseModal() {
+  const isTerminal = aucModal.classList.contains('done') || aucModal.classList.contains('summary');
+  aucOverlay.classList.remove('open');
+  aucModal.classList.remove('correct', 'wrong', 'done', 'summary');
   if (!isTerminal) {
-    setTimeout(checkEndState, 250);
+    setTimeout(aucCheckEnd, 250);
   }
 }
 
-function isSelectionPossible() {
-  return Array.from(lotsContainer.children).some(card => {
+function aucIsSelectionPossible() {
+  return Array.from(aucContainer.children).some(card => {
     const cost = Number(card.dataset.cost);
     const isSelected = card.classList.contains('correct') || card.classList.contains('wrong');
-    return !isSelected && spent + cost <= BUDGET;
+    return !isSelected && aucSpent + cost <= AUC_BUDGET;
   });
 }
 
-function updateBudget() {
-  spentEl.textContent = spent;
-  const left = BUDGET - spent;
-  leftEl.textContent = left;
-  leftBox.classList.toggle('low', left < MIN_LOT);
+function aucUpdateBudget() {
+  aucSpentEl.textContent = aucSpent;
+  const left = AUC_BUDGET - aucSpent;
+  aucLeftEl.textContent = left;
+  aucLeftBox.classList.toggle('low', left < AUC_MIN);
 
-  Array.from(lotsContainer.children).forEach(card => {
+  Array.from(aucContainer.children).forEach(card => {
     const cost = Number(card.dataset.cost);
     const isSelected = card.classList.contains('correct') || card.classList.contains('wrong');
     if (!isSelected) {
-      if (spent + cost > BUDGET) {
+      if (aucSpent + cost > AUC_BUDGET) {
         card.classList.add('disabled');
       } else {
         card.classList.remove('disabled');
@@ -409,50 +406,50 @@ function updateBudget() {
   });
 }
 
-function checkEndState() {
-  if (doneShown) return;
+function aucCheckEnd() {
+  if (aucDoneShown) return;
 
-  const cards = Array.from(lotsContainer.children);
+  const cards = Array.from(aucContainer.children);
   const anyWrong = cards.some(c => c.classList.contains('wrong'));
   const correctCount = cards.filter(c => c.classList.contains('correct')).length;
   const wrongCount = cards.filter(c => c.classList.contains('wrong')).length;
-  const left = BUDGET - spent;
+  const left = AUC_BUDGET - aucSpent;
 
-  if (spent === REQUIRED_SPENT && !anyWrong) {
-    doneShown = true;
-    const lotWord = pluralize(correctCount, 'лот', 'лота', 'лотов');
-    let msg = `Вы потратили ${spent} токенов, выбрали ${correctCount} ${lotWord} и выполнили задание абсолютно верно!`;
+  if (aucSpent === AUC_REQUIRED && !anyWrong) {
+    aucDoneShown = true;
+    const lotWord = aucPlural(correctCount, 'лот', 'лота', 'лотов');
+    let msg = `Вы потратили ${aucSpent} токенов, выбрали ${correctCount} ${lotWord} и выполнили задание абсолютно верно!`;
     if (left > 0) {
-      const tokenWord = pluralize(left, 'токен', 'токена', 'токенов');
-      msg += ` Оставшиеся ${left} ${tokenWord} — в запасе: минимальный лот стоит ${MIN_LOT}.`;
+      const tokenWord = aucPlural(left, 'токен', 'токена', 'токенов');
+      msg += ` Оставшиеся ${left} ${tokenWord} — в запасе: минимальный лот стоит ${AUC_MIN}.`;
     }
-    openModal('done', msg);
+    aucOpenModal('done', msg);
     return;
   }
 
-  if (spent > 0 && !isSelectionPossible()) {
-    const lotWord = pluralize(correctCount, 'лот', 'лота', 'лотов');
-    const errWord = pluralize(wrongCount, 'ошибку', 'ошибки', 'ошибок');
-    let msg = `Вы потратили ${spent} токенов, выбрали ${correctCount} ${lotWord} верно и допустили ${wrongCount} ${errWord}.`;
+  if (aucSpent > 0 && !aucIsSelectionPossible()) {
+    const lotWord = aucPlural(correctCount, 'лот', 'лота', 'лотов');
+    const errWord = aucPlural(wrongCount, 'ошибку', 'ошибки', 'ошибок');
+    let msg = `Вы потратили ${aucSpent} токенов, выбрали ${correctCount} ${lotWord} верно и допустили ${wrongCount} ${errWord}.`;
     if (left > 0) {
-      const tokenWord = pluralize(left, 'токен', 'токена', 'токенов');
+      const tokenWord = aucPlural(left, 'токен', 'токена', 'токенов');
       msg += ` Ещё ${left} ${tokenWord} остались неиспользованными — на минимальный лот их уже не хватает.`;
     }
     msg += ' Попробуйте выполнить задание снова.';
-    openModal('summary', msg);
+    aucOpenModal('summary', msg);
   }
 }
 
-function render() {
-  lotsContainer.innerHTML = '';
-  spent = 0;
-  doneShown = false;
-  overlay.classList.remove('open');
-  updateBudget();
+function aucRender() {
+  aucContainer.innerHTML = '';
+  aucSpent = 0;
+  aucDoneShown = false;
+  aucOverlay.classList.remove('open');
+  aucUpdateBudget();
 
-  lots.forEach(lot => {
+  aucLots.forEach(lot => {
     const card = document.createElement('div');
-    card.className = 'lot-card';
+    card.className = 'auc-card';
     card.dataset.cost = lot.cost;
     card.dataset.correct = lot.correct ? 'true' : 'false';
 
@@ -476,35 +473,35 @@ function render() {
 
       if (card.classList.contains('correct') || card.classList.contains('wrong')) {
         card.classList.remove('correct', 'wrong');
-        spent -= lot.cost;
-        updateBudget();
-        checkEndState();
+        aucSpent -= lot.cost;
+        aucUpdateBudget();
+        aucCheckEnd();
         return;
       }
 
-      if (spent + lot.cost > BUDGET) return;
+      if (aucSpent + lot.cost > AUC_BUDGET) return;
 
       card.classList.add(lot.correct ? 'correct' : 'wrong');
-      spent += lot.cost;
-      updateBudget();
-      openModal(lot.correct ? 'correct' : 'wrong', lot.feedback);
+      aucSpent += lot.cost;
+      aucUpdateBudget();
+      aucOpenModal(lot.correct ? 'correct' : 'wrong', lot.feedback);
     });
 
-    lotsContainer.appendChild(card);
+    aucContainer.appendChild(card);
   });
 }
 
-modalClose.addEventListener('click', closeModal);
-overlay.addEventListener('click', (e) => {
-  if (e.target === overlay) closeModal();
+aucModalClose.addEventListener('click', aucCloseModal);
+aucOverlay.addEventListener('click', (e) => {
+  if (e.target === aucOverlay) aucCloseModal();
 });
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+  if (e.key === 'Escape' && aucOverlay.classList.contains('open')) aucCloseModal();
 });
 
-restart.addEventListener('click', render);
+aucRestart.addEventListener('click', aucRender);
 
-render();
+aucRender();
 </script>
 </body>
 </html>
