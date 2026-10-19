@@ -75,13 +75,25 @@
   .budget-item.left span:last-child { color: #059669; }
   .budget-item.left.low span:last-child { color: #dc2626; }
 
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+  /* закреплённая сетка — flex с жёсткой шириной карточек */
+  #lots {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 16px !important;
+    align-items: stretch !important;
+  }
+  #lots > .card {
+    flex: 0 0 calc(50% - 8px) !important;
+    width: calc(50% - 8px) !important;
+    max-width: calc(50% - 8px) !important;
+    min-width: 0 !important;
   }
   @media (max-width: 700px) {
-    .grid { grid-template-columns: 1fr; }
+    #lots > .card {
+      flex: 0 0 100% !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
   }
 
   .card {
@@ -308,7 +320,7 @@
     <div class="budget-item left" id="leftBox"><span>Осталось</span><span id="left">120</span></div>
   </div>
 
-  <div id="lots" class="grid"></div>
+  <div id="lots"></div>
 
   <div class="controls">
     <button class="btn btn-restart" id="restart">Начать заново</button>
@@ -507,6 +519,10 @@ document.addEventListener('keydown', (e) => {
 
 restart.addEventListener('click', render);
 
+render();
+</script>
+</body>
+</html>
 render();
 </script>
 </body>
