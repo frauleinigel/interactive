@@ -6,7 +6,6 @@
 <title>Аукцион ценностей</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
     background: linear-gradient(160deg, #f8fafc 0%, #eef2ff 100%);
@@ -48,9 +47,7 @@
     margin-bottom: 24px;
     line-height: 1.5;
   }
-  .subtitle span {
-    display: block;
-  }
+  .subtitle span { display: block; }
   @media (max-width: 700px) {
     .subtitle { font-size: 14px; }
   }
@@ -75,28 +72,17 @@
   .budget-item.left span:last-child { color: #059669; }
   .budget-item.left.low span:last-child { color: #dc2626; }
 
-  /* закреплённая сетка — flex с жёсткой шириной карточек */
-  #lots {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 16px !important;
-    align-items: stretch !important;
-  }
-  #lots > .card {
-    flex: 0 0 calc(50% - 8px) !important;
-    width: calc(50% - 8px) !important;
-    max-width: calc(50% - 8px) !important;
-    min-width: 0 !important;
+  .lots-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    width: 100%;
   }
   @media (max-width: 700px) {
-    #lots > .card {
-      flex: 0 0 100% !important;
-      width: 100% !important;
-      max-width: 100% !important;
-    }
+    .lots-grid { grid-template-columns: minmax(0, 1fr); }
   }
 
-  .card {
+  .lot-card {
     position: relative;
     background: #ffffff;
     border: 2px solid #e5e7eb;
@@ -111,13 +97,13 @@
     flex-direction: column;
     justify-content: center;
   }
-  .card:hover:not(.disabled):not(.correct):not(.wrong) {
+  .lot-card:hover:not(.disabled):not(.correct):not(.wrong) {
     transform: translateY(-3px);
     box-shadow: 0 12px 24px rgba(15, 23, 42, 0.10);
     border-color: #93c5fd;
   }
 
-  .card .name {
+  .lot-card .name {
     font-size: 16px;
     font-weight: 700;
     line-height: 1.35;
@@ -125,14 +111,14 @@
     padding-right: 60px;
     color: #1f2937;
   }
-  .card .desc {
+  .lot-card .desc {
     font-size: 14px;
     color: #4b5563;
     line-height: 1.45;
     padding-right: 60px;
   }
 
-  .card .price {
+  .lot-card .price {
     position: absolute;
     top: 18px;
     right: 18px;
@@ -145,7 +131,7 @@
     white-space: nowrap;
   }
 
-  .card::after {
+  .lot-card::after {
     content: "";
     position: absolute;
     bottom: 18px;
@@ -158,12 +144,12 @@
     transition: all .2s ease;
   }
 
-  .card.correct {
+  .lot-card.correct {
     border-color: #10b981;
     background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%);
     box-shadow: 0 10px 24px rgba(16, 185, 129, 0.18);
   }
-  .card.correct::after {
+  .lot-card.correct::after {
     background: #10b981;
     border-color: #10b981;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>");
@@ -172,12 +158,12 @@
     background-size: 14px;
   }
 
-  .card.wrong {
+  .lot-card.wrong {
     border-color: #ef4444;
     background: linear-gradient(180deg, #fef2f2 0%, #ffffff 100%);
     box-shadow: 0 10px 24px rgba(239, 68, 68, 0.15);
   }
-  .card.wrong::after {
+  .lot-card.wrong::after {
     background: #ef4444;
     border-color: #ef4444;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><line x1='18' y1='6' x2='6' y2='18'/><line x1='6' y1='6' x2='18' y2='18'/></svg>");
@@ -186,7 +172,7 @@
     background-size: 12px;
   }
 
-  .card.disabled {
+  .lot-card.disabled {
     opacity: .4;
     pointer-events: none;
   }
@@ -207,7 +193,7 @@
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: transform .18s ease, box-shadow .18s ease, background .18s ease, opacity .18s ease;
+    transition: transform .18s ease, box-shadow .18s ease;
   }
 
   .btn-restart {
@@ -260,7 +246,6 @@
     font-size: 20px;
     line-height: 1.55;
     color: #1f2937;
-    font-weight: 400;
   }
   .modal.correct .modal-text { color: #065f46; }
   .modal.wrong .modal-text { color: #991b1b; }
@@ -301,8 +286,8 @@
     .modal.done .modal-text { font-size: 19px; }
     .budget { gap: 14px; font-size: 14px; padding: 14px 16px; }
     .budget-item span:last-child { font-size: 17px; }
-    .card .name, .card .desc { padding-right: 0; }
-    .card .price { position: static; display: inline-block; margin-bottom: 8px; }
+    .lot-card .name, .lot-card .desc { padding-right: 0; }
+    .lot-card .price { position: static; display: inline-block; margin-bottom: 8px; }
   }
 </style>
 </head>
@@ -320,7 +305,7 @@
     <div class="budget-item left" id="leftBox"><span>Осталось</span><span id="left">120</span></div>
   </div>
 
-  <div id="lots"></div>
+  <div id="lots" class="lots-grid"></div>
 
   <div class="controls">
     <button class="btn btn-restart" id="restart">Начать заново</button>
@@ -467,7 +452,7 @@ function render() {
 
   lots.forEach(lot => {
     const card = document.createElement('div');
-    card.className = 'card';
+    card.className = 'lot-card';
     card.dataset.cost = lot.cost;
     card.dataset.correct = lot.correct ? 'true' : 'false';
 
@@ -519,10 +504,6 @@ document.addEventListener('keydown', (e) => {
 
 restart.addEventListener('click', render);
 
-render();
-</script>
-</body>
-</html>
 render();
 </script>
 </body>
