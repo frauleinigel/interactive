@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Выберите две первопричины проблем</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f4f6fa;
+    color: #212529;
+    padding: 30px 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .header { text-align: center; margin-bottom: 30px; max-width: 800px; width: 100%; }
+  
+  /* Насыщенный алый */
+  .header h1 { 
+    font-size: 26px; 
+    font-weight: 700; 
+    margin: 0 0 15px; 
+    color: #d90429; 
+    line-height: 1.3; 
+  }
+  
+  /* Насыщенный темно-синий */
+  .header .subtitle { 
+    font-size: 20px; 
+    font-weight: 700; 
+    color: #1e3a8a; 
+    margin: 0 0 20px; 
+  }
+  
+  /* Насыщенный зеленый */
+  .header .hint { 
+    font-size: 17px; 
+    font-weight: 700; 
+    color: #15803d; 
+    font-style: normal;
+    background: #dcfce7;
+    padding: 14px 20px;
+    border-radius: 8px;
+    display: inline-block;
+    margin: 0 auto;
+    text-align: center;
+    max-width: 100%;
+    box-shadow: 0 2px 6px rgba(21,128,61,0.08);
+  }
+
+  /* --- СЕТКА КАРТОЧЕК --- */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    width: 100%;
+    max-width: 1000px;
+    margin-bottom: 30px;
+  }
+
+  .card {
+    background: #fff;
+    border: 2px solid #dfe4f0;
+    border-radius: 12px;
+    padding: 20px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #212529;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    display: flex;
+    align-items: center;
+    min-height: 110px;
+    position: relative;
+  }
+
+  .card:hover {
+    border-color: #9aa8c8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+  }
+
+  .card.selected {
+    border-color: #2563eb;
+    background: #f0f5ff;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+  }
+
+  .card.selected::after {
+    content: "✓";
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    color: #2563eb;
+    font-size: 22px;
+    font-weight: bold;
+  }
+
+  /* --- БЛОК КНОПОК --- */
+  .controls {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .check-btn, .restart-btn {
+    padding: 16px 40px;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .check-btn {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.25);
+  }
+  .check-btn:hover { background: #1d4ed8; }
+  .check-btn:active { transform: scale(0.98); }
+
+  .restart-btn {
+    background: #fff;
+    color: #2563eb;
+    border: 2px solid #2563eb;
+  }
+  .restart-btn:hover { background: #f0f5ff; }
+  .restart-btn:active { transform: scale(0.98); }
+
+  /* --- МОДАЛКА --- */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(20, 30, 50, 0.5);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100; opacity: 0; pointer-events: none;
+    transition: opacity 0.2s; padding: 20px;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: auto; }
+  .modal-content {
+    background: #fff; border-radius: 16px; padding: 30px;
+    width: 100%; max-width: 500px; 
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-close {
+    position: absolute; top: 15px; right: 15px;
+    background: #f1f3f5; border: none; width: 34px; height: 34px;
+    border-radius: 50%; font-size: 22px; color: #495057; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .modal-close:hover { background: #e9ecef; }
+  
+  .modal-icon {
+    width: 64px; height: 64px; border-radius: 50%;
+    margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+  }
+  .modal-icon.success { background: #d1e7dd; color: #198754; }
+  .modal-icon.error { background: #f8d7da; color: #dc3545; }
+  .modal-icon.warning { background: #fff3cd; color: #856404; }
+  .modal-icon.info { background: #cfe2ff; color: #084298; }
+
+  .modal-title { font-size: 22px; margin: 0 0 15px; text-align: center; color: #1a2233; }
+  .modal-text { font-size: 15px; color: #495057; margin: 0; line-height: 1.6; }
+  .modal-text p { margin-top: 0; margin-bottom: 12px; }
+  .modal-text ul { padding-left: 20px; margin-top: 10px; margin-bottom: 10px; }
+  .modal-text li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Выберите две первопричины проблем</h1>
+    <p class="subtitle">Остальные четыре — следствия.</p>
+    <p class="hint">Подсказка: спрашивайте себя не «плохо ли это», а «исчезнет ли остальное, если это устранить».</p>
+  </div>
+
+  <div class="cards-grid" id="cardsGrid">
+    <!-- Карточки генерируются через JS -->
+  </div>
+
+  <div class="controls">
+    <button class="check-btn" id="checkBtn">Проверить</button>
+    <button class="restart-btn" id="restartBtn">Начать заново</button>
+  </div>
+
+  <div class="modal-overlay" id="feedbackModal">
+    <div class="modal-content">
+      <button class="modal-close" id="modalClose">&times;</button>
+      <div class="modal-icon" id="modalIcon"></div>
+      <h3 class="modal-title" id="modalTitle"></h3>
+      <div class="modal-text" id="modalText"></div>
+    </div>
+  </div>
+
+<script>
+(function() {
+  const CARDS = [
+    { id: 1, text: "Рекомендации предлагают книги, которые никто не брал." },
+    { id: 2, text: "В электронном каталоге есть фиктивные читатели и книги, записанные на них." },
+    { id: 3, text: "На одно мероприятие пришло 5 человек, на другое — 50, и непонятно почему." },
+    { id: 4, text: "Сотрудники тратят часы на ручные отчёты, которые могли бы собираться автоматически." },
+    { id: 5, text: "АБИС и бухгалтерия не связаны: данные о закупках и выдаче сводят вручную." },
+    { id: 6, text: "Директор не может ответить, влияет ли комплектование на книговыдачу." }
+  ];
+
+  const CORRECT_IDS = [2, 5];
+
+  const cardsGrid = document.getElementById("cardsGrid");
+  const checkBtn = document.getElementById("checkBtn");
+  const restartBtn = document.getElementById("restartBtn");
+  const modal = document.getElementById("feedbackModal");
+  const modalIcon = document.getElementById("modalIcon");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalText = document.getElementById("modalText");
+  const modalClose = document.getElementById("modalClose");
+
+  let selectedCards = [];
+
+  // --- Отрисовка карточек ---
+  function renderCards() {
+    cardsGrid.innerHTML = "";
+    const shuffled = [...CARDS].sort(() => Math.random() - 0.5);
+    
+    shuffled.forEach(card => {
+      const el = document.createElement("div");
+      el.className = "card";
+      el.dataset.id = card.id;
+      el.textContent = card.text;
+      
+      el.addEventListener("click", () => toggleCard(card.id, el));
+      cardsGrid.appendChild(el);
+    });
+  }
+
+  // --- Логика выбора ---
+  function toggleCard(id, el) {
+    const index = selectedCards.indexOf(id);
+    
+    if (index > -1) {
+      selectedCards.splice(index, 1);
+      el.classList.remove("selected");
+    } else {
+      if (selectedCards.length < 2) {
+        selectedCards.push(id);
+        el.classList.add("selected");
+      } else {
+        showModal("info", "Лимит выбора", "Вы уже выбрали две таблички. Снимите выбор с одной из них, чтобы выбрать другую.");
+      }
+    }
+  }
+
+  // --- Проверка ---
+  checkBtn.addEventListener("click", () => {
+    if (selectedCards.length !== 2) {
+      showModal("info", "Нужно выбрать ровно две", "Нужно выбрать ровно две первопричины. Вернитесь к подсказке: исчезнет ли остальное, если это устранить?");
+      return;
+    }
+
+    const correctSelectedCount = selectedCards.filter(id => CORRECT_IDS.includes(id)).length;
+
+    if (correctSelectedCount === 2) {
+      // 1. ОБЕ ВЕРНЫ
+      const successHtml = `
+        <p>Верно. Вы нашли две первопричины: системы не связаны между собой и данные грязные. Из них растут остальные проблемы.</p>
+        <p>Новая система не решает ни одну из этих причин: сначала порядок в данных и описанные процессы, потом программа.</p>
+        <p><strong>Остальные карточки в упражнении — следствия:</strong> странные рекомендации, непонятная посещаемость, ручные отчёты, вопросы без ответа. Они рассыплются, если почистить данные и связать системы.</p>
+      `;
+      showModal("success", "Вы справились с заданием!", successHtml);
+    } 
+    else if (correctSelectedCount === 1) {
+      // 2. ОДНА ВЕРНА, ОДНА НЕТ
+      const partialHtml = `
+        <p>Одна из выбранных карточек — первопричина, другая — нет.</p>
+        <p>Кликните по кнопке "Начать заново" и подумайте внимательнее, чтобы сделать правильный выбор.</p>
+      `;
+      showModal("warning", "Есть одна ошибка", partialHtml);
+    } 
+    else {
+      // 3. ОБЕ НЕВЕРНЫ
+      const errorHtml = `
+        <p>Обе выбранные карточки — следствия, а не первопричины.</p>
+        <p>Кликните по кнопке "Начать заново" и внимательно подумайте над задачей, чтобы сделать правильный выбор.</p>
+      `;
+      showModal("error", "Ошибка", errorHtml);
+    }
+  });
+
+  // --- Перезапуск ---
+  restartBtn.addEventListener("click", () => {
+    selectedCards = [];
+    modal.classList.remove("show");
+    renderCards();
+  });
+
+  // --- Модальное окно ---
+  function showModal(type, title, text) {
+    modalIcon.className = "modal-icon " + type;
+    
+    if (type === "success") modalIcon.innerHTML = "&#10004;";
+    else if (type === "error") modalIcon.innerHTML = "&#10006;";
+    else if (type === "warning") modalIcon.innerHTML = "!";
+    else modalIcon.innerHTML = "i";
+
+    modalTitle.textContent = title;
+    modalText.innerHTML = text;
+    modal.classList.add("show");
+  }
+
+  modalClose.addEventListener("click", () => modal.classList.remove("show"));
+  modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("show"); });
+
+  // Запуск
+  renderCards();
+})();
+</script>
+</body>
+</html>

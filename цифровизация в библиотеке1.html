@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Уровни цифровизации</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f4f6fa;
+    color: #212529;
+    padding: 20px 10px;
+    overflow-x: auto; /* Горизонтальный скролл для очень узких экранов */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .header { text-align: center; margin-bottom: 25px; }
+  .header h1 { font-size: 20px; font-weight: 700; margin: 0; color: #1a2233; line-height: 1.3; }
+
+  /* --- СЕТКА СТРОГО В 3 КОЛОНКИ --- */
+  .board {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 1fr;
+    gap: 15px;
+    max-width: 1100px;
+    min-width: 320px;
+    margin: 0 auto;
+    align-items: stretch; /* Растягиваем колонки на одну высоту */
+  }
+
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 0;
+  }
+  
+  /* Центральная колонка прижимает ловушку к низу */
+  .col-center {
+    justify-content: space-between;
+  }
+
+  /* --- ЛЕНТА С КАРТОЧКАМИ (Deck) --- */
+  .deck-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    height: 170px;
+    flex-shrink: 0;
+  }
+
+  .deck-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #fff;
+    border: 1px solid #dee2e6;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; 
+    z-index: 20;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    font-size: 14px;
+  }
+  .deck-nav.prev { left: 0; }
+  .deck-nav.next { right: 0; }
+  .deck-nav:disabled { opacity: 0.3; cursor: default; }
+
+  .card-stack {
+    position: relative;
+    width: 100%;
+    max-width: 260px;
+    height: 140px;
+    margin: 0 30px;
+  }
+
+  .card-item {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: #fff;
+    border: 2px solid #dfe4f0;
+    border-radius: 12px;
+    padding: 15px; /* Больше отступов */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 14px; /* УВЕЛИЧЕН ШРИФТ */
+    line-height: 1.4;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    cursor: grab;
+    user-select: none;
+    overflow: hidden;
+    word-break: break-word; 
+  }
+  .card-item:active { cursor: grabbing; }
+  
+  .card-item::before {
+    content: ""; position: absolute;
+    top: 5px; left: 5px; right: 5px; bottom: -5px;
+    background: #fff; border: 2px solid #dfe4f0; border-radius: 12px;
+    z-index: -1; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  }
+  .card-item::after {
+    content: ""; position: absolute;
+    top: 10px; left: 10px; right: 10px; bottom: -10px;
+    background: #fff; border: 2px solid #dfe4f0; border-radius: 12px;
+    z-index: -2;
+  }
+
+  .card-item.dragging { opacity: 0.5; }
+
+  /* --- КОРЗИНЫ (Контейнеры) --- */
+  .zone {
+    background: #fff;
+    border: 2px solid #cdd5e0;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    height: 270px; /* Жестко зафиксированная высота */
+    flex-shrink: 0;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+  .zone.dragover { 
+    border-color: #0d6efd; 
+    box-shadow: 0 0 0 3px rgba(13,110,253,0.2); 
+  }
+
+  /* Яркие цвета */
+  .zone[data-key="scada"] { border-color: #4338ca; background: #f4f6ff; }
+  .zone[data-key="mes"]   { border-color: #0f766e; background: #f0fdf4; }
+  .zone[data-key="erp"]   { border-color: #7e22ce; background: #faf5ff; }
+  .zone[data-key="olap"]  { border-color: #ea580c; background: #fff7ed; } 
+  .zone[data-key="trap"]  { border-color: #dc2626; background: #fef2f2; } 
+
+  .zone-header {
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    background: #fff;
+    border-bottom: 2px solid #f1f3f5;
+    flex-shrink: 0;
+  }
+  .zone[data-key="scada"] .zone-header { border-bottom-color: #e0e7ff; }
+  .zone[data-key="mes"] .zone-header   { border-bottom-color: #ccfbf1; }
+  .zone[data-key="erp"] .zone-header   { border-bottom-color: #f3e8ff; }
+  .zone[data-key="olap"] .zone-header  { border-bottom-color: #ffedd5; }
+  .zone[data-key="trap"] .zone-header  { border-bottom-color: #fee2e2; }
+
+  .zone-title { font-size: 15px; font-weight: 800; }
+  .zone[data-key="scada"] .zone-title { color: #4338ca; }
+  .zone[data-key="mes"] .zone-title   { color: #0f766e; }
+  .zone[data-key="erp"] .zone-title   { color: #7e22ce; }
+  .zone[data-key="olap"] .zone-title  { color: #ea580c; }
+  .zone[data-key="trap"] .zone-title  { color: #dc2626; }
+
+  .zone-toggle {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 11px;
+    color: #495057;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .zone-toggle:hover { background: #e9ecef; }
+  .zone-toggle.expanded { transform: rotate(180deg); }
+
+  .zone-body {
+    flex: 1;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+  }
+
+  /* --- ПЛАШКИ ВНУТРИ КОРЗИН --- */
+  .placed-card {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+  .placed-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 13px; /* УВЕЛИЧЕН ШРИФТ */
+    font-weight: 600;
+    color: #343a40;
+    user-select: none;
+  }
+  .placed-header:hover { background: #f8f9fa; }
+  .placed-header .arrow { font-size: 10px; color: #adb5bd; transition: transform 0.3s; }
+  .placed-card.expanded .placed-header .arrow { transform: rotate(180deg); }
+
+  .placed-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s ease;
+  }
+  .placed-card.expanded .placed-body { grid-template-rows: 1fr; }
+  .placed-inner { overflow: hidden; }
+  .placed-text { 
+    padding: 0 12px 12px 12px; 
+    font-size: 12px; /* УВЕЛИЧЕН ШРИФТ */
+    color: #495057; 
+    line-height: 1.4; 
+    word-break: break-word;
+  }
+
+  /* --- МОДАЛКА --- */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(20, 30, 50, 0.4);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100; opacity: 0; pointer-events: none;
+    transition: opacity 0.2s; padding: 15px;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: auto; }
+  .modal-content {
+    background: #fff; border-radius: 16px; padding: 24px;
+    width: 100%; max-width: 350px; text-align: center;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  }
+  .modal-close {
+    position: absolute; top: 10px; right: 10px;
+    background: #f1f3f5; border: none; width: 32px; height: 32px;
+    border-radius: 50%; font-size: 20px; color: #495057; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-close:hover { background: #e9ecef; }
+  .modal-icon {
+    width: 55px; height: 55px; border-radius: 50%;
+    margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+  }
+  .modal-icon.success { background: #d1e7dd; color: #198754; }
+  .modal-icon.error { background: #f8d7da; color: #dc3545; }
+  .modal-title { font-size: 18px; margin: 0 0 8px; }
+  .modal-text { font-size: 14px; color: #6c757d; margin: 0; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Перетащите карточки в соответствующие контейнеры</h1>
+  </div>
+
+  <div class="board">
+    <!-- Левая колонка -->
+    <div class="col">
+      <div class="zone" data-key="scada">
+        <div class="zone-header">
+          <span class="zone-title">SCADA</span>
+          <button class="zone-toggle" onclick="toggleZone('scada')">&#9660;</button>
+        </div>
+        <div class="zone-body"></div>
+      </div>
+      <div class="zone" data-key="mes">
+        <div class="zone-header">
+          <span class="zone-title">MES</span>
+          <button class="zone-toggle" onclick="toggleZone('mes')">&#9660;</button>
+        </div>
+        <div class="zone-body"></div>
+      </div>
+    </div>
+
+    <!-- Центральная колонка -->
+    <div class="col col-center">
+      <div class="deck-container">
+        <button class="deck-nav prev" id="prevBtn">&#10094;</button>
+        <div class="card-stack" id="cardStack"></div>
+        <button class="deck-nav next" id="nextBtn">&#10095;</button>
+      </div>
+      <div class="zone" data-key="trap">
+        <div class="zone-header">
+          <span class="zone-title">Ловушка</span>
+          <button class="zone-toggle" onclick="toggleZone('trap')">&#9660;</button>
+        </div>
+        <div class="zone-body"></div>
+      </div>
+    </div>
+
+    <!-- Правая колонка -->
+    <div class="col">
+      <div class="zone" data-key="erp">
+        <div class="zone-header">
+          <span class="zone-title">ERP</span>
+          <button class="zone-toggle" onclick="toggleZone('erp')">&#9660;</button>
+        </div>
+        <div class="zone-body"></div>
+      </div>
+      <div class="zone" data-key="olap">
+        <div class="zone-header">
+          <span class="zone-title">OLAP</span>
+          <button class="zone-toggle" onclick="toggleZone('olap')">&#9660;</button>
+        </div>
+        <div class="zone-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="feedbackModal">
+    <div class="modal-content">
+      <button class="modal-close" id="modalClose">&times;</button>
+      <div class="modal-icon" id="modalIcon"></div>
+      <h3 class="modal-title" id="modalTitle"></h3>
+      <p class="modal-text" id="modalText"></p>
+    </div>
+  </div>
+
+<script>
+(function() {
+  const CARDS = [
+    { id: 1, zone: "scada", text: "Единая поисковая строка, в которой читатель сразу видит результаты по каталогу" },
+    { id: 2, zone: "scada", text: "АРМ книговыдачи: библиотекарь выдаёт и принимает книги, система сама считает срок возврата" },
+    { id: 3, zone: "scada", text: "Фасетный поиск: результаты группируются по автору, году, теме" },
+    { id: 4, zone: "mes",   text: "Модуль, который показывает, на каком этапе находится заказ книги: закупка, поставка, комплектование, обработка" },
+    { id: 5, zone: "mes",   text: "Модуль аудита книгообеспеченности: видно, каких книг не хватает для учебных планов" },
+    { id: 6, zone: "mes",   text: "Система показывает, когда освободится сотрудник, чтобы записать его на мероприятие" },
+    { id: 7, zone: "erp",   text: "Учёт рабочего времени и расписание сотрудников в одной системе с бухгалтерией" },
+    { id: 8, zone: "erp",   text: "Свод денег, кадров и закупок в одну систему, чтобы видеть общую картину" },
+    { id: 9, zone: "olap",  text: "Аналитический отчёт: почему на одно мероприятие пришло 5 человек, а на другое — 50" },
+    { id: 10, zone: "olap", text: "Система проверяет, какие действия реально влияют на посещаемость, и отбрасывает остальные" },
+    { id: 11, zone: "trap", text: "Библиотекарь переносит бумажный журнал выдачи в Excel и продолжает вести его вручную" },
+    { id: 12, zone: "trap", text: "Сотрудник вручную сводит данные о закупках и выдаче в Excel, чтобы ответить на вопрос директора" }
+  ];
+
+  const FEEDBACK = {
+    scada: "Да, это уровень SCADA: программа снимает рутину с сотрудника.",
+    mes: "Да, это уровень MES: программа проводит заказ через все этапы и не даёт ему потеряться.",
+    erp: "Да, это уровень ERP: данные о деньгах, кадрах и закупках сведены в одну систему.",
+    olap: "Да, это уровень OLAP: система анализирует данные и отбрасывает то, что ни на что не влияет.",
+    trap: "Да, это ловушка! Excel вместо программы — это не цифровизация."
+  };
+
+  const cardStack = document.getElementById("cardStack");
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const modal = document.getElementById("feedbackModal");
+  const modalIcon = document.getElementById("modalIcon");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalText = document.getElementById("modalText");
+  const modalClose = document.getElementById("modalClose");
+
+  let currentIndex = 0;
+  let placedCards = {}; 
+  let activeCardElement = null;
+
+  window.toggleZone = function(zoneKey) {
+    const zone = document.querySelector(`.zone[data-key="${zoneKey}"]`);
+    const btn = zone.querySelector('.zone-toggle');
+    const isExpanded = btn.classList.contains('expanded');
+    const cards = zone.querySelectorAll('.placed-card');
+    
+    cards.forEach(c => {
+      if (isExpanded) c.classList.remove('expanded');
+      else c.classList.add('expanded');
+    });
+    btn.classList.toggle('expanded');
+  };
+
+  function showModal(isSuccess, title, text) {
+    modalIcon.className = "modal-icon " + (isSuccess ? "success" : "error");
+    modalIcon.innerHTML = isSuccess ? "&#10004;" : "&#10006;";
+    modalTitle.textContent = title;
+    modalText.textContent = text;
+    modal.classList.add("show");
+  }
+
+  modalClose.addEventListener("click", () => modal.classList.remove("show"));
+  modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("show"); });
+
+  function renderDeck() {
+    cardStack.innerHTML = "";
+    if (Object.keys(placedCards).length === CARDS.length) {
+      prevBtn.style.display = "none";
+      nextBtn.style.display = "none";
+      return;
+    } else {
+      prevBtn.style.display = "flex";
+      nextBtn.style.display = "flex";
+    }
+
+    let nextUnplacedIdx = currentIndex;
+    let loopCount = 0;
+    while (placedCards[CARDS[nextUnplacedIdx].id] && loopCount < CARDS.length) {
+      nextUnplacedIdx = (nextUnplacedIdx + 1) % CARDS.length;
+      loopCount++;
+    }
+    currentIndex = nextUnplacedIdx;
+
+    for (let i = 0; i < 3; i++) {
+      const idx = (currentIndex + i) % CARDS.length;
+      const card = CARDS[idx];
+      if (placedCards[card.id]) continue;
+
+      const el = document.createElement("div");
+      el.className = "card-item";
+      el.textContent = card.text;
+      el.dataset.id = card.id;
+      
+      if (i > 0) {
+        el.style.pointerEvents = "none";
+        el.style.zIndex = 10 - i;
+        el.style.top = (i * 6) + "px";
+        el.style.opacity = "0.6";
+      } else {
+        el.draggable = true;
+        el.style.zIndex = 20;
+        el.addEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("text/plain", card.id);
+          e.target.classList.add("dragging");
+        });
+        el.addEventListener("dragend", (e) => {
+          e.target.classList.remove("dragging");
+        });
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          showModal(true, "Текст карточки", card.text);
+        });
+        activeCardElement = el;
+      }
+      cardStack.appendChild(el);
+    }
+
+    const unplacedCount = CARDS.length - Object.keys(placedCards).length;
+    prevBtn.disabled = unplacedCount <= 1;
+    nextBtn.disabled = unplacedCount <= 1;
+  }
+
+  prevBtn.addEventListener("click", () => {
+    do { currentIndex = (currentIndex - 1 + CARDS.length) % CARDS.length; } 
+    while (placedCards[CARDS[currentIndex].id]);
+    renderDeck();
+  });
+
+  nextBtn.addEventListener("click", () => {
+    do { currentIndex = (currentIndex + 1) % CARDS.length; } 
+    while (placedCards[CARDS[currentIndex].id]);
+    renderDeck();
+  });
+
+  document.querySelectorAll('.zone').forEach(zone => {
+    zone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      zone.classList.add("dragover");
+    });
+    zone.addEventListener("dragleave", () => zone.classList.remove("dragover"));
+    zone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      zone.classList.remove("dragover");
+      const cardId = parseInt(e.dataTransfer.getData("text/plain"), 10);
+      handlePlace(cardId, zone.dataset.key);
+    });
+    zone.addEventListener("click", (e) => {
+      if (e.target.closest('.placed-card') || e.target.closest('.zone-toggle')) return;
+      if (activeCardElement && !modal.classList.contains("show")) {
+         const cardId = parseInt(activeCardElement.dataset.id, 10);
+         handlePlace(cardId, zone.dataset.key);
+      }
+    });
+  });
+
+  function handlePlace(cardId, zoneKey) {
+    if (placedCards[cardId]) return;
+    const card = CARDS.find(c => c.id === cardId);
+
+    if (card.zone === zoneKey) {
+      placedCards[cardId] = zoneKey;
+      
+      const zoneBody = document.querySelector(`.zone[data-key="${zoneKey}"] .zone-body`);
+      const placedEl = document.createElement("div");
+      placedEl.className = "placed-card";
+      
+      placedEl.innerHTML = `
+        <div class="placed-header">
+          <span>Карточка ${card.id}</span>
+          <span class="arrow">&#9660;</span>
+        </div>
+        <div class="placed-body">
+          <div class="placed-inner">
+            <div class="placed-text">${card.text}</div>
+          </div>
+        </div>
+      `;
+
+      placedEl.querySelector(".placed-header").addEventListener("click", (e) => {
+        e.stopPropagation();
+        placedEl.classList.toggle("expanded");
+      });
+
+      zoneBody.appendChild(placedEl);
+      
+      if (Object.keys(placedCards).length === CARDS.length) {
+        showModal(true, "Вы справились с заданием!", "Все карточки разложены верно.");
+      } else {
+        showModal(true, "Верно!", FEEDBACK[zoneKey]);
+      }
+      
+      renderDeck();
+    } else {
+      showModal(false, "Ошибка", "Попробуйте еще раз");
+    }
+  }
+
+  renderDeck();
+})();
+</script>
+</body>
+</html>
