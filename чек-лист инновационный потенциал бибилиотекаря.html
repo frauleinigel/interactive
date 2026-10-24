@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Чек-лист · Развитие инновационного потенциала библиотекаря</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        background: white;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        padding: 30px 20px;
+        display: flex;
+        justify-content: center;
+        color: #000;
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 900px;
+        width: 100%;
+        background: white;
+        padding: 30px 40px 40px;
+        border: 1px solid #eaeaea;
+    }
+
+    h1 {
+        font-size: 26px;
+        font-weight: 700;
+        color: #cc0000;
+        text-align: center;
+        margin: 0 0 28px 0;
+        letter-spacing: -0.2px;
+        line-height: 1.25;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .memo-label {
+        display: block;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 3px;
+        color: #0b2b4a;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    .step-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .step-list li {
+        margin-bottom: 22px;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #000000;
+    }
+    .step-list li:last-child { margin-bottom: 0; }
+
+    .step-content { flex: 1; }
+
+    .step-title {
+        font-weight: 700;
+        font-size: 17px;
+        display: block;
+        margin-bottom: 6px;
+        color: #000;
+    }
+
+    .step-title .diamond-green {
+        color: #2e7d32;
+        margin-right: 6px;
+        font-weight: 400;
+    }
+
+    .sub-item {
+        padding-left: 0;
+        margin-top: 4px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .checkbox {
+        flex-shrink: 0;
+        width: 15px;
+        height: 15px;
+        border: 1.5px solid #0b2b4a;
+        background: white;
+        margin-top: 5px;
+        position: relative;
+        transition: all 0.15s ease;
+    }
+
+    .sub-text {
+        flex: 1;
+        color: #000;
+        transition: color 0.15s ease;
+    }
+
+    .sub-item:hover .checkbox {
+        background: #f7f9fb;
+    }
+
+    .sub-item.checked .checkbox {
+        background: #2e7d32;
+        border-color: #2e7d32;
+    }
+    .sub-item.checked .checkbox::after {
+        content: '';
+        position: absolute;
+        left: 3px;
+        top: 0px;
+        width: 5px;
+        height: 9px;
+        border-right: 2px solid white;
+        border-bottom: 2px solid white;
+        transform: rotate(45deg);
+    }
+
+    .sub-item.checked .sub-text {
+        color: #999;
+        text-decoration: line-through;
+        text-decoration-color: #2e7d32;
+    }
+
+    .rule-block {
+        margin: 8px 0 4px 0;
+        padding: 16px 20px;
+        background: #f7f9fb;
+        border-radius: 6px;
+        color: #0b2b4a;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 1.5;
+    }
+
+    .pdf-btn-wrap {
+        margin-top: 35px;
+        text-align: right;
+        border-top: 1px solid #ddd;
+        padding-top: 24px;
+    }
+    .pdf-btn {
+        background: #2e7d32;
+        color: white;
+        border: none;
+        padding: 10px 32px;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+        letter-spacing: 0.3px;
+    }
+    .pdf-btn:hover { background: #1b5e20; }
+    .pdf-btn:focus { outline: 2px solid #2e7d32; outline-offset: 2px; }
+
+    @media print {
+        body { background: white; padding: 0; margin: 0; }
+        .container { border: none; padding: 25px 30px; max-width: 100%; }
+        .pdf-btn-wrap { display: none; }
+        h1 { color: #cc0000 !important; }
+        .memo-label { color: #0b2b4a !important; }
+        .step-title { color: #000 !important; }
+        .step-title .diamond-green { color: #2e7d32 !important; }
+        .rule-block {
+            color: #0b2b4a !important;
+            background: #f7f9fb !important;
+        }
+        .sub-item.checked .sub-text { color: #000 !important; }
+        .sub-item.checked .checkbox { background: white !important; border-color: #0b2b4a !important; }
+        .sub-item.checked .checkbox::after {
+            border-right-color: #0b2b4a;
+            border-bottom-color: #0b2b4a;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .container { padding: 20px 15px; }
+        h1 { font-size: 20px; }
+        .step-list li { font-size: 15px; margin-bottom: 18px; }
+        .pdf-btn { width: 100%; }
+    }
+</style>
+</head>
+<body>
+<div class="container">
+
+    <h1>
+        <span class="memo-label">Стартовый чек-лист на неделю</span>
+        РАЗВИТИЕ ИННОВАЦИОННОГО ПОТЕНЦИАЛА<br>БИБЛИОТЕКАРЯ
+    </h1>
+
+    <ul class="step-list">
+
+        <li>
+            <div class="step-content">
+                <span class="step-title"><span class="diamond-green">◆</span>Когнитивные способности</span>
+                <div class="sub-item"><span class="checkbox"></span><span class="sub-text">Добавьте один «тренажер для мозга»: головоломки, новое хобби, упражнения на память и внимание</span></div>
+                <div class="sub-item"><span class="checkbox"></span><span class="sub-text">Выделяйте хотя бы пять минут в день на медитацию, дыхательную практику или йогу</span></div>
+                <div class="sub-item"><span class="checkbox"></span><span class="sub-text">Сходите на одну прогулку без телефона и без спешки</span></div>
+                <div class="sub-item"><span class="checkbox"></span><span class="sub-text">Посвятите 10 минут иностранному языку или музыке: выучите новые слова или сыграйте мелодию на инструменте</span></div>
+                <div class="sub-item"><span class="checkbox"></span><span class="sub-text">Замените один перекус на бегу полезным обедом</span></div>
+                <div class="sub-item"><span class="checkbox"></span><span class="sub-text">Поговорите с психологом, если чувствуете тревогу или выгорание</span></div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-content">
+                <span class="step-title"><span class="diamond-green">◆</span>Первый шаг к новой роли</span>
+                <div class="sub-item"><span class="checkbox"></span><span class="sub-text">Выберите один новый вектор развития внутри библиотеки: проект, наставничество, временное замещение</span></div>
+                <div class="sub-item"><span class="checkbox"></span><span class="sub-text">Сформулируйте аргумент для руководства: какую пользу учреждению принесет ваша новая роль</span></div>
+                <div class="sub-item"><span class="checkbox"></span><span class="sub-text">Присмотрите вариант развития за пределами библиотеки: конференцию, профессиональное сообщество, совместный проект с музеем или школой, онлайн-курс</span></div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-content">
+                <span class="step-title"><span class="diamond-green">◆</span>От несогласия к инновации</span>
+                <div class="sub-item"><span class="checkbox"></span><span class="sub-text">Придумайте один пилот, который можно реализовать за месяц</span></div>
+                <div class="sub-item"><span class="checkbox"></span><span class="sub-text">Переформулируйте идею на языке пользы: что это сэкономит или улучшит</span></div>
+                <div class="sub-item"><span class="checkbox"></span><span class="sub-text">Найдите одного-двух союзников среди коллег</span></div>
+                <div class="sub-item"><span class="checkbox"></span><span class="sub-text">Придите к руководителю с решением, а не с проблемой</span></div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-content">
+                <div class="rule-block">В конце недели запишите: что получилось, а что перенести на следующую. Главное — не останавливаться.</div>
+            </div>
+        </li>
+
+    </ul>
+
+    <div class="pdf-btn-wrap">
+        <button class="pdf-btn" onclick="window.print()">Сохранить в PDF</button>
+    </div>
+
+</div>
+
+<script>
+(function() {
+    document.querySelectorAll('.sub-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            item.classList.toggle('checked');
+        });
+    });
+})();
+</script>
+</body>
+</html>
