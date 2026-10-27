@@ -67,6 +67,7 @@ body {
     animation: fadeSlide 0.4s ease;
 }
 
+/* ─── БАЗОВАЯ СЕТКА: цепочки слева, карточки строго справа ─── */
 .game-layout {
     display: grid;
     grid-template-columns: 1fr 260px;
@@ -82,7 +83,7 @@ body {
     padding: 12px;
     position: sticky;
     top: 20px;
-    order: 2;
+    order: 2; /* гарантированно справа */
 }
 .pool-label {
     font-size: 0.82rem;
@@ -157,7 +158,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 14px;
-    order: 1;
+    order: 1; /* гарантированно слева */
     min-width: 0;
 }
 .chain {
@@ -172,7 +173,7 @@ body {
     background: #fafffb;
 }
 
-/* Заголовок цепочки — красный, заглавными, болд, размер как в карточках */
+/* Заголовок цепочки */
 .chain-label {
     font-size: 1.1rem;
     color: #b3002d;
@@ -188,7 +189,7 @@ body {
     gap: 6px;
 }
 
-/* Звено — меньше полей, крупнее текст */
+/* Звено */
 .slot {
     position: relative;
     flex: 1;
@@ -221,7 +222,7 @@ body {
     background: #ffffff;
 }
 
-/* Подписи «Событие / Мероприятие / Тема года» */
+/* Подписи в звеньях */
 .slot-label {
     font-size: 1.15rem;
     color: #1a1a1a;
@@ -233,7 +234,6 @@ body {
 }
 .slot.filled .slot-label { display: none; }
 
-/* Главное — крупный текст внутри звена */
 .slot-content {
     font-size: 1.18rem;
     color: #000000;
@@ -279,7 +279,7 @@ body {
     font-weight: 700;
 }
 
-/* ── Плашка под готовую формулировку — увеличена ── */
+/* Плашка под готовую формулировку */
 .formulation {
     margin-top: 10px;
     padding: 14px 16px;
@@ -381,7 +381,7 @@ body {
     font-size: 1.4rem;
 }
 
-/* Планшет */
+/* ─── Планшет (ширина до 960px) ─── */
 @media (max-width: 960px) {
     body { padding: 16px; }
     .card { padding: 24px 18px 28px; border-radius: 18px; }
@@ -415,22 +415,42 @@ body {
     .modal-content { font-size: 1.1rem; }
 }
 
-/* Мобильный — одна колонка */
-@media (max-width: 720px) {
+/* ─── Небольшой планшет / крупный телефон (до 800px) ─── */
+@media (max-width: 800px) {
+    .game-layout {
+        grid-template-columns: 1fr 180px; /* всё ещё две колонки! */
+        gap: 10px;
+    }
+    .pool-card {
+        font-size: 0.95rem;
+        padding: 6px 8px 6px 20px;
+    }
+    .pool-card::before { width: 7px; height: 7px; left: 7px; }
+    .chain { padding: 8px 9px 10px; }
+    .chain-label { font-size: 0.95rem; }
+    .slot { min-height: 46px; padding: 4px 6px; }
+    .slot-content { font-size: 1rem; padding-right: 16px; }
+    .slot-label { font-size: 0.95rem; }
+    .arrow { font-size: 1rem; }
+    .formulation { font-size: 1rem; padding: 10px 12px; min-height: 50px; }
+}
+
+/* ─── Телефон (до 600px) — здесь уже ставим в одну колонку ─── */
+@media (max-width: 600px) {
     body { padding: 10px; }
     .card { padding: 18px 12px 22px; }
     .situation-title { font-size: 1.4rem; }
     .subhead { font-size: 0.95rem; padding: 10px 12px; margin-bottom: 16px; }
     .game-layout {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /* одна колонка */
         gap: 14px;
     }
     .pool-section {
         position: static;
-        order: 1;
+        order: 1; /* карточки наверх */
         padding: 12px;
     }
-    .chains-section { order: 2; }
+    .chains-section { order: 2; /* цепочки вниз */ }
     .pool-cards {
         display: grid;
         grid-template-columns: 1fr 1fr;
