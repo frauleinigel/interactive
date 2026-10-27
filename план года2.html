@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Памятка · Нормативная база для плана мероприятий</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        background: white;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        padding: 30px 20px;
+        display: flex;
+        justify-content: center;
+        line-height: 1.45;
+    }
+
+    .container {
+        max-width: 900px;
+        width: 100%;
+        background: white;
+        padding: 30px 40px 40px;
+        border: 1px solid #eaeaea;
+    }
+
+    h1 {
+        font-size: 20px; /* Уменьшенный размер для подзаголовка */
+        font-weight: 700;
+        color: #cc0000;
+        text-align: center;
+        margin: 0 0 24px 0;
+        letter-spacing: -0.2px;
+        line-height: 1.3;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .memo-label {
+        display: block;
+        font-size: 22px; /* Увеличенный размер для слова Памятка */
+        font-weight: 700;
+        letter-spacing: 3px;
+        color: #0b2b4a;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+
+    .step-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .step-list li {
+        margin-bottom: 18px;
+        font-size: 16px;
+        line-height: 1.45;
+        color: #000000;
+    }
+
+    .step-list li:last-child {
+        margin-bottom: 0;
+    }
+
+    .step-content {
+        flex: 1;
+    }
+
+    .step-title {
+        font-weight: 700;
+        color: #0b2b4a;
+        font-size: 17px;
+        display: flex; /* Используем flex для выравнивания кружка и текста */
+        align-items: flex-start;
+        margin-bottom: 4px;
+    }
+
+    /* Зеленый кружок вместо нумерации */
+    .step-title::before {
+        content: '';
+        display: inline-block;
+        flex-shrink: 0;
+        width: 8px;
+        height: 8px;
+        background-color: #2e7d32;
+        border-radius: 50%;
+        margin-top: 7px; /* Выравнивание по центру первой строки текста */
+        margin-right: 8px;
+    }
+
+    .sub-item {
+        padding-left: 16px; /* Отступ для выравнивания с текстом заголовка */
+        margin-top: 0;
+        position: relative;
+    }
+
+    .pdf-btn-wrap {
+        margin-top: 30px;
+        text-align: right;
+        border-top: 1px solid #ddd;
+        padding-top: 24px;
+    }
+
+    .pdf-btn {
+        background: #2e7d32;
+        color: white;
+        border: none;
+        padding: 10px 32px;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+        letter-spacing: 0.3px;
+    }
+
+    .pdf-btn:hover {
+        background: #1b5e20;
+    }
+
+    .pdf-btn:focus {
+        outline: 2px solid #2e7d32;
+        outline-offset: 2px;
+    }
+
+    @media print {
+        body {
+            background: white;
+            padding: 0;
+            margin: 0;
+        }
+        .container {
+            border: none;
+            padding: 25px 30px;
+            max-width: 100%;
+        }
+        .pdf-btn-wrap {
+            display: none;
+        }
+        h1 {
+            color: #cc0000 !important;
+        }
+        .memo-label {
+            color: #0b2b4a !important;
+        }
+        .step-title {
+            color: #0b2b4a !important;
+        }
+        .step-title::before {
+            background-color: #2e7d32 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .container {
+            padding: 20px 15px;
+        }
+        h1 {
+            font-size: 16px; /* Уменьшено для мобильных, чтобы влезло в одну строку */
+        }
+        .memo-label {
+            font-size: 20px;
+        }
+        .step-list li {
+            font-size: 15px;
+            margin-bottom: 15px;
+        }
+        .pdf-btn {
+            width: 100%;
+        }
+    }
+</style>
+</head>
+<body>
+<div class="container">
+
+    <h1>
+        <span class="memo-label">Памятка</span>
+        НОРМАТИВНАЯ БАЗА ДЛЯ ПЛАНА МЕРОПРИЯТИЙ
+    </h1>
+
+    <ul class="step-list">
+
+        <li>
+            <div class="step-content">
+                <span class="step-title">Основы законодательства РФ о культуре (утв. Верховным Советом РФ 09.10.1992 № 3612-1).</span>
+                <div class="sub-item">Базовый отраслевой закон: права граждан на культурную деятельность, принципы господдержки, обязанности учреждений — ссылка придает плану правовую обоснованность.</div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-content">
+                <span class="step-title">Основы государственной политики по сохранению и укреплению традиционных российских духовно-нравственных ценностей (Указ Президента РФ от 09.11.2022 № 809).</span>
+                <div class="sub-item">Ссылайтесь на пункты о просветительской и воспитательной работе.</div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-content">
+                <span class="step-title">Стратегия государственной культурной политики на период до 2030 года (распоряжение Правительства РФ от 11.09.2024 № 2501-р).</span>
+                <div class="sub-item">Определяет миссию учреждений культуры и целевые направления.</div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-content">
+                <span class="step-title">Национальные цели развития РФ на период до 2030 года и на перспективу до 2036 года (Указ Президента РФ от 07.05.2024 № 309).</span>
+                <div class="sub-item">Для плана важны цели по самореализации и развитию талантов и по созданию комфортной и безопасной среды.</div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-content">
+                <span class="step-title">Государственная программа РФ «Развитие культуры» (постановление Правительства РФ от 15.04.2014 № 317).</span>
+                <div class="sub-item">Содержит целевые показатели и механизмы поддержки, которые соотносятся с планом учреждения.</div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-content">
+                <span class="step-title">Федеральный закон «О противодействии экстремистской деятельности» (от 25.07.2002 № 114-ФЗ).</span>
+                <div class="sub-item">Обосновывает мероприятия по профилактике экстремизма и формированию безопасной среды.</div>
+            </div>
+        </li>
+
+        <li>
+            <div class="step-content">
+                <span class="step-title">Стратегия государственной национальной политики РФ на период до 2036 года (Указ Президента РФ от 25.11.2025 № 858).</span>
+                <div class="sub-item">Обосновывает мероприятия по укреплению межнационального согласия и профилактике экстремизма.</div>
+            </div>
+        </li>
+
+    </ul>
+
+    <div class="pdf-btn-wrap">
+        <button class="pdf-btn" onclick="window.print()">Сохранить в PDF</button>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Конструктор плана мероприятий — Актион Культура</title>
+<style>
+  :root{
+    --blue:#1f3a68;
+    --blue-light:#2f4f8a;
+    --blue-pale:#e8eef8;
+    --orange:#c25a1f;
+    --orange-light:#e07a3a;
+    --green:#1a8c4a;
+    --green-light:#22a85a;
+    --green-dark:#0f6b36;
+    --gray:#6b7280;
+    --gray-light:#f3f4f6;
+    --gray-border:#d1d5db;
+    --white:#ffffff;
+    --text:#1f2937;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--text);
+    background:var(--gray-light);
+    line-height:1.45;
+    font-size:14px;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding:16px;
+  }
+  .app{
+    width:100%;
+    max-width:800px;
+    height:1500px;
+    max-height:calc(100vh - 32px);
+    background:var(--white);
+    border-radius:10px;
+    box-shadow:0 4px 24px rgba(0,0,0,.10);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+
+  /* Header */
+  .header{
+    background:var(--blue);
+    color:var(--white);
+    padding:14px 18px;
+    flex-shrink:0;
+  }
+  .header h1{font-size:16px;font-weight:600;margin-bottom:2px;line-height:1.3;}
+  .header p{font-size:11.5px;opacity:.85;line-height:1.35;}
+
+  /* Progress */
+  .progress{
+    background:var(--white);
+    display:flex;
+    border-bottom:1px solid var(--gray-border);
+    flex-shrink:0;
+  }
+  .progress-step{
+    flex:1;
+    text-align:center;
+    padding:9px 4px;
+    font-size:10.5px;
+    color:var(--gray);
+    border-bottom:3px solid transparent;
+    line-height:1.2;
+  }
+  .progress-step.active{
+    color:var(--blue);
+    border-bottom-color:var(--green);
+    font-weight:600;
+  }
+  .progress-step.done{color:var(--blue-light);}
+  .progress-step .num{
+    display:inline-block;
+    width:16px;height:16px;line-height:16px;
+    border-radius:50%;
+    background:var(--gray-border);
+    color:var(--white);
+    font-size:10px;
+    margin-right:4px;
+  }
+  .progress-step.active .num{background:var(--green);}
+  .progress-step.done .num{background:var(--blue-light);}
+
+  /* Panel (scroll area) */
+  .panel{
+    flex:1 1 auto;
+    overflow-y:auto;
+    padding:18px 18px 8px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .panel h2{
+    font-size:16px;
+    color:var(--blue);
+    margin-bottom:4px;
+  }
+  .panel .sub{
+    font-size:12px;
+    color:var(--gray);
+    margin-bottom:16px;
+    line-height:1.45;
+  }
+
+  /* Start */
+  .start-box{text-align:center;padding:10px 0;}
+  .start-box p{max-width:560px;margin:0 auto 16px;color:var(--gray);font-size:13px;}
+  .start-box .lead{font-size:14px;color:var(--text);margin-bottom:8px;}
+
+  /* Buttons */
+  .btn{
+    display:inline-block;
+    padding:9px 18px;
+    border-radius:6px;
+    border:none;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.15s;
+    font-family:inherit;
+    line-height:1.2;
+  }
+  .btn-primary{background:var(--green);color:var(--white);}
+  .btn-primary:hover{background:var(--green-light);}
+  .btn-primary:disabled{background:var(--gray-border);cursor:not-allowed;}
+  .btn-secondary{background:var(--white);color:var(--blue);border:1px solid var(--gray-border);}
+  .btn-secondary:hover{background:var(--blue-pale);}
+  .btn-green{background:var(--green);color:var(--white);}
+  .btn-green:hover{background:var(--green-light);}
+  .btn-ghost{background:transparent;color:var(--gray);border:none;padding:9px 6px;}
+  .btn-ghost:hover{color:var(--blue);}
+  .btn-reset{
+    background:transparent;
+    color:var(--gray);
+    border:none;
+    padding:9px 6px;
+    font-size:12px;
+    text-decoration:underline;
+    text-underline-offset:3px;
+    cursor:pointer;
+    font-family:inherit;
+    font-weight:500;
+  }
+  .btn-reset:hover{color:var(--orange);}
+
+  /* Sticky footer nav */
+  .nav-buttons{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 18px;
+    border-top:1px solid var(--gray-border);
+    background:var(--white);
+    flex-shrink:0;
+    gap:8px;
+  }
+  .nav-buttons .left{display:flex;gap:4px;align-items:center;flex-wrap:wrap;}
+  .nav-buttons .right{display:flex;gap:8px;}
+
+  /* Form */
+  .field{margin-bottom:18px;}
+  .field-label{
+    font-weight:600;
+    font-size:13px;
+    margin-bottom:8px;
+    display:block;
+    color:var(--blue);
+    line-height:1.3;
+  }
+  .field-hint{font-size:11.5px;color:var(--gray);margin-bottom:8px;line-height:1.4;}
+  .options{display:flex;flex-wrap:wrap;gap:6px;}
+  .option{
+    display:inline-flex;
+    align-items:center;
+    padding:6px 12px;
+    border:1px solid var(--gray-border);
+    border-radius:16px;
+    cursor:pointer;
+    font-size:12px;
+    user-select:none;
+    transition:.15s;
+    background:var(--white);
+    line-height:1.3;
+  }
+  .option:hover{border-color:var(--blue-light);}
+  .option.selected{
+    background:var(--blue);
+    color:var(--white);
+    border-color:var(--blue);
+  }
+
+  /* Tabs */
+  .tabs{display:flex;gap:2px;margin-bottom:12px;border-bottom:1px solid var(--gray-border);}
+  .tab{
+    padding:8px 14px;
+    font-size:12.5px;
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+    color:var(--gray);
+    font-weight:500;
+    line-height:1.2;
+  }
+  .tab.active{color:var(--blue);border-bottom-color:var(--green);font-weight:600;}
+
+  /* Filters */
+  .filters{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+  .filters select{
+    padding:6px 8px;
+    font-size:12px;
+    border:1px solid var(--gray-border);
+    border-radius:6px;
+    font-family:inherit;
+    color:var(--text);
+    background:var(--white);
+    flex:1 1 0;
+    min-width:0;
+  }
+
+  /* Date list */
+  .date-list{border:1px solid var(--gray-border);border-radius:8px;overflow:hidden;}
+  .date-item{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:9px 12px;
+    border-bottom:1px solid var(--gray-light);
+    cursor:pointer;
+    transition:.1s;
+  }
+  .date-item:last-child{border-bottom:none;}
+  .date-item:hover{background:var(--blue-pale);}
+  .date-item.selected{background:var(--blue-pale);}
+  .checkbox{
+    width:16px;height:16px;
+    border:2px solid var(--gray-border);
+    border-radius:4px;
+    flex-shrink:0;
+    margin-top:2px;
+    position:relative;
+    background:var(--white);
+  }
+  .date-item.selected .checkbox{background:var(--green);border-color:var(--green);}
+  .date-item.selected .checkbox::after{
+    content:"";
+    position:absolute;
+    left:4px;top:0px;
+    width:4px;height:8px;
+    border:solid var(--white);
+    border-width:0 2px 2px 0;
+    transform:rotate(45deg);
+  }
+  .date-info{flex:1;min-width:0;}
+  .date-title{font-size:12.5px;font-weight:500;margin-bottom:2px;line-height:1.35;}
+  .date-meta{font-size:11px;color:var(--gray);display:flex;gap:5px;flex-wrap:wrap;align-items:center;line-height:1.3;}
+  .date-date{font-weight:600;color:var(--blue);}
+  .badge{
+    display:inline-block;
+    font-size:10px;
+    padding:1px 6px;
+    border-radius:8px;
+    background:var(--blue-pale);
+    color:var(--blue);
+    font-weight:500;
+    line-height:1.4;
+  }
+  .badge.orange{background:#fde8dc;color:var(--orange);}
+  .badge.gray{background:var(--gray-light);color:var(--gray);}
+
+  /* Format cards */
+  .format-group{margin-bottom:16px;}
+  .format-group h3{
+    font-size:13px;
+    color:var(--blue);
+    margin-bottom:8px;
+    padding-bottom:5px;
+    border-bottom:1px dashed var(--gray-border);
+    line-height:1.35;
+  }
+  .format-cards{display:grid;grid-template-columns:1fr;gap:10px;}
+  .card{
+    border:1px solid var(--gray-border);
+    border-radius:8px;
+    padding:12px;
+    background:var(--white);
+    transition:.15s;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .card:hover{border-color:var(--blue-light);box-shadow:0 2px 8px rgba(0,0,0,.05);}
+  .card.selected{border-color:var(--green);background:#f3fbf6;box-shadow:0 0 0 2px rgba(26,140,74,.18);}
+  .card-title{font-size:13px;font-weight:600;color:var(--text);line-height:1.4;}
+  .card-tags{display:flex;flex-wrap:wrap;gap:4px;}
+  .card-footer{margin-top:auto;display:flex;justify-content:flex-end;padding-top:4px;}
+  .card-select{
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--blue);
+    cursor:pointer;
+    padding:3px 10px;
+    border:1px solid var(--blue);
+    border-radius:12px;
+    background:var(--white);
+    transition:.15s;
+  }
+  .card.selected .card-select{background:var(--green);color:var(--white);border-color:var(--green);}
+  details{margin-top:2px;}
+  details summary{
+    font-size:11.5px;
+    color:var(--blue-light);
+    cursor:pointer;
+    font-weight:500;
+    padding:2px 0;
+    line-height:1.35;
+  }
+  details summary:hover{color:var(--orange);}
+  details div{font-size:11.5px;color:var(--gray);padding:4px 0 2px 10px;line-height:1.45;}
+
+  /* Summary */
+  .summary-header{
+    background:var(--blue-pale);
+    padding:10px 12px;
+    border-radius:8px;
+    margin-bottom:12px;
+    font-size:11.5px;
+    color:var(--blue);
+    line-height:1.5;
+  }
+  .summary-header strong{color:var(--blue);}
+  .summary-table-wrap{overflow-x:auto;margin-bottom:8px;border-radius:8px;border:1px solid var(--gray-border);}
+  .summary-table{
+    width:100%;
+    min-width:720px;
+    border-collapse:collapse;
+    font-size:11px;
+  }
+  .summary-table th{
+    background:var(--blue);
+    color:var(--white);
+    padding:7px 6px;
+    text-align:left;
+    font-weight:600;
+    font-size:10.5px;
+    line-height:1.3;
+  }
+  .summary-table td{
+    padding:6px 6px;
+    border-bottom:1px solid var(--gray-border);
+    vertical-align:top;
+    line-height:1.35;
+  }
+  .summary-table tr:last-child td{border-bottom:none;}
+  .summary-table tbody tr:nth-child(even) td{background:#fafbfd;}
+  .section-row td{
+    background:var(--gray-light)!important;
+    font-weight:600;
+    color:var(--blue);
+    font-size:11px;
+    padding:6px 8px;
+  }
+
+  /* ── Ячейка с карандашом ── */
+  .edit-cell{
+    position:relative;
+    display:block;
+  }
+  .edit-cell input{
+    width:100%;
+    border:1px solid transparent;
+    padding:2px 16px 2px 3px;   /* справа место под карандаш */
+    font-size:11px;
+    font-family:inherit;
+    border-radius:3px;
+    background:transparent;
+    color:var(--text);
+    line-height:1.3;
+  }
+  .edit-cell input:hover,
+  .edit-cell input:focus{
+    border-color:var(--gray-border);
+    background:var(--white);
+    outline:none;
+  }
+  .edit-cell::after{
+    content:"✏️";
+    position:absolute;
+    right:2px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:9px;
+    line-height:1;
+    opacity:.5;
+    pointer-events:none;
+    transition:opacity .15s;
+  }
+  .edit-cell:hover::after,
+  .edit-cell:focus-within::after{
+    opacity:.95;
+  }
+
+  .priority-cell{font-size:10px;color:var(--orange);font-weight:600;line-height:1.3;}
+  .empty{
+    text-align:center;
+    padding:28px 16px;
+    color:var(--gray);
+    font-size:12.5px;
+  }
+
+  /* ── Плашка «Оценка эффекта» ── */
+  .effect-box{
+    background:var(--white);
+    border:2px solid var(--green);
+    border-radius:10px;
+    padding:12px 14px;
+    margin-bottom:12px;
+    font-size:11.5px;
+    line-height:1.5;
+    color:var(--text);
+  }
+  .effect-box strong{
+    color:var(--green-dark);
+    font-weight:700;
+  }
+  .effect-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px;}
+  .effect-item{font-size:11px;line-height:1.3;flex:1 1 40%;color:var(--gray);}
+  .effect-item b{font-size:15px;color:var(--blue);display:block;line-height:1.2;}
+
+  /* Hidden */
+  .step{display:none;}
+  .step.active{display:block;}
+
+  /* Print */
+  @media print{
+    body{padding:0;background:var(--white);font-size:10px;display:block;}
+    .app{max-width:none;height:auto;max-height:none;box-shadow:none;border-radius:0;overflow:visible;}
+    .header,.progress,.nav-buttons,.filters,.tabs,.btn,.btn-reset,.effect-box,.summary-header,.date-list{display:none!important;}
+    .panel{overflow:visible;padding:0;}
+    .summary-table{min-width:0;font-size:9px;}
+    .summary-table th,.summary-table td{padding:4px 5px;}
+    .summary-table td input{border:none;}
+    .edit-cell::after{display:none!important;}
+    .print-title{display:block!important;margin-bottom:10px;}
+    .print-title h2{font-size:13px;margin-bottom:6px;}
+    .print-title p{font-size:9px;color:#000;line-height:1.4;}
+  }
+  .print-title{display:none;}
+
+  /* Very small */
+  @media(max-width:520px){
+    body{padding:8px;}
+    .app{height:calc(100vh - 16px);}
+    .header{padding:12px 14px;}
+    .header h1{font-size:15px;}
+    .progress-step{font-size:9.5px;padding:7px 2px;}
+    .progress-step .num{display:none;}
+    .panel{padding:14px 14px 6px;}
+    .nav-buttons{padding:10px 14px;flex-wrap:wrap;}
+    .effect-item{flex:1 1 100%;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>Конструктор плана мероприятий</h1>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress" id="progress">
+    <div class="progress-step" data-step="0"><span class="num">1</span>Старт</div>
+    <div class="progress-step" data-step="1"><span class="num">2</span>Параметры</div>
+    <div class="progress-step" data-step="2"><span class="num">3</span>Даты</div>
+    <div class="progress-step" data-step="3"><span class="num">4</span>Форматы</div>
+    <div class="progress-step" data-step="4"><span class="num">5</span>План</div>
+  </div>
+
+  <div class="panel" id="panel">
+
+    <!-- STEP 0: START -->
+    <div class="step active" data-step="0">
+      <div class="start-box">
+        <p class="lead"><strong>📋 Соберите годовой план мероприятий за несколько шагов</strong></p>
+        <button class="btn btn-green" onclick="goTo(1)">Собрать план</button>
+      </div>
+    </div>
+
+    <!-- STEP 1: PARAMETERS -->
+    <div class="step" data-step="1">
+      <h2>Параметры вашего учреждения</h2>
+      <p class="sub">Выберите тип учреждения, приоритеты и целевые аудитории — от этого зависит подборка форматов.</p>
+
+      <div class="field">
+        <label class="field-label">Тип учреждения <span style="color:var(--orange)">*</span></label>
+        <div class="options" id="instOptions"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Приоритеты государственной политики <span style="color:var(--orange)">*</span></label>
+        <p class="field-hint">Можно выбрать несколько. Каждое мероприятие в плане будет привязано к приоритету.</p>
+        <div class="options" id="priorityOptions"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Целевые аудитории</label>
+        <p class="field-hint">Необязательно. Если не выбраны — покажем все форматы с пометкой аудитории.</p>
+        <div class="options" id="audienceOptions"></div>
+      </div>
+    </div>
+
+    <!-- STEP 2: DATES -->
+    <div class="step" data-step="2">
+      <h2>Выбор дат</h2>
+      <p class="sub">Обязательные даты предзаполнены по типу учреждения и приоритетам. Добавьте тематические события.</p>
+
+      <div class="tabs">
+        <div class="tab active" data-tab="mandatory" onclick="switchTab('mandatory')">Обязательные даты</div>
+        <div class="tab" data-tab="thematic" onclick="switchTab('thematic')">Тематические даты</div>
+      </div>
+
+      <div class="filters" id="filters" style="display:none;">
+        <select id="filterMonth"><option value="">Все месяцы</option></select>
+        <select id="filterPriority"><option value="">Все приоритеты</option></select>
+        <select id="filterAudience"><option value="">Все аудитории</option></select>
+      </div>
+
+      <div class="date-list" id="dateList"></div>
+      <p style="font-size:11.5px;color:var(--gray);margin-top:8px;">Выбрано дат: <strong id="datesCount">0</strong></p>
+    </div>
+
+    <!-- STEP 3: FORMATS -->
+    <div class="step" data-step="3">
+      <h2>Подборка форматов</h2>
+      <p class="sub">Выберите мероприятия для каждой даты. Карточки можно раскрыть — там методический акцент и рекомендации по организации.</p>
+      <div id="formatGroups"></div>
+    </div>
+
+    <!-- STEP 4: SUMMARY -->
+    <div class="step" data-step="4">
+      <div class="print-title">
+        <h2>План мероприятий учреждения культуры на год</h2>
+        <p>Разработан на основании: Стратегии государственной культурной политики на период до 2030 года (утв. распоряжением Правительства от 11.09.2024 № 2501-р); Национальных целей развития РФ на период до 2030 года (Указ Президента от 07.05.2024 № 309); Основ государственной политики по сохранению и укреплению традиционных российских духовно-нравственных ценностей (утв. Указом Президента от 09.11.2022 № 809).</p>
+      </div>
+
+      <div class="summary-header" id="summaryHeader"></div>
+      <div class="effect-box" id="effectBox"></div>
+      <div class="summary-table-wrap" id="summaryTableWrap"></div>
+    </div>
+
+  </div>
+
+  <!-- STICKY FOOTER NAV -->
+  <div class="nav-buttons" id="navButtons" style="display:none;">
+    <div class="left">
+      <button class="btn btn-ghost" id="btnBack" onclick="goBack()">← Назад</button>
+      <button class="btn-reset" id="btnReset" onclick="resetAll()">Сбросить параметры</button>
+    </div>
+    <div class="right" id="rightButtons"></div>
+  </div>
+
+</div>
+
+<script>
+/* ============ DATA ============ */
+const INSTITUTIONS = ["Библиотека","КДУ","Музей","Театр","ДШИ","Парк"];
+
+const PRIORITIES = [
+  {id:"patriot", name:"Патриотизм и личная ответственность"},
+  {id:"unity", name:"Сила коллективного единства"},
+  {id:"creation", name:"Созидание и взгляд в будущее"},
+  {id:"national", name:"Национальное единство и культурное разнообразие"},
+  {id:"moral", name:"Нравственные ориентиры"},
+  {id:"family", name:"Семейные ценности"},
+  {id:"intl", name:"Международное лидерство России"},
+  {id:"heroism", name:"Героизм и единство во времена испытаний"},
+  {id:"leaders", name:"Воспитание будущих лидеров"},
+  {id:"opportunities", name:"Россия как страна возможностей"}
+];
+
+const AUDIENCES = [
+  {id:"school", name:"Школьники 7–13"},
+  {id:"youth", name:"Молодёжь 14–22"},
+  {id:"young", name:"Молодые специалисты 23–35"},
+  {id:"family", name:"Семьи с детьми"}
+];
+
+const MONTHS = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+
+const DATES = [
+  {id:"d1", m:0, d:"1 января", title:"Новый год", type:"Госпраздник", priority:"family", audiences:["family","school"], mandatory:true},
+  {id:"d2", m:0, d:"1 января", title:"День былинного богатыря Ильи Муромца", type:"Тематическая", priority:"patriot", audiences:["school","family"], mandatory:false},
+  {id:"d3", m:0, d:"4 января", title:"Всемирный день азбуки Брайля", type:"Международная", priority:"moral", audiences:["school","youth"], mandatory:false},
+  {id:"d4", m:0, d:"14 января", title:"200 лет со дня рождения П. П. Семёнова-Тян-Шанского", type:"Юбилей", priority:"creation", audiences:["youth","young"], mandatory:false},
+  {id:"d5", m:0, d:"25 января", title:"День российского студенчества (Татьянин день)", type:"Памятная дата", priority:"leaders", audiences:["youth","young"], mandatory:true},
+  {id:"d6", m:0, d:"27 января", title:"День полного освобождения Ленинграда от фашистской блокады", type:"День воинской славы", priority:"patriot", audiences:["school","youth","family"], mandatory:true},
+  {id:"d7", m:0, d:"31 января", title:"230 лет со дня рождения Франца Шуберта", type:"Юбилей", priority:"moral", audiences:["young","family"], mandatory:false},
+  {id:"d8", m:1, d:"2 февраля", title:"День разгрома советскими войсками немецко-фашистских войск в Сталинградской битве", type:"День воинской славы", priority:"heroism", audiences:["school","youth","family"], mandatory:true},
+  {id:"d9", m:1, d:"8 февраля", title:"День российской науки", type:"Тематическая", priority:"creation", audiences:["school","youth"], mandatory:true},
+  {id:"d10", m:1, d:"14 февраля", title:"Международный день книгодарения", type:"Международная", priority:"national", audiences:["school","family"], mandatory:false},
+  {id:"d11", m:1, d:"21 февраля", title:"Международный день родного языка", type:"Международная", priority:"national", audiences:["school","youth","family"], mandatory:true},
+  {id:"d12", m:1, d:"23 февраля", title:"День защитника Отечества", type:"Госпраздник", priority:"patriot", audiences:["school","youth","family"], mandatory:true},
+  {id:"d13", m:2, d:"8 марта", title:"Международный женский день", type:"Госпраздник", priority:"family", audiences:["family","school"], mandatory:true},
+  {id:"d14", m:2, d:"18 марта", title:"День воссоединения Крыма с Россией", type:"Памятная дата", priority:"patriot", audiences:["school","youth","family"], mandatory:true},
+  {id:"d15", m:2, d:"21 марта", title:"Всемирный день поэзии", type:"Международная", priority:"moral", audiences:["school","youth","young"], mandatory:false},
+  {id:"d16", m:2, d:"25 марта", title:"День работника культуры", type:"Профессиональный", priority:"leaders", audiences:["young","family"], mandatory:true},
+  {id:"d17", m:3, d:"2 апреля", title:"Международный день детской книги", type:"Международная", priority:"moral", audiences:["school","family"], mandatory:true},
+  {id:"d18", m:3, d:"12 апреля", title:"День космонавтики", type:"Тематическая", priority:"creation", audiences:["school","youth","family"], mandatory:true},
+  {id:"d19", m:3, d:"18 апреля", title:"День победы русских воинов князя Александра Невского на Чудском озере", type:"День воинской славы", priority:"heroism", audiences:["school","youth"], mandatory:true},
+  {id:"d20", m:4, d:"9 мая", title:"День Победы советского народа в Великой Отечественной войне", type:"Госпраздник", priority:"patriot", audiences:["school","youth","family","young"], mandatory:true},
+  {id:"d21", m:4, d:"15 мая", title:"Международный день семьи", type:"Международная", priority:"family", audiences:["family","school"], mandatory:true},
+  {id:"d22", m:4, d:"18 мая", title:"Международный день музеев", type:"Профессиональный", priority:"national", audiences:["school","youth","family"], mandatory:false},
+  {id:"d23", m:4, d:"24 мая", title:"День славянской письменности и культуры", type:"Тематическая", priority:"national", audiences:["school","youth","family"], mandatory:true},
+  {id:"d24", m:4, d:"27 мая", title:"Общероссийский день библиотек", type:"Профессиональный", priority:"creation", audiences:["youth","young","family"], mandatory:false},
+  {id:"d25", m:5, d:"1 июня", title:"Международный день защиты детей", type:"Международная", priority:"family", audiences:["school","family"], mandatory:true},
+  {id:"d26", m:5, d:"6 июня", title:"День русского языка", type:"Тематическая", priority:"national", audiences:["school","youth","family"], mandatory:true},
+  {id:"d27", m:5, d:"12 июня", title:"День России", type:"Госпраздник", priority:"patriot", audiences:["school","youth","family","young"], mandatory:true},
+  {id:"d28", m:5, d:"22 июня", title:"День памяти и скорби — день начала Великой Отечественной войны", type:"Памятная дата", priority:"heroism", audiences:["school","youth","family"], mandatory:true},
+  {id:"d29", m:6, d:"8 июля", title:"Всероссийский день семьи, любви и верности", type:"Госпраздник", priority:"family", audiences:["family","school"], mandatory:true},
+  {id:"d30", m:6, d:"28 июля", title:"День Крещения Руси", type:"Памятная дата", priority:"moral", audiences:["family","young"], mandatory:false},
+  {id:"d31", m:7, d:"9 августа", title:"Международный день коренных народов мира", type:"Международная", priority:"national", audiences:["school","youth"], mandatory:false},
+  {id:"d32", m:7, d:"22 августа", title:"День Государственного флага России", type:"Госпраздник", priority:"patriot", audiences:["school","youth","family"], mandatory:true},
+  {id:"d33", m:7, d:"23 августа", title:"День разгрома советскими войсками немецко-фашистских войск в Курской битве", type:"День воинской славы", priority:"heroism", audiences:["school","youth","family"], mandatory:true},
+  {id:"d34", m:8, d:"1 сентября", title:"День знаний", type:"Госпраздник", priority:"leaders", audiences:["school","family"], mandatory:true},
+  {id:"d35", m:8, d:"3 сентября", title:"День Победы над милитаристской Японией и окончания Второй мировой войны", type:"Памятная дата", priority:"patriot", audiences:["school","youth","family"], mandatory:true},
+  {id:"d36", m:8, d:"8 сентября", title:"День языков народов России", type:"Тематическая", priority:"national", audiences:["school","youth","family"], mandatory:false},
+  {id:"d37", m:8, d:"21 сентября", title:"День победы русских полков в Куликовской битве", type:"День воинской славы", priority:"heroism", audiences:["school","youth"], mandatory:true},
+  {id:"d38", m:9, d:"1 октября", title:"Международный день музыки", type:"Международная", priority:"moral", audiences:["school","youth","family"], mandatory:false},
+  {id:"d39", m:9, d:"4 октября", title:"70-летие запуска первого искусственного спутника Земли", type:"Тематическая", priority:"creation", audiences:["school","youth","family"], mandatory:true},
+  {id:"d40", m:9, d:"19 октября", title:"День отца", type:"Госпраздник", priority:"family", audiences:["family","school"], mandatory:true},
+  {id:"d41", m:10, d:"4 ноября", title:"День народного единства", type:"Госпраздник", priority:"patriot", audiences:["school","youth","family","young"], mandatory:true},
+  {id:"d42", m:10, d:"20 ноября", title:"Всемирный день ребёнка", type:"Международная", priority:"family", audiences:["school","family"], mandatory:false},
+  {id:"d43", m:10, d:"28 ноября", title:"День матери", type:"Госпраздник", priority:"family", audiences:["family","school"], mandatory:true},
+  {id:"d44", m:11, d:"3 декабря", title:"День Неизвестного Солдата", type:"Памятная дата", priority:"heroism", audiences:["school","youth","family"], mandatory:true},
+  {id:"d45", m:11, d:"5 декабря", title:"День добровольца (волонтёра)", type:"Тематическая", priority:"unity", audiences:["youth","young","family"], mandatory:false},
+  {id:"d46", m:11, d:"9 декабря", title:"День Героев Отечества", type:"Памятная дата", priority:"heroism", audiences:["school","youth","family"], mandatory:true},
+  {id:"d47", m:11, d:"12 декабря", title:"День Конституции Российской Федерации", type:"Госпраздник", priority:"patriot", audiences:["school","youth","family"], mandatory:true},
+  {id:"d48", m:11, d:"22 декабря", title:"90 лет со дня рождения Эдуарда Успенского", type:"Юбилей", priority:"moral", audiences:["school","family"], mandatory:false}
+];
+
+const FORMATS = {
+  d1:[
+    {id:"f1", title:"Светёлка литературная «Новогодние истории у ёлки»", format:"Тематическая встреча", aud:["school","family"], accent:"Семейное чтение и преемственность традиций", rec:"Чтение вслух рождественских рассказов, 60–90 мин, 15–30 чел. Партнёр — школьная библиотека.", grant:false},
+    {id:"f2", title:"Мастерская семейных традиций «Новогоднее письмо в будущее»", format:"Мастер-класс", aud:["family"], accent:"Семейные ценности, связь поколений", rec:"Совместное написание послания семье на следующий год, 45–60 мин, 10–20 семей.", grant:false},
+    {id:"f3", title:"Выставка-сюрприз «Книга под ёлкой»", format:"Выставка", aud:["school","family"], accent:"Продвижение чтения через игру", rec:"Экспозиция завёрнутых изданий с подсказками, работает весь январь.", grant:false}
+  ],
+  d2:[
+    {id:"f4", title:"Светёлка литературная «Азбука мужества»", format:"Тематическая встреча", aud:["school","family"], accent:"Гражданско-патриотическое воспитание через былины", rec:"Чтение былин и народных сказок о богатырях, 60 мин, 15–25 чел.", grant:false},
+    {id:"f5", title:"Театр добрых поступков «Азбука мужества»", format:"Игровая симуляция", aud:["school"], accent:"Нравственный выбор и взаимовыручка", rec:"Ролевая игра по ситуациям из былин, 45–60 мин, 12–20 чел.", grant:false},
+    {id:"f6", title:"Литературный дозор «По следам богатырей»", format:"Викторина", aud:["school"], accent:"Знакомство с былинным эпосом", rec:"Командная игра, 60 мин, 2–4 команды по 6 чел.", grant:false}
+  ],
+  d3:[
+    {id:"f7", title:"Беседа за книжным столом «Мир на кончиках пальцев»", format:"Тематическая встреча", aud:["school","youth"], accent:"Инклюзия и доступность чтения", rec:"Разговор о людях, которые читают руками, 45–60 мин, 12–20 чел.", grant:false},
+    {id:"f8", title:"Мастерская добра «Подарок другу»", format:"Мастер-класс", aud:["school","youth"], accent:"Нравственные ориентиры, взаимопомощь", rec:"Создание тактильных открыток для незрячих читателей, 60 мин, 10–15 чел.", grant:true},
+    {id:"f9", title:"Медиарассказ «Луи Брайль и его азбука»", format:"Лекторий", aud:["school","youth"], accent:"История доступного чтения", rec:"Познавательное мероприятие с видеорядом, 45 мин, 20–40 чел.", grant:false}
+  ],
+  d4:[
+    {id:"f10", title:"Эко-путешествие «Тропами великого географа»", format:"Экспедиция", aud:["school","family"], accent:"Наука и географические открытия", rec:"Маршрут по станциям об экспедициях Семёнова-Тян-Шанского, 90 мин, 15–25 чел.", grant:true},
+    {id:"f11", title:"Поисковое путешествие «Путь к вершинам»", format:"Викторина", aud:["school","youth"], accent:"Работа с атласами и энциклопедиями", rec:"Командная игра по географии и краеведению, 60–90 мин, 2–4 команды.", grant:false},
+    {id:"f12", title:"Выставка-карта «География России»", format:"Выставка", aud:["school","youth","family"], accent:"Исторические и современные карты", rec:"Интерактивная экспозиция с QR-кодами на виртуальные туры.", grant:false}
+  ],
+  d5:[
+    {id:"f13", title:"Встреча без галстуков «Студенческие годы чудесные»", format:"Тематическая встреча", aud:["youth","young"], accent:"Образование и преемственность поколений", rec:"Неформальная беседа с выпускниками вузов, 60–90 мин, 20–30 чел.", grant:false},
+    {id:"f14", title:"Литературные посиделки «Татьянин день»", format:"Тематическая встреча", aud:["youth","young"], accent:"Продвижение чтения через традицию", rec:"Чтение стихов и прозы о студенчестве с чаепитием, 60 мин, 15–20 чел.", grant:false},
+    {id:"f15", title:"Книжный клуб «Студенты читают»", format:"Дискуссия", aud:["youth","young"], accent:"Воспитание будущих лидеров", rec:"Обсуждение книг, популярных среди молодёжи, 60–90 мин.", grant:true}
+  ],
+  d6:[
+    {id:"f16", title:"Вечер памяти «Нет, не ушла война в преданье»", format:"Тематическая встреча", aud:["school","youth","family"], accent:"Историческая память и патриотизм", rec:"Рассказ с документальными фрагментами и чтением мемуаров, 60–90 мин, 30–50 чел.", grant:false},
+    {id:"f17", title:"Чтецкий марафон «Строки, опалённые войной»", format:"Марафон", aud:["school","youth","family"], accent:"Сохранение исторической памяти", rec:"Последовательное чтение стихов и прозы о блокаде, 60–120 мин.", grant:true},
+    {id:"f18", title:"Урок мужества «Дорога жизни»", format:"Лекторий", aud:["school","youth"], accent:"Героизм и единство во времена испытаний", rec:"Тематическое мероприятие с документальными материалами, 45–60 мин, 25–40 чел.", grant:false},
+    {id:"f19", title:"Акция «Письмо герою»", format:"Акция", aud:["school","youth"], accent:"Личная ответственность за судьбу России", rec:"Послание защитникам Ленинграда, написанное от руки, в течение дня.", grant:false}
+  ],
+  d7:[
+    {id:"f20", title:"Литературно-музыкальный вечер «Музыка Шуберта»", format:"Тематическая встреча", aud:["young","family"], accent:"Синтез музыки и слова", rec:"Чтение отрывков с исполнением композиций, 60–90 мин, 20–40 чел.", grant:false},
+    {id:"f21", title:"Музыкально-поэтическая гостиная", format:"Тематическая встреча", aud:["young","family"], accent:"Нравственные ориентиры через искусство", rec:"Камерная встреча с чтением стихов и музыкой Шуберта, 60 мин, 15–25 чел.", grant:false}
+  ],
+  d8:[
+    {id:"f22", title:"Урок мужества «Сталинград: 200 дней стойкости»", format:"Лекторий", aud:["school","youth","family"], accent:"Патриотизм и историческая память", rec:"Тематическое мероприятие с документальными материалами, 45–60 мин, 25–40 чел.", grant:false},
+    {id:"f23", title:"Выставка-память «Память пылающих лет»", format:"Выставка", aud:["school","youth","family"], accent:"Сохранение исторической памяти", rec:"Экспозиция с архивными фотографиями, книгами, письмами.", grant:false},
+    {id:"f24", title:"Чтецкий вечер «Герои прошлой и новой России»", format:"Тематическая встреча", aud:["school","youth"], accent:"Героизм и единство во времена испытаний", rec:"Чтение произведений о героях, 60–90 мин, 20–30 чел.", grant:true}
+  ],
+  d9:[
+    {id:"f25", title:"Поисковое путешествие «Тропами науки»", format:"Викторина", aud:["school","youth"], accent:"Наука и созидание", rec:"Командная игра по станциям с научными открытиями, 60–90 мин.", grant:false},
+    {id:"f26", title:"Интеллектуариум «Наука вокруг нас»", format:"Игровая симуляция", aud:["school","family"], accent:"Семейное познание", rec:"Семейное занятие с логикой, речью и чтением, 60 мин, 10–15 семей.", grant:false},
+    {id:"f27", title:"Выставка-экспедиция «Тропами науки»", format:"Выставка", aud:["school","youth"], accent:"Научно-популярная литература", rec:"Экспозиция с книгами, картами и QR-кодами.", grant:false}
+  ],
+  d10:[
+    {id:"f28", title:"Акция «Подари книгу библиотеке»", format:"Акция", aud:["school","family"], accent:"Продвижение чтения и коллективное единство", rec:"Сбор книг от читателей с оформлением дарительной надписи, в течение дня.", grant:false},
+    {id:"f29", title:"Книжный клуб «Книга между нами»", format:"Дискуссия", aud:["school","family"], accent:"Семейное чтение", rec:"Обсуждение любимых книг, принесённых читателями, 60 мин.", grant:false}
+  ],
+  d11:[
+    {id:"f30", title:"Литературно-музыкальная гостиная «Язык — душа народа»", format:"Тематическая встреча", aud:["school","youth","family"], accent:"Национальное единство и культурное разнообразие", rec:"Поэзия народов региона как часть общероссийского наследия, 60–90 мин, 40–60 чел. Партнёр — районная библиотека, школа.", grant:true},
+    {id:"f31", title:"Этнографический калейдоскоп «Родной язык в сказках и пословицах»", format:"Викторина", aud:["school","family"], accent:"Воспитание уважения к национальным традициям", rec:"Интерактивная викторина, 60 мин, 2–4 команды.", grant:false},
+    {id:"f32", title:"Выставка-карта «Языки народов России»", format:"Выставка", aud:["school","youth","family"], accent:"Культурное разнообразие", rec:"Карта языков, книги, QR-коды на аудиозаписи.", grant:false}
+  ],
+  d12:[
+    {id:"f33", title:"Концерт «Защитникам Отечества посвящается»", format:"Концерт", aud:["school","youth","family"], accent:"Патриотизм и личная ответственность", rec:"Торжественный концерт с участием творческих коллективов, 60–90 мин, 100+ чел.", grant:false},
+    {id:"f34", title:"Урок мужества «Герои рядом»", format:"Лекторий", aud:["school","youth"], accent:"Героизм и единство", rec:"Встреча с ветеранами и участниками СВО, 45–60 мин, 25–40 чел.", grant:true},
+    {id:"f35", title:"Выставка-вопрос «Что такое подвиг сегодня?»", format:"Выставка", aud:["school","youth","family"], accent:"Нравственные ориентиры", rec:"Экспозиция с книгами, былинами, цитатами.", grant:false}
+  ],
+  d13:[
+    {id:"f36", title:"Праздничный концерт «Для милых дам»", format:"Концерт", aud:["family","school"], accent:"Семейные ценности", rec:"Концертная программа с участием коллективов, 60–90 мин, 100+ чел.", grant:false},
+    {id:"f37", title:"Мастерская семейных традиций «Подарок маме»", format:"Мастер-класс", aud:["family","school"], accent:"Связь поколений", rec:"Создание открыток и поделок, 45–60 мин, 10–20 семей.", grant:false}
+  ],
+  d14:[
+    {id:"f38", title:"Тематический час «Крым и Россия: вместе навсегда»", format:"Лекторий", aud:["school","youth","family"], accent:"Патриотизм и историческая память", rec:"Рассказ с видеорядом об истории воссоединения, 45–60 мин, 25–40 чел.", grant:false},
+    {id:"f39", title:"Выставка-карта «Крым: история и культура»", format:"Выставка", aud:["school","youth","family"], accent:"Национальное единство", rec:"Экспозиция с картами, книгами, фотографиями.", grant:false}
+  ],
+  d15:[
+    {id:"f40", title:"Горница поэтическая «Строки о любви»", format:"Тематическая встреча", aud:["school","youth","young"], accent:"Нравственные ориентиры", rec:"Чтение стихов с чаепитием, 60 мин, 15–25 чел.", grant:false},
+    {id:"f41", title:"Чтение вслух «Строки, согревающие душу»", format:"Марафон", aud:["school","youth","young"], accent:"Продвижение чтения", rec:"Акция, где участники по очереди читают стихи, в течение дня.", grant:false}
+  ],
+  d16:[
+    {id:"f42", title:"Вечер-портрет «Лица сцены»", format:"Тематическая встреча", aud:["young","family"], accent:"Воспитание будущих лидеров", rec:"Встреча с деятелями культуры, 60–90 мин, 20–40 чел.", grant:false},
+    {id:"f43", title:"Выставка-портрет «Артисты нашего города»", format:"Выставка", aud:["young","family"], accent:"Профессиональные традиции", rec:"Экспозиция о деятелях искусства, программки, фотографии.", grant:false}
+  ],
+  d17:[
+    {id:"f44", title:"Книжный домик «В гостях у сказки»", format:"Тематическая встреча", aud:["school","family"], accent:"Продвижение чтения", rec:"Уютный уголок с книгами, чтение вслух, 45–60 мин, 10–20 чел.", grant:false},
+    {id:"f45", title:"Театр теней «Сказки о главном»", format:"Игровая симуляция", aud:["school","family"], accent:"Нравственные ориентиры", rec:"Инсценировка фрагментов с обсуждением, 45–60 мин.", grant:false}
+  ],
+  d18:[
+    {id:"f46", title:"Поисковое путешествие «К звёздам»", format:"Викторина", aud:["school","youth"], accent:"Наука и созидание", rec:"Командная игра по астрономии и физике, 60–90 мин.", grant:false},
+    {id:"f47", title:"Медиарассказ «Вселенная в одной книге»", format:"Лекторий", aud:["school","youth"], accent:"Популяризация науки", rec:"Мероприятие с видеорядом о жизни и открытиях учёных, 45 мин, 25–40 чел.", grant:false},
+    {id:"f48", title:"Выставка-вопрос «Что там, за звёздами?»", format:"Выставка", aud:["school","youth","family"], accent:"Научно-популярная литература", rec:"Экспозиция с вопросом в заголовке, книги и иллюстрации.", grant:false}
+  ],
+  d19:[
+    {id:"f49", title:"Урок мужества «Ледовое побоище»", format:"Лекторий", aud:["school","youth"], accent:"Героизм и единство", rec:"Тематическое мероприятие с картами и документами, 45 мин, 25–40 чел.", grant:false},
+    {id:"f50", title:"Выставка-память «Александр Невский»", format:"Выставка", aud:["school","youth"], accent:"Патриотизм и историческая память", rec:"Экспозиция с репродукциями, книгами, картами.", grant:false}
+  ],
+  d20:[
+    {id:"f51", title:"Концерт для ветеранов, посвящённый Победе", format:"Концерт", aud:["school","youth","family","young"], accent:"Патриотизм и личная ответственность за судьбу России", rec:"Торжественный концерт с участием коллективов, 90 мин, 100+ чел. Ветеранам и участникам СВО вход бесплатный.", grant:true},
+    {id:"f52", title:"Чтецкий вечер «Герои прошлой и новой России»", format:"Тематическая встреча", aud:["school","youth","family"], accent:"Героизм и единство во времена испытаний", rec:"Чтение произведений о героях, 60–90 мин, 30–50 чел.", grant:true},
+    {id:"f53", title:"Акция «Письмо солдату»", format:"Акция", aud:["school","youth"], accent:"Личная ответственность и поддержка", rec:"Написание писем поддержки, в течение дня.", grant:false},
+    {id:"f54", title:"Выставка-память «Память пылающих лет»", format:"Выставка", aud:["school","youth","family"], accent:"Сохранение исторической памяти", rec:"Экспозиция с архивными фотографиями и книгами о войне.", grant:false}
+  ],
+  d21:[
+    {id:"f55", title:"Семейный праздник «Всей семьёй в библиотеку»", format:"Тематическая встреча", aud:["family","school"], accent:"Семейные ценности", rec:"Игровая программа для семей, 90 мин, 15–25 семей.", grant:false},
+    {id:"f56", title:"Мастер-класс «Семейное древо»", format:"Мастер-класс", aud:["family"], accent:"Связь поколений", rec:"Создание родословной, 60 мин, 10–15 семей.", grant:false}
+  ],
+  d22:[
+    {id:"f57", title:"День открытых дверей «Музей в гости»", format:"День открытых дверей", aud:["school","youth","family"], accent:"Культурное разнообразие", rec:"Экскурсии, встречи, 3–6 часов, 50+ чел.", grant:false},
+    {id:"f58", title:"Выставка-вернисаж «Сокровища музеев»", format:"Выставка", aud:["school","youth","family"], accent:"Национальное единство", rec:"Репродукции, книги, материалы о музеях.", grant:false}
+  ],
+  d23:[
+    {id:"f59", title:"Этнографический калейдоскоп «Славянская письменность»", format:"Тематическая встреча", aud:["school","youth","family"], accent:"Национальное единство и культурное разнообразие", rec:"Рассказ о Кирилле и Мефодии, чтение, 60 мин, 25–40 чел.", grant:false},
+    {id:"f60", title:"Выставка-цитата «Слова, которые лечат»", format:"Выставка", aud:["school","youth","family"], accent:"Нравственные ориентиры", rec:"Стенд с цитатами из русской классики.", grant:false}
+  ],
+  d24:[
+    {id:"f61", title:"Праздник «Библиотека — территория чтения»", format:"Тематическая встреча", aud:["youth","young","family"], accent:"Продвижение чтения и профессия библиотекаря", rec:"Праздничная программа с награждением читателей, 90 мин, 50+ чел.", grant:false},
+    {id:"f62", title:"Выставка-ретро «История библиотек»", format:"Выставка", aud:["youth","young","family"], accent:"Сохранение профессиональных традиций", rec:"Экспозиция об истории библиотечного дела.", grant:false}
+  ],
+  d25:[
+    {id:"f63", title:"Праздник «Детство — это мы!»", format:"Тематическая встреча", aud:["school","family"], accent:"Семейные ценности и защита детства", rec:"Игровая программа, конкурсы, 90 мин, 30–50 чел.", grant:false},
+    {id:"f64", title:"Выставка-настроение «Когда хочется чуда»", format:"Выставка", aud:["school","family"], accent:"Продвижение чтения", rec:"Книги по эмоциональному состоянию.", grant:false}
+  ],
+  d26:[
+    {id:"f65", title:"Литературная гостиная «Русское слово»", format:"Тематическая встреча", aud:["school","youth","family"], accent:"Национальное единство и культурное разнообразие", rec:"Чтение классики, 60–90 мин, 25–40 чел.", grant:false},
+    {id:"f66", title:"Выставка-цитата «Слова, написанные от руки»", format:"Выставка", aud:["school","youth","family"], accent:"Продвижение чтения", rec:"Стенд с каллиграфическими цитатами.", grant:false}
+  ],
+  d27:[
+    {id:"f67", title:"Концерт «Россия — это мы»", format:"Концерт", aud:["school","youth","family","young"], accent:"Патриотизм и единство", rec:"Торжественная программа, 90 мин, 100+ чел.", grant:false},
+    {id:"f68", title:"Выставка-карта «Россия: единство в разнообразии»", format:"Выставка", aud:["school","youth","family"], accent:"Национальное единство", rec:"Карта народов, книги, фотографии.", grant:false}
+  ],
+  d28:[
+    {id:"f69", title:"Час памяти «22 июня — день скорби»", format:"Тематическая встреча", aud:["school","youth","family"], accent:"Историческая память", rec:"Минута молчания, чтение, документальные кадры, 45 мин.", grant:false},
+    {id:"f70", title:"Выставка-память «Война в судьбах земляков»", format:"Выставка", aud:["school","youth","family"], accent:"Героизм и единство", rec:"Краеведческие материалы, фотографии, письма.", grant:false}
+  ],
+  d29:[
+    {id:"f71", title:"Праздник «Семья — главная ценность»", format:"Тематическая встреча", aud:["family","school"], accent:"Семейные ценности", rec:"Игровая программа, 90 мин, 20–30 семей.", grant:false},
+    {id:"f72", title:"Мастер-класс «Ромашка — символ семьи»", format:"Мастер-класс", aud:["family","school"], accent:"Связь поколений", rec:"Создание символа праздника, 45 мин.", grant:false}
+  ],
+  d30:[
+    {id:"f73", title:"Духовная беседа «Свет Крещения»", format:"Тематическая встреча", aud:["family","young"], accent:"Духовно-нравственное воспитание", rec:"Разговор о смысле праздника, 60 мин, 20–30 чел.", grant:false},
+    {id:"f74", title:"Выставка-традиция «Святая вода и белый снег»", format:"Выставка", aud:["family","young"], accent:"Народные традиции", rec:"Этнографическая экспозиция.", grant:false}
+  ],
+  d31:[
+    {id:"f75", title:"Этнографический калейдоскоп «Народы мира»", format:"Викторина", aud:["school","youth"], accent:"Национальное единство и культурное разнообразие", rec:"Интерактивная викторина, 60 мин.", grant:false},
+    {id:"f76", title:"Выставка-карта «Коренные народы России»", format:"Выставка", aud:["school","youth"], accent:"Культурное разнообразие", rec:"Карта, книги, фотографии.", grant:false}
+  ],
+  d32:[
+    {id:"f77", title:"Торжественная линейка «Флаг России»", format:"Линейка", aud:["school","youth","family"], accent:"Патриотизм и личная ответственность", rec:"Церемония поднятия флага, 30 мин, 100+ чел.", grant:false},
+    {id:"f78", title:"Выставка-цитата «Символы России»", format:"Выставка", aud:["school","youth","family"], accent:"Национальное единство", rec:"Стенд с символикой и цитатами.", grant:false}
+  ],
+  d33:[
+    {id:"f79", title:"Урок мужества «Курская дуга»", format:"Лекторий", aud:["school","youth","family"], accent:"Героизм и единство во времена испытаний", rec:"Тематическое мероприятие, 45 мин, 25–40 чел.", grant:false},
+    {id:"f80", title:"Выставка-память «Огненная дуга»", format:"Выставка", aud:["school","youth","family"], accent:"Историческая память", rec:"Экспозиция с картами, фотографиями.", grant:false}
+  ],
+  d34:[
+    {id:"f81", title:"Праздник «Здравствуй, школа!»", format:"Тематическая встреча", aud:["school","family"], accent:"Воспитание будущих лидеров", rec:"Игровая программа, 60 мин, 30–50 чел.", grant:false},
+    {id:"f82", title:"Выставка-наставник «Книги, которые учат мыслить»", format:"Выставка", aud:["school","family"], accent:"Образование и чтение", rec:"Подборка энциклопедий и научпопа.", grant:false}
+  ],
+  d35:[
+    {id:"f83", title:"Час памяти «Окончание Второй мировой»", format:"Тематическая встреча", aud:["school","youth","family"], accent:"Патриотизм и историческая память", rec:"Рассказ с документальными кадрами, 45 мин.", grant:false},
+    {id:"f84", title:"Выставка-память «Дальневосточная победа»", format:"Выставка", aud:["school","youth"], accent:"Героизм и единство", rec:"Книги, карты, фотографии.", grant:false}
+  ],
+  d36:[
+    {id:"f85", title:"Лингвистический квест «Языки народов России»", format:"Викторина", aud:["school","youth","family"], accent:"Национальное единство и культурное разнообразие", rec:"Командная игра, 60 мин.", grant:false},
+    {id:"f86", title:"Выставка-карта «Языковая карта России»", format:"Выставка", aud:["school","youth","family"], accent:"Культурное разнообразие", rec:"Карта, книги, аудиозаписи.", grant:false}
+  ],
+  d37:[
+    {id:"f87", title:"Урок мужества «Куликовская битва»", format:"Лекторий", aud:["school","youth"], accent:"Героизм и единство", rec:"Тематическое мероприятие с картами, 45 мин.", grant:false},
+    {id:"f88", title:"Выставка-память «Дмитрий Донской»", format:"Выставка", aud:["school","youth"], accent:"Историческая память", rec:"Книги, репродукции, карты.", grant:false}
+  ],
+  d38:[
+    {id:"f89", title:"Музыкально-поэтическая гостиная «Музыка и слово»", format:"Тематическая встреча", aud:["school","youth","family"], accent:"Нравственные ориентиры", rec:"Чтение и музыка, 60 мин.", grant:false},
+    {id:"f90", title:"Выставка-портрет «Композиторы России»", format:"Выставка", aud:["school","youth","family"], accent:"Культурное наследие", rec:"Портреты, ноты, книги.", grant:false}
+  ],
+  d39:[
+    {id:"f91", title:"Поисковое путешествие «К звёздам»", format:"Викторина", aud:["school","youth","family"], accent:"Наука и созидание", rec:"Командная игра, 60–90 мин.", grant:false},
+    {id:"f92", title:"Выставка-экспедиция «Космос рядом»", format:"Выставка", aud:["school","youth","family"], accent:"Научно-популярная литература", rec:"Книги, схемы, QR-коды.", grant:false}
+  ],
+  d40:[
+    {id:"f93", title:"Встреча «Папа может всё»", format:"Тематическая встреча", aud:["family","school"], accent:"Семейные ценности", rec:"Игровая программа для отцов и детей, 60 мин.", grant:false},
+    {id:"f94", title:"Мастер-класс «Подарок папе»", format:"Мастер-класс", aud:["family","school"], accent:"Связь поколений", rec:"Создание поделок, 45 мин.", grant:false}
+  ],
+  d41:[
+    {id:"f95", title:"Концерт «В единстве — сила»", format:"Концерт", aud:["school","youth","family","young"], accent:"Патриотизм и сила коллективного единства", rec:"Торжественная программа, 90 мин, 100+ чел.", grant:true},
+    {id:"f96", title:"Этнографический калейдоскоп «Народы России»", format:"Викторина", aud:["school","youth","family"], accent:"Национальное единство и культурное разнообразие", rec:"Интерактивная программа, 60 мин.", grant:false},
+    {id:"f97", title:"Выставка-карта «Россия: единство в разнообразии»", format:"Выставка", aud:["school","youth","family"], accent:"Культурное разнообразие", rec:"Карта, книги, фотографии.", grant:false}
+  ],
+  d42:[
+    {id:"f98", title:"Праздник «Дети — наше будущее»", format:"Тематическая встреча", aud:["school","family"], accent:"Семейные ценности", rec:"Игровая программа, 60 мин.", grant:false},
+    {id:"f99", title:"Выставка-совет «Как помочь тому, кто видит иначе»", format:"Выставка", aud:["school","family"], accent:"Нравственные ориентиры", rec:"Книги о доступной среде.", grant:false}
+  ],
+  d43:[
+    {id:"f100", title:"Концерт «Мама — главное слово»", format:"Концерт", aud:["family","school"], accent:"Семейные ценности", rec:"Торжественная программа, 90 мин, 100+ чел.", grant:false},
+    {id:"f101", title:"Мастерская семейных традиций «Подарок маме»", format:"Мастер-класс", aud:["family","school"], accent:"Связь поколений", rec:"Открытки и поделки, 45 мин.", grant:false},
+    {id:"f102", title:"Светёлка литературная «Слово, которое греет»", format:"Тематическая встреча", aud:["family","school"], accent:"Семейное чтение", rec:"Чтение писем и стихов о маме, 60 мин.", grant:false}
+  ],
+  d44:[
+    {id:"f103", title:"Час памяти «Имя твоё неизвестно»", format:"Тематическая встреча", aud:["school","youth","family"], accent:"Героизм и единство", rec:"Минута молчания, чтение, 45 мин.", grant:false},
+    {id:"f104", title:"Выставка-память «Неизвестный Солдат»", format:"Выставка", aud:["school","youth","family"], accent:"Историческая память", rec:"Книги, фотографии, письма.", grant:false}
+  ],
+  d45:[
+    {id:"f105", title:"Акция «День добрых дел»", format:"Акция", aud:["youth","young","family"], accent:"Сила коллективного единства", rec:"Волонтёрская акция, в течение дня.", grant:true},
+    {id:"f106", title:"Встреча с волонтёрами «Делать добро просто»", format:"Тематическая встреча", aud:["youth","young"], accent:"Нравственные ориентиры", rec:"Беседа с волонтёрами, 60 мин.", grant:false}
+  ],
+  d46:[
+    {id:"f107", title:"Урок мужества «Герои Отечества»", format:"Лекторий", aud:["school","youth","family"], accent:"Героизм и единство во времена испытаний", rec:"Тематическое мероприятие с приглашением ветеранов, 45–60 мин.", grant:true},
+    {id:"f108", title:"Выставка-портрет «Герои нашего времени»", format:"Выставка", aud:["school","youth","family"], accent:"Патриотизм и личная ответственность", rec:"Портреты, книги, материалы.", grant:false}
+  ],
+  d47:[
+    {id:"f109", title:"Правовой лабиринт «Знай свои права»", format:"Викторина", aud:["school","youth"], accent:"Правовое просвещение и личная ответственность", rec:"Интерактивная игра по Конституции, 60 мин.", grant:false},
+    {id:"f110", title:"Выставка-памятка «Конституция России»", format:"Выставка", aud:["school","youth","family"], accent:"Правовая грамотность", rec:"Книги, документы, памятки.", grant:false}
+  ],
+  d48:[
+    {id:"f111", title:"Книжный домик «В гостях у героев Успенского»", format:"Тематическая встреча", aud:["school","family"], accent:"Продвижение чтения", rec:"Чтение вслух, игры, 45–60 мин.", grant:false},
+    {id:"f112", title:"Театр теней «Сказки Успенского»", format:"Игровая симуляция", aud:["school","family"], accent:"Нравственные ориентиры", rec:"Инсценировка с обсуждением, 45 мин.", grant:false}
+  ]
+};
+
+function getSection(fmt, datePriority, aud){
+  if(aud.includes("family") && fmt.aud.includes("family")) return 0;
+  if(datePriority === "patriot" || datePriority === "heroism") return 2;
+  if(aud.includes("school") && fmt.aud.includes("school")) return 1;
+  if(fmt.aud.includes("youth") || fmt.aud.includes("young")) return 3;
+  if(datePriority === "creation" || datePriority === "moral") return 4;
+  return 1;
+}
+const SECTIONS = [
+  "Мероприятия, рекомендуемые для семейного посещения",
+  "Мероприятия для школьников и студентов",
+  "Мероприятия, посвящённые патриотическим памятным/юбилейным датам",
+  "Мероприятия по Пушкинской карте",
+  "Мероприятия к юбилеям"
+];
+
+const state = {
+  institution: null,
+  priorities: [],
+  audiences: [],
+  dates: [],
+  formats: []
+};
+
+let currentStep = 0;
+
+/* ============ RENDER OPTIONS ============ */
+function renderOptions(){
+  const inst = document.getElementById('instOptions');
+  inst.innerHTML = INSTITUTIONS.map(i =>
+    `<div class="option" data-val="${i}">${i}</div>`
+  ).join('');
+  inst.querySelectorAll('.option').forEach(el=>{
+    el.addEventListener('click',()=>{
+      inst.querySelectorAll('.option').forEach(x=>x.classList.remove('selected'));
+      el.classList.add('selected');
+      state.institution = el.dataset.val;
+      updateNav();
+    });
+  });
+
+  const prio = document.getElementById('priorityOptions');
+  prio.innerHTML = PRIORITIES.map(p =>
+    `<div class="option" data-val="${p.id}">${p.name}</div>`
+  ).join('');
+  prio.querySelectorAll('.option').forEach(el=>{
+    el.addEventListener('click',()=>{
+      el.classList.toggle('selected');
+      const v = el.dataset.val;
+      if(el.classList.contains('selected')){
+        if(!state.priorities.includes(v)) state.priorities.push(v);
+      } else {
+        state.priorities = state.priorities.filter(x=>x!==v);
+      }
+      updateNav();
+    });
+  });
+
+  const aud = document.getElementById('audienceOptions');
+  aud.innerHTML = AUDIENCES.map(a =>
+    `<div class="option" data-val="${a.id}">${a.name}</div>`
+  ).join('');
+  aud.querySelectorAll('.option').forEach(el=>{
+    el.addEventListener('click',()=>{
+      el.classList.toggle('selected');
+      const v = el.dataset.val;
+      if(el.classList.contains('selected')){
+        if(!state.audiences.includes(v)) state.audiences.push(v);
+      } else {
+        state.audiences = state.audiences.filter(x=>x!==v);
+      }
+    });
+  });
+}
+
+/* ============ STEP 2: DATES ============ */
+let currentTab = 'mandatory';
+
+function switchTab(tab){
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===tab));
+  document.getElementById('filters').style.display = tab==='thematic' ? 'flex' : 'none';
+  renderDates();
+}
+
+function renderDates(){
+  const list = document.getElementById('dateList');
+  let filtered = DATES.filter(d => currentTab==='mandatory' ? d.mandatory : !d.mandatory);
+  if(currentTab==='thematic'){
+    const m = document.getElementById('filterMonth').value;
+    const p = document.getElementById('filterPriority').value;
+    const a = document.getElementById('filterAudience').value;
+    if(m !== '') filtered = filtered.filter(d => d.m === parseInt(m));
+    if(p) filtered = filtered.filter(d => d.priority === p);
+    if(a) filtered = filtered.filter(d => d.audiences.includes(a));
+  }
+  if(filtered.length === 0){
+    list.innerHTML = '<div class="empty">Нет дат по выбранным фильтрам.</div>';
+    updateDatesCount();
+    return;
+  }
+  const byMonth = {};
+  filtered.forEach(d => { (byMonth[d.m] = byMonth[d.m] || []).push(d); });
+  let html = '';
+  Object.keys(byMonth).sort((a,b)=>a-b).forEach(m => {
+    html += `<div style="padding:6px 12px;background:var(--gray-light);font-weight:600;font-size:11px;color:var(--blue);">${MONTHS[m]}</div>`;
+    byMonth[m].forEach(d => {
+      const sel = state.dates.includes(d.id);
+      const pName = PRIORITIES.find(p=>p.id===d.priority)?.name || '';
+      html += `<div class="date-item ${sel?'selected':''}" data-id="${d.id}">
+        <div class="checkbox"></div>
+        <div class="date-info">
+          <div class="date-title">${d.title}</div>
+          <div class="date-meta">
+            <span class="date-date">${d.d}</span>
+            <span class="badge gray">${d.type}</span>
+            <span class="badge">${pName}</span>
+          </div>
+        </div>
+      </div>`;
+    });
+  });
+  list.innerHTML = html;
+  list.querySelectorAll('.date-item').forEach(el=>{
+    el.addEventListener('click',()=>{
+      el.classList.toggle('selected');
+      const id = el.dataset.id;
+      if(state.dates.includes(id)) state.dates = state.dates.filter(x=>x!==id);
+      else state.dates.push(id);
+      updateDatesCount();
+    });
+  });
+  updateDatesCount();
+}
+
+function updateDatesCount(){
+  document.getElementById('datesCount').textContent = state.dates.length;
+  updateNav();
+}
+
+/* ============ STEP 3: FORMATS ============ */
+function renderFormats(){
+  const wrap = document.getElementById('formatGroups');
+  const selectedDates = DATES.filter(d => state.dates.includes(d.id));
+  if(selectedDates.length === 0){
+    wrap.innerHTML = '<div class="empty">Вернитесь на шаг назад и выберите хотя бы одну дату.</div>';
+    return;
+  }
+  let html = '';
+  selectedDates.forEach(date => {
+    let cards = FORMATS[date.id] || [];
+    if(state.audiences.length){
+      const filt = cards.filter(c => c.aud.some(a=>state.audiences.includes(a)));
+      if(filt.length) cards = filt;
+    }
+    const pName = PRIORITIES.find(p=>p.id===date.priority)?.name || '';
+    html += `<div class="format-group">
+      <h3>${date.d} — ${date.title} <span class="badge orange" style="margin-left:4px;">${pName}</span></h3>
+      <div class="format-cards">`;
+    if(cards.length === 0){
+      html += '<p style="font-size:12px;color:var(--gray);">Нет готовых карточек под выбранные параметры. Адаптируйте формат из другого раздела.</p>';
+    }
+    cards.forEach(c => {
+      const sel = state.formats.includes(c.id);
+      const audNames = c.aud.map(a=>AUDIENCES.find(x=>x.id===a)?.name).filter(Boolean).join(", ");
+      html += `<div class="card ${sel?'selected':''}" data-id="${c.id}">
+        <div class="card-title">${c.title}</div>
+        <div class="card-tags">
+          <span class="badge gray">${c.format}</span>
+          <span class="badge">${audNames}</span>
+          ${c.grant?'<span class="badge orange">Грант / цикл</span>':''}
+        </div>
+        <details><summary>Методический акцент</summary><div>${c.accent}</div></details>
+        <details><summary>Рекомендации по организации</summary><div>${c.rec}</div></details>
+        <div class="card-footer">
+          <span class="card-select">${sel?'✓ Выбрано':'Выбрать'}</span>
+        </div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  wrap.innerHTML = html;
+  wrap.querySelectorAll('.card').forEach(el=>{
+    el.addEventListener('click',(e)=>{
+      if(e.target.tagName === 'SUMMARY') return;
+      e.preventDefault();
+      el.classList.toggle('selected');
+      const id = el.dataset.id;
+      if(state.formats.includes(id)) state.formats = state.formats.filter(x=>x!==id);
+      else state.formats.push(id);
+      const btn = el.querySelector('.card-select');
+      btn.textContent = state.formats.includes(id) ? '✓ Выбрано' : 'Выбрать';
+      updateNav();
+    });
+  });
+  updateNav();
+}
+
+/* ============ STEP 4: SUMMARY ============ */
+function renderSummary(){
+  const header = document.getElementById('summaryHeader');
+  const instName = state.institution || 'Учреждение культуры';
+  const prioNames = state.priorities.map(p=>PRIORITIES.find(x=>x.id===p)?.name).filter(Boolean).join("; ");
+  header.innerHTML = `<strong>${instName}</strong> · План мероприятий на год<br>
+    Приоритеты: ${prioNames}<br>
+    Целевые аудитории: ${state.audiences.map(a=>AUDIENCES.find(x=>x.id===a)?.name).join(", ") || 'все'}`;
+
+  const N = state.dates.length;
+  const M = state.formats.length;
+  const K = state.formats.length;
+  const hours = (N*2.5) + (M*1.5) + (K*1);
+  const days = (hours/8).toFixed(1);
+  const effectBox = document.getElementById('effectBox');
+  effectBox.innerHTML = `<strong>Оценка эффекта:</strong> сервис сокращает подготовку плана с нескольких недель до нескольких дней.
+    <div class="effect-row">
+      <div class="effect-item"><b>${N}</b>выбрано дат</div>
+      <div class="effect-item"><b>${M}</b>готовых формулировок</div>
+      <div class="effect-item"><b>${hours.toFixed(1)} ч</b>экономия времени методиста</div>
+      <div class="effect-item"><b>${days} дн.</b>при 8-часовом дне</div>
+    </div>`;
+
+  const wrap = document.getElementById('summaryTableWrap');
+  if(state.formats.length === 0){
+    wrap.innerHTML = '<div class="empty">Вы не выбрали ни одного мероприятия.</div>';
+    return;
+  }
+
+  const rows = state.formats.map(fid => {
+    const card = Object.values(FORMATS).flat().find(c=>c.id===fid);
+    const date = DATES.find(d => (FORMATS[d.id]||[]).some(c=>c.id===fid));
+    if(!card || !date) return null;
+    const pName = PRIORITIES.find(p=>p.id===date.priority)?.name || '';
+    const section = getSection(card, date.priority, state.audiences);
+    return {card, date, pName, section};
+  }).filter(Boolean);
+
+  const bySection = {};
+  rows.forEach(r => { (bySection[r.section] = bySection[r.section] || []).push(r); });
+
+  let html = `<table class="summary-table">
+    <thead><tr>
+      <th style="width:24px;">№</th>
+      <th>Наименование</th>
+      <th style="width:90px;">Место</th>
+      <th style="width:130px;">Приоритет</th>
+      <th style="width:80px;">Дата</th>
+      <th style="width:80px;">Ответственный</th>
+      <th style="width:70px;">Примечания</th>
+    </tr></thead><tbody>`;
+
+  let counter = 0;
+  Object.keys(bySection).sort((a,b)=>a-b).forEach(sec => {
+    html += `<tr class="section-row"><td colspan="7">${SECTIONS[sec]}</td></tr>`;
+    bySection[sec].forEach(r => {
+      counter++;
+      html += `<tr>
+        <td>${counter}</td>
+        <td>${r.card.title}</td>
+        <td><span class="edit-cell"><input type="text" value="Адрес учреждения" data-field="place"></span></td>
+        <td class="priority-cell">${r.pName.toUpperCase()}</td>
+        <td><span class="edit-cell"><input type="text" value="${r.date.d}" data-field="date"></span></td>
+        <td><span class="edit-cell"><input type="text" placeholder="ФИО" data-field="person"></span></td>
+        <td><span class="edit-cell"><input type="text" placeholder="Льготы" data-field="note"></span></td>
+      </tr>`;
+    });
+  });
+  html += `</tbody></table>`;
+  wrap.innerHTML = html;
+}
+
+/* ============ RESET ============ */
+function resetAll(){
+  state.institution = null;
+  state.priorities = [];
+  state.audiences = [];
+  state.dates = [];
+  state.formats = [];
+  document.querySelectorAll('#instOptions .option, #priorityOptions .option, #audienceOptions .option')
+    .forEach(el => el.classList.remove('selected'));
+  const dc = document.getElementById('datesCount');
+  if(dc) dc.textContent = '0';
+  const fm = document.getElementById('filterMonth');
+  const fp = document.getElementById('filterPriority');
+  const fa = document.getElementById('filterAudience');
+  if(fm) fm.value = '';
+  if(fp) fp.value = '';
+  if(fa) fa.value = '';
+  currentTab = 'mandatory';
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab==='mandatory'));
+  const filt = document.getElementById('filters');
+  if(filt) filt.style.display = 'none';
+  const wrap = document.getElementById('summaryTableWrap');
+  if(wrap) wrap.innerHTML = '';
+  const header = document.getElementById('summaryHeader');
+  if(header) header.innerHTML = '';
+  const eff = document.getElementById('effectBox');
+  if(eff) eff.innerHTML = '';
+  const fg = document.getElementById('formatGroups');
+  if(fg) fg.innerHTML = '';
+  const dl = document.getElementById('dateList');
+  if(dl) dl.innerHTML = '';
+  goTo(1);
+}
+
+/* ============ NAVIGATION ============ */
+function updateNav(){
+  const nav = document.getElementById('navButtons');
+  const right = document.getElementById('rightButtons');
+  const back = document.getElementById('btnBack');
+  const reset = document.getElementById('btnReset');
+  if(currentStep === 0){
+    nav.style.display = 'none';
+    return;
+  }
+  nav.style.display = 'flex';
+  back.style.visibility = 'visible';
+  reset.style.display = currentStep >= 1 ? 'inline-block' : 'none';
+  right.innerHTML = '';
+
+  if(currentStep === 1){
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-primary';
+    btn.textContent = 'Далее →';
+    btn.disabled = !(state.institution && state.priorities.length > 0);
+    btn.onclick = ()=>goTo(2);
+    right.appendChild(btn);
+  } else if(currentStep === 2){
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-primary';
+    btn.textContent = 'Далее →';
+    btn.disabled = state.dates.length === 0;
+    btn.onclick = ()=>goTo(3);
+    right.appendChild(btn);
+  } else if(currentStep === 3){
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-primary';
+    btn.textContent = 'Далее →';
+    btn.disabled = state.formats.length === 0;
+    btn.onclick = ()=>goTo(4);
+    right.appendChild(btn);
+  } else if(currentStep === 4){
+    const b2 = document.createElement('button');
+    b2.className = 'btn btn-green';
+    b2.textContent = 'Сохранить PDF';
+    b2.onclick = ()=>window.print();
+    right.appendChild(b2);
+  }
+}
+
+function goBack(){
+  if(currentStep > 0) goTo(currentStep - 1);
+}
+
+function goTo(step){
+  currentStep = step;
+  if(step === 2){ renderDates(); initFilters(); }
+  if(step === 3){ renderFormats(); }
+  if(step === 4){ renderSummary(); }
+  document.querySelectorAll('.step').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.step) === step);
+  });
+  document.querySelectorAll('.progress-step').forEach(el => {
+    const s = parseInt(el.dataset.step);
+    el.classList.toggle('active', s === step);
+    el.classList.toggle('done', s < step);
+  });
+  document.getElementById('panel').scrollTop = 0;
+  updateNav();
+}
+
+/* ============ INIT ============ */
+function initFilters(){
+  const mSel = document.getElementById('filterMonth');
+  if(mSel.options.length === 1){
+    MONTHS.forEach((m,i)=>{
+      const o = document.createElement('option');
+      o.value = i; o.textContent = m;
+      mSel.appendChild(o);
+    });
+    const pSel = document.getElementById('filterPriority');
+    PRIORITIES.forEach(p=>{
+      const o = document.createElement('option');
+      o.value = p.id; o.textContent = p.name;
+      pSel.appendChild(o);
+    });
+    const aSel = document.getElementById('filterAudience');
+    AUDIENCES.forEach(a=>{
+      const o = document.createElement('option');
+      o.value = a.id; o.textContent = a.name;
+      aSel.appendChild(o);
+    });
+    [mSel,pSel,aSel].forEach(s=>s.addEventListener('change', renderDates));
+  }
+}
+
+renderOptions();
+updateNav();
+</script>
+</body>
+</html>

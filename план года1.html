@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Кто хочет стать миллионером — Преамбула плана</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at center, #1a1f4d 0%, #0a0d24 60%, #05060f 100%);
+  color: #fff;
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+.app {
+  width: 100%;
+  max-width: 1000px;
+  min-height: 560px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.topbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  background: rgba(15, 20, 50, 0.5);
+  border-radius: 12px;
+  border: 1px solid #2a3a6a;
+}
+.logo-wrap {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+.logo {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #ffd86b;
+  box-shadow: 0 0 32px rgba(255, 216, 107, 0.55);
+  background: #0a0d24;
+  flex-shrink: 0;
+}
+.logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.timer-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  justify-self: center;
+}
+.block-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #9aacd4;
+}
+.timer {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid #4a6cd4;
+  background: rgba(10, 15, 40, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #7fa4ff;
+  transition: all 0.3s;
+}
+.timer.warning {
+  border-color: #ff6b4a;
+  color: #ff6b4a;
+  animation: pulse 1s infinite;
+}
+.timer.out { border-color: #4a4a4a; color: #888; }
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.lifelines-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  justify-self: end;
+}
+.lifelines {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+}
+.lifeline {
+  padding: 6px;
+  background: linear-gradient(135deg, #ffd86b 0%, #ffaa33 100%);
+  border: 3px solid #fff;
+  border-radius: 50%;
+  width: 72px;
+  height: 72px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  color: #1a1f4d;
+  transition: all 0.2s;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.15;
+  box-shadow: 0 0 15px rgba(255, 216, 107, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.lifeline:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 0 25px rgba(255, 216, 107, 0.8);
+}
+.lifeline:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  text-decoration: line-through;
+  box-shadow: none;
+  background: #444;
+  border-color: #666;
+  color: #999;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  justify-content: center;
+  flex: 1;
+}
+.screen { display: none; flex-direction: column; gap: 16px; }
+.screen.active { display: flex; }
+.start-screen {
+  text-align: center;
+  padding: 48px 24px;
+  background: rgba(15, 20, 50, 0.6);
+  border-radius: 16px;
+  border: 1px solid #2a3a6a;
+}
+.start-screen h1 {
+  font-size: 26px;
+  color: #ffd86b;
+  margin-bottom: 24px;
+  line-height: 1.3;
+}
+.btn {
+  padding: 14px 32px;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  background: linear-gradient(135deg, #ffd86b 0%, #ffaa33 100%);
+  color: #1a1f4d;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 216, 107, 0.4);
+}
+.question-box {
+  background: linear-gradient(135deg, rgba(30, 40, 90, 0.9) 0%, rgba(20, 25, 60, 0.9) 100%);
+  border: 2px solid #4a6cd4;
+  border-radius: 50px;
+  padding: 22px 30px;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(74, 108, 212, 0.3);
+}
+.question-text {
+  font-size: 16px;
+  line-height: 1.5;
+  color: #e8eeff;
+}
+.options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(30, 40, 90, 0.8) 0%, rgba(20, 25, 60, 0.8) 100%);
+  border: 2px solid #3a4a8a;
+  border-radius: 30px;
+  color: #e8eeff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  font-family: inherit;
+}
+.option:hover:not(.disabled) {
+  border-color: #7fa4ff;
+  background: linear-gradient(135deg, rgba(50, 70, 140, 0.9) 0%, rgba(30, 40, 90, 0.9) 100%);
+}
+.option .key {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(74, 108, 212, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #ffd86b;
+  font-size: 13px;
+}
+.option .text { flex: 1; }
+.option .pct {
+  font-size: 12px;
+  color: #9aacd4;
+  opacity: 0;
+  transition: opacity 0.3s;
+  flex-shrink: 0;
+}
+.option.show-pct .pct { opacity: 1; }
+.option.correct {
+  background: linear-gradient(135deg, #2a8a4a 0%, #1a5a2a 100%);
+  border-color: #4acd6a;
+  box-shadow: 0 0 20px rgba(74, 205, 106, 0.5);
+}
+.option.wrong {
+  background: linear-gradient(135deg, #8a2a2a 0%, #5a1a1a 100%);
+  border-color: #cd4a4a;
+  box-shadow: 0 0 20px rgba(205, 74, 74, 0.5);
+}
+.option.hidden {
+  opacity: 0.15;
+  pointer-events: none;
+  text-decoration: line-through;
+}
+.option.disabled { cursor: default; pointer-events: none; }
+.feedback {
+  display: none;
+  padding: 16px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.55;
+  border: 1px solid;
+}
+.feedback.active { display: block; }
+.feedback.ok {
+  background: rgba(42, 138, 74, 0.15);
+  border-color: #4acd6a;
+  color: #b8f0c8;
+}
+.feedback.fail {
+  background: rgba(138, 42, 42, 0.15);
+  border-color: #cd4a4a;
+  color: #f0c8c8;
+}
+.feedback b { color: #fff; }
+.call-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.85);
+  background: linear-gradient(135deg, #1e2860 0%, #0f1440 100%);
+  border: 2px solid #ffd86b;
+  border-radius: 16px;
+  padding: 24px 28px;
+  max-width: 380px;
+  width: 90%;
+  text-align: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s;
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.7);
+}
+.call-popup.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+.call-popup .title {
+  color: #ffd86b;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+.call-popup .text {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #e8eeff;
+  margin-bottom: 16px;
+}
+.call-popup .close {
+  font-size: 12px;
+  color: #9aacd4;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  font-family: inherit;
+}
+.next-btn {
+  align-self: center;
+  padding: 12px 40px;
+  background: linear-gradient(135deg, #4a6cd4 0%, #2a4a9a 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.next-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(74, 108, 212, 0.4);
+}
+
+@media (max-width: 800px) {
+  .topbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+  }
+  .logo-wrap {
+    order: 1;
+    flex: 0 0 auto;
+  }
+  .logo {
+    width: 80px;
+    height: 80px;
+    border-width: 3px;
+  }
+  .timer-block {
+    order: 2;
+    flex: 0 0 auto;
+    justify-self: auto;
+  }
+  .timer {
+    width: 56px;
+    height: 56px;
+    font-size: 20px;
+  }
+  .lifelines-block {
+    order: 3;
+    flex: 1 0 100%;
+    align-items: center;
+    justify-self: auto;
+  }
+  .lifelines {
+    justify-content: center;
+    gap: 8px;
+  }
+  .lifeline {
+    width: 56px;
+    height: 56px;
+    font-size: 10px;
+    border-width: 2px;
+  }
+  .options { grid-template-columns: 1fr; }
+  .start-screen h1 { font-size: 21px; }
+  .question-text { font-size: 14.5px; }
+  .question-box { padding: 18px 20px; border-radius: 24px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="logo-wrap">
+      <div class="logo">
+        <img src="https://www.cultmanager.ru/images/Vibecoding/998752701765368067.jpg" alt="Логотип">
+      </div>
+    </div>
+    <div class="timer-block">
+      <div class="block-label">Таймер</div>
+      <div class="timer" id="timer">60</div>
+    </div>
+    <div class="lifelines-block">
+      <div class="block-label">Подсказки</div>
+      <div class="lifelines" id="lifelines">
+        <button class="lifeline" data-lifeline="fifty" id="llFifty">50/50</button>
+        <button class="lifeline" data-lifeline="call" id="llCall">Звонок</button>
+        <button class="lifeline" data-lifeline="audience" id="llAudience">Зал</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="screen start-screen active" id="startScreen">
+      <h1>Кто хочет стать миллионером?</h1>
+      <button class="btn" id="startBtn">Начать игру</button>
+    </div>
+    <div class="screen game-screen" id="gameScreen">
+      <div class="question-box">
+        <div class="question-text" id="questionText"></div>
+      </div>
+      <div class="options" id="options"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="next-btn" id="nextBtn" style="display:none;">Вернуться к стартовому экрану</button>
+    </div>
+  </div>
+
+  <div class="call-popup" id="callPopup">
+    <div class="title">Звонок коллеге</div>
+    <div class="text" id="callText"></div>
+    <button class="close" id="callClose">Закрыть</button>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    text: "Что нужно зафиксировать в преамбуле плана мероприятий на год?",
+    options: {
+      A: "Календарный план по месяцам",
+      B: "Перечень ответственных и партнёров",
+      C: "Нормативную базу и тему года",
+      D: "Смету и показатели охвата"
+    },
+    correct: "C",
+    feedbackRight: "<b>Точное попадание!</b> Действительно, преамбула задаёт правовую опору плана: на какие документы вы ссылаетесь и какую тему года учитываете. Без неё учредитель читает план как список мероприятий.",
+    feedbackWrong: "<b>Увы, вы ошиблись.</b> Это не повод расстраиваться — лучше обдумайте правильный ответ. В преамбуле плана на год нужно зафиксировать нормативную базу и тему года — это правовая опора и привязка к государственной повестке. Без них план выглядит как набор развлечений.",
+    fifty: ["A", "D"],
+    call: "Коллега говорит: «Начни с документов — на что ссылаешься, тем и защищаешься».",
+    audience: { A: 12, B: 8, C: 68, D: 12 }
+  }
+];
+
+const state = {
+  qIndex: 0,
+  usedFifty: false,
+  usedCall: false,
+  usedAudience: false,
+  timeout: false,
+  timerValue: 60,
+  timerInterval: null,
+  answered: true
+};
+
+const $ = id => document.getElementById(id);
+const timerEl = $('timer');
+const questionText = $('questionText');
+const optionsEl = $('options');
+const feedbackEl = $('feedback');
+const nextBtn = $('nextBtn');
+const startScreen = $('startScreen');
+const gameScreen = $('gameScreen');
+const callPopup = $('callPopup');
+const callText = $('callText');
+
+function startGame() {
+  state.qIndex = 0;
+  state.usedFifty = false;
+  state.usedCall = false;
+  state.usedAudience = false;
+  startScreen.classList.remove('active');
+  gameScreen.classList.add('active');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  state.answered = false;
+  state.timeout = false;
+  const q = QUESTIONS[state.qIndex];
+  questionText.textContent = q.text;
+  feedbackEl.className = 'feedback';
+  feedbackEl.innerHTML = '';
+  nextBtn.style.display = 'none';
+
+  optionsEl.innerHTML = '';
+  ['A', 'B', 'C', 'D'].forEach(k => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.dataset.key = k;
+    btn.innerHTML = '<span class="key">' + k + '</span><span class="text">' + q.options[k] + '</span><span class="pct"></span>';
+    btn.addEventListener('click', function() { selectAnswer(k); });
+    optionsEl.appendChild(btn);
+  });
+
+  resetLifelines();
+  startTimer();
+}
+
+function resetLifelines() {
+  $('llFifty').disabled = state.usedFifty;
+  $('llCall').disabled = state.usedCall;
+  $('llAudience').disabled = state.usedAudience;
+}
+
+function startTimer() {
+  stopTimer();
+  state.timerValue = 60;
+  timerEl.textContent = state.timerValue;
+  timerEl.className = 'timer';
+  state.timerInterval = setInterval(function() {
+    state.timerValue--;
+    timerEl.textContent = state.timerValue;
+    if (state.timerValue <= 15 && state.timerValue > 0) {
+      timerEl.classList.add('warning');
+    }
+    if (state.timerValue <= 0) {
+      stopTimer();
+      timerEl.textContent = '0';
+      timerEl.className = 'timer out';
+      state.timeout = true;
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (state.timerInterval) {
+    clearInterval(state.timerInterval);
+    state.timerInterval = null;
+  }
+}
+
+function selectAnswer(key) {
+  if (state.answered) return;
+  state.answered = true;
+  stopTimer();
+
+  const q = QUESTIONS[state.qIndex];
+  const isCorrect = key === q.correct;
+
+  optionsEl.querySelectorAll('.option').forEach(btn => {
+    btn.classList.add('disabled');
+    const k = btn.dataset.key;
+    if (k === q.correct) {
+      btn.classList.add('correct');
+    } else if (k === key && !isCorrect) {
+      btn.classList.add('wrong');
+    }
+  });
+
+  feedbackEl.className = 'feedback active ' + (isCorrect ? 'ok' : 'fail');
+  let text = isCorrect ? q.feedbackRight : q.feedbackWrong;
+  if (state.timeout) {
+    text = '<b>Время вышло.</b> ' + text;
+  }
+  feedbackEl.innerHTML = text;
+
+  nextBtn.style.display = 'block';
+}
+
+function backToStart() {
+  stopTimer();
+  timerEl.textContent = '60';
+  timerEl.className = 'timer';
+  gameScreen.classList.remove('active');
+  startScreen.classList.add('active');
+}
+
+$('llFifty').addEventListener('click', function() {
+  if (state.usedFifty || state.answered) return;
+  state.usedFifty = true;
+  $('llFifty').disabled = true;
+  const q = QUESTIONS[state.qIndex];
+  optionsEl.querySelectorAll('.option').forEach(btn => {
+    if (q.fifty.includes(btn.dataset.key)) {
+      btn.classList.add('hidden');
+    }
+  });
+});
+
+$('llCall').addEventListener('click', function() {
+  if (state.usedCall || state.answered) return;
+  state.usedCall = true;
+  $('llCall').disabled = true;
+  const q = QUESTIONS[state.qIndex];
+  callText.textContent = q.call;
+  callPopup.classList.add('active');
+});
+
+$('callClose').addEventListener('click', function() {
+  callPopup.classList.remove('active');
+});
+
+$('llAudience').addEventListener('click', function() {
+  if (state.usedAudience || state.answered) return;
+  state.usedAudience = true;
+  $('llAudience').disabled = true;
+  const q = QUESTIONS[state.qIndex];
+  optionsEl.querySelectorAll('.option').forEach(btn => {
+    const k = btn.dataset.key;
+    btn.querySelector('.pct').textContent = q.audience[k] + '%';
+    btn.classList.add('show-pct');
+  });
+});
+
+$('startBtn').addEventListener('click', startGame);
+nextBtn.addEventListener('click', backToStart);
+</script>
+</body>
+</html>
