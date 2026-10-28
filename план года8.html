@@ -96,6 +96,8 @@
     overflow-y:auto;
     padding:18px 18px 8px;
     -webkit-overflow-scrolling:touch;
+    display:flex;
+    flex-direction:column;
   }
   .panel h2{
     font-size:16px;
@@ -110,9 +112,37 @@
   }
 
   /* Start */
-  .start-box{text-align:center;padding:10px 0;}
-  .start-box p{max-width:560px;margin:0 auto 16px;color:var(--gray);font-size:13px;}
-  .start-box .lead{font-size:14px;color:var(--text);margin-bottom:8px;}
+  .step.active[data-step="0"]{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding-bottom:24px;
+  }
+  .start-box{
+    text-align:center;
+    max-width:560px;
+    margin:0 auto;
+    padding:0 8px;
+  }
+  .start-box .lead{
+    font-size:22px;
+    font-weight:700;
+    color:var(--blue);
+    line-height:1.35;
+    margin-bottom:32px;
+  }
+  .btn-start{
+    font-size:28px;
+    padding:28px 88px;
+    border-radius:14px;
+    letter-spacing:.3px;
+    box-shadow:0 10px 28px rgba(26,140,74,.35);
+  }
+  .btn-start:hover{
+    background:var(--green-light);
+    box-shadow:0 14px 34px rgba(26,140,74,.45);
+  }
 
   /* Buttons */
   .btn{
@@ -374,7 +404,7 @@
   .edit-cell input{
     width:100%;
     border:1px solid transparent;
-    padding:2px 16px 2px 3px;   /* справа место под карандаш */
+    padding:2px 16px 2px 3px;
     font-size:11px;
     font-family:inherit;
     border-radius:3px;
@@ -463,6 +493,8 @@
     .panel{padding:14px 14px 6px;}
     .nav-buttons{padding:10px 14px;flex-wrap:wrap;}
     .effect-item{flex:1 1 100%;}
+    .start-box .lead{font-size:18px;margin-bottom:26px;}
+    .btn-start{font-size:22px;padding:22px 56px;}
   }
 </style>
 </head>
@@ -488,8 +520,8 @@
     <!-- STEP 0: START -->
     <div class="step active" data-step="0">
       <div class="start-box">
-        <p class="lead"><strong>📋 Соберите годовой план мероприятий за несколько шагов</strong></p>
-        <button class="btn btn-green" onclick="goTo(1)">Собрать план</button>
+        <p class="lead">📋 Соберите проект годового плана мероприятий</p>
+        <button class="btn btn-green btn-start" onclick="goTo(1)">Начать</button>
       </div>
     </div>
 
@@ -983,8 +1015,14 @@ function renderDates(){
     el.addEventListener('click',()=>{
       el.classList.toggle('selected');
       const id = el.dataset.id;
-      if(state.dates.includes(id)) state.dates = state.dates.filter(x=>x!==id);
-      else state.dates.push(id);
+      if(state.dates.includes(id)){
+        state.dates = state.dates.filter(x=>x!==id);
+        // каскадно снимаем форматы удалённой даты
+        const dateFmts = (FORMATS[id] || []).map(c => c.id);
+        state.formats = state.formats.filter(fid => !dateFmts.includes(fid));
+      } else {
+        state.dates.push(id);
+      }
       updateDatesCount();
     });
   });
@@ -1040,8 +1078,8 @@ function renderFormats(){
   wrap.innerHTML = html;
   wrap.querySelectorAll('.card').forEach(el=>{
     el.addEventListener('click',(e)=>{
-      if(e.target.tagName === 'SUMMARY') return;
-      e.preventDefault();
+      // клики по details (summary и содержимому) не должны менять выбор карточки
+      if(e.target.closest('details')) return;
       el.classList.toggle('selected');
       const id = el.dataset.id;
       if(state.formats.includes(id)) state.formats = state.formats.filter(x=>x!==id);
@@ -1056,6 +1094,12 @@ function renderFormats(){
 
 /* ============ STEP 4: SUMMARY ============ */
 function renderSummary(){
+  // страховка: выкидываем форматы, чьи даты не выбраны
+  const validIds = new Set(
+    state.dates.flatMap(did => (FORMATS[did] || []).map(c => c.id))
+  );
+  state.formats = state.formats.filter(fid => validIds.has(fid));
+
   const header = document.getElementById('summaryHeader');
   const instName = state.institution || 'Учреждение культуры';
   const prioNames = state.priorities.map(p=>PRIORITIES.find(x=>x.id===p)?.name).filter(Boolean).join("; ");
