@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактив с коробками</title>
+    <style>
+        /* --- ОБЩИЕ СТИЛИ --- */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .interactive-wrapper {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .interactive-title {
+            text-align: center;
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        .interactive-boxes {
+            position: relative;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            line-height: 0;
+        }
+
+        .boxes-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* --- ГРУППЫ КНОПОК НА КАРТИНКЕ --- */
+        .hotspot-group {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 15px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .left-box { left: 2%; }
+        .right-box { right: 2%; }
+
+        /* --- КНОПКИ С ТЕКСТОМ НА КАРТИНКЕ --- */
+        .hotspot-btn {
+            pointer-events: auto;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #2c3e50;
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-size: 16px;
+            font-family: inherit;
+            font-weight: 600;
+            color: #2c3e50;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .hotspot-btn:hover {
+            transform: scale(1.05);
+            background: #ffffff;
+            border-color: #1a252f;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+
+        .hotspot-btn .icon {
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        /* --- БЛОК С ВОПРОСОМ --- */
+        .quiz-section {
+            margin-top: 30px;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .quiz-question {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .quiz-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        /* Базовый стиль кнопок */
+        .quiz-btn {
+            padding: 12px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* Левая кнопка - синяя */
+        .quiz-btn[data-choice="left"] {
+            background-color: #3498db;
+            box-shadow: 0 4px 6px rgba(52, 152, 219, 0.3);
+        }
+        .quiz-btn[data-choice="left"]:hover {
+            background-color: #2980b9;
+        }
+
+        /* Правая кнопка - красная */
+        .quiz-btn[data-choice="right"] {
+            background-color: #e74c3c;
+            box-shadow: 0 4px 6px rgba(231, 76, 60, 0.3);
+        }
+        .quiz-btn[data-choice="right"]:hover {
+            background-color: #c0392b;
+        }
+
+        /* Состояние, когда кнопка выбрана */
+        .quiz-btn.selected {
+            border-color: #2c3e50;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        /* Состояние, когда кнопка не выбрана (бледнеет) */
+        .quiz-btn.faded {
+            opacity: 0.4;
+            filter: grayscale(80%);
+            transform: scale(0.95);
+            box-shadow: none;
+        }
+
+        /* Запрет наведения на отключенные кнопки */
+        .quiz-btn:disabled {
+            cursor: not-allowed;
+            transform: none; /* Убираем эффект увеличения при наведении */
+        }
+
+        /* Текст пояснения - темно-фиолетовый болд */
+        .quiz-feedback {
+            display: none; 
+            margin-top: 20px;
+            font-size: 18px;
+            color: #4a148c; /* Темно-фиолетовый */
+            font-weight: bold;
+            padding: 15px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- МОДАЛЬНОЕ ОКНО --- */
+        .modal-overlay {
+            display: none; 
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            line-height: 1.6;
+            font-size: 18px;
+            color: #2c3e50;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 30px;
+            cursor: pointer;
+            color: #888;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #e74c3c;
+        }
+        
+        /* Адаптация для мобильных */
+        @media (max-width: 600px) {
+            .hotspot-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+                gap: 4px;
+            }
+            .hotspot-btn .icon { font-size: 16px; }
+            .left-box { left: 1%; }
+            .right-box { right: 1%; }
+            
+            .quiz-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .quiz-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="interactive-wrapper">
+        <div class="interactive-title">Исследуйте коробки. Нажмите на кнопки рядом с каждой.</div>
+        
+        <!-- БЛОК С КАРТИНКОЙ И КНОПКАМИ -->
+        <div class="interactive-boxes" id="interactiveBoxes">
+            <img src="https://www.cultmanager.ru/images/Vibecoding/image---2026-11-03t041116.086.jpeg" alt="Две посылки" class="boxes-image">
+
+            <!-- Левая коробка -->
+            <div class="hotspot-group left-box">
+                <button class="hotspot-btn" data-modal="left-eye" aria-label="Посмотреть на левую коробку">
+                    <span class="icon">👁️</span><span class="label">Посмотреть</span>
+                </button>
+                <button class="hotspot-btn" data-modal="left-ear" aria-label="Послушать левую коробку">
+                    <span class="icon">👂</span><span class="label">Послушать</span>
+                </button>
+                <button class="hotspot-btn" data-modal="left-mouth" aria-label="Спросить курьера о левой коробке">
+                    <span class="icon">👄</span><span class="label">Спросить курьера</span>
+                </button>
+            </div>
+
+            <!-- Правая коробка -->
+            <div class="hotspot-group right-box">
+                <button class="hotspot-btn" data-modal="right-eye" aria-label="Посмотреть на правую коробку">
+                    <span class="icon">👁️</span><span class="label">Посмотреть</span>
+                </button>
+                <button class="hotspot-btn" data-modal="right-ear" aria-label="Послушать правую коробку">
+                    <span class="icon">👂</span><span class="label">Послушать</span>
+                </button>
+                <button class="hotspot-btn" data-modal="right-mouth" aria-label="Спросить курьера о правой коробке">
+                    <span class="icon">👄</span><span class="label">Спросить курьера</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- БЛОК С ВОПРОСОМ -->
+        <div class="quiz-section">
+            <h3 class="quiz-question">Какая из коробок кажется вам подозрительной?</h3>
+            <div class="quiz-buttons">
+                <button class="quiz-btn" data-choice="left">Левая</button>
+                <button class="quiz-btn" data-choice="right">Правая</button>
+            </div>
+            <div class="quiz-feedback" id="quizFeedback">
+                Ответ принят. Смотрите расшифровку ниже.
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Модальное окно -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose" aria-label="Закрыть">×</button>
+            <p id="modalText"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- ЛОГИКА ДЛЯ МОДАЛЬНОГО ОКНА (КОРОБКИ) ---
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modalText = document.getElementById('modalText');
+            const modalClose = document.getElementById('modalClose');
+
+            const modalContent = {
+                'left-eye': '👁️ На коробке пятна и надписи от руки, есть пометка «Лично».',
+                'left-ear': '👂 Звук похож на тиканье часов.',
+                'left-mouth': '👄 Курьер говорит: «Когда я нес коробку, почувствовал, что центр тяжести внутри смещается».',
+                'right-eye': '👁️ На коробке надпись: «Вы еще пожалеете», обратный адрес не указан.',
+                'right-ear': '👂 С расстояния слышно шипение.',
+                'right-mouth': '👄 Курьер говорит: «Когда я нес эту коробку, заметил непривычный запах».'
+            };
+
+            document.querySelectorAll('.hotspot-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const modalId = this.getAttribute('data-modal');
+                    modalText.textContent = modalContent[modalId] || 'Информация не найдена.';
+                    modalOverlay.classList.add('active');
+                });
+            });
+
+            modalClose.addEventListener('click', () => modalOverlay.classList.remove('active'));
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) modalOverlay.classList.remove('active');
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
+                    modalOverlay.classList.remove('active');
+                }
+            });
+
+            // --- ЛОГИКА ДЛЯ ВОПРОСА (ВЫБОР КОРОБКИ) ---
+            const quizButtons = document.querySelectorAll('.quiz-btn');
+            const quizFeedback = document.getElementById('quizFeedback');
+
+            quizButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Показываем текст
+                    quizFeedback.style.display = 'block';
+                    
+                    // Убираем выделение со всех кнопок
+                    quizButtons.forEach(b => {
+                        b.classList.remove('selected', 'faded');
+                    });
+                    
+                    // Выделяем нажатую кнопку
+                    this.classList.add('selected');
+                    
+                    // Делаем вторую кнопку бледной
+                    quizButtons.forEach(b => {
+                        if (b !== this) b.classList.add('faded');
+                    });
+
+                    // БЛОКИРУЕМ ВСЕ КНОПКИ, ЧТОБЫ НЕЛЬЗЯ БЫЛО ПЕРЕГОЛОСОВАТЬ
+                    quizButtons.forEach(b => {
+                        b.disabled = true;
+                    });
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
