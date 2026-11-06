@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тренажёр-квест: Опасная доставка</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --text:#1a2332;
+    --muted:#5b6b82;
+    --line:#c3cddb;
+    --amber:#f39a12;
+    --amber-dark:#b45309;
+    --green:#16a34a;
+    --purple:#7c3aed;
+    --purple-dark:#5b21b6;
+    --purple-deep:#4c1d95;
+    --purple-soft:#f5f3ff;
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{height:100%;}
+
+  body{
+    margin:0;
+    padding:24px 16px 70px;
+    font-family:'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    color:var(--text);
+    background:var(--bg);
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .app{width:100%; max-width:980px; position:relative;}
+
+  /* ---------- ЭКРАНЫ ---------- */
+  .screen{display:none;}
+  .screen.active{
+    display:block;
+    animation:screenIn .5s cubic-bezier(.2,.8,.3,1) both;
+  }
+  @keyframes screenIn{
+    from{opacity:0; transform:translateY(18px) scale(.995);}
+    to{opacity:1; transform:none;}
+  }
+
+  /* =====================================================
+     ШАПКА: РЕЧЕВОЙ ПУЗЫРЬ + ЭДУАРД
+     ===================================================== */
+  .topline{
+    display:flex;
+    align-items:stretch;
+    gap:16px;
+    margin-bottom:22px;
+  }
+
+  .bubble{
+    position:relative;
+    flex:1 1 auto;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    background:#ffffff;
+    border:2px solid #94a3b8;
+    border-radius: 24px 24px 24px 8px;
+    padding:20px 26px 20px 28px;
+    box-shadow:
+      0 10px 28px rgba(15,23,42,.13),
+      0 2px 6px rgba(15,23,42,.07);
+    overflow:visible;
+  }
+
+  .bubble::before{
+    content:'';
+    position:absolute;
+    right:-19px;
+    top:28px;
+    width:0; height:0;
+    border-top:15px solid transparent;
+    border-bottom:15px solid transparent;
+    border-left:19px solid #94a3b8;
+  }
+  .bubble::after{
+    content:'';
+    position:absolute;
+    right:-14px;
+    top:31px;
+    width:0; height:0;
+    border-top:12px solid transparent;
+    border-bottom:12px solid transparent;
+    border-left:15px solid #ffffff;
+  }
+
+  .bubble.center-tail{border-radius:24px;}
+  .bubble.center-tail::before{
+    right:auto; left:50%; top:auto; bottom:-19px;
+    transform:translateX(-50%);
+    border-left:15px solid transparent;
+    border-right:15px solid transparent;
+    border-top:19px solid #94a3b8;
+    border-bottom:0;
+  }
+  .bubble.center-tail::after{
+    right:auto; left:50%; top:auto; bottom:-14px;
+    transform:translateX(-50%);
+    border-left:12px solid transparent;
+    border-right:12px solid transparent;
+    border-top:15px solid #ffffff;
+    border-bottom:0;
+  }
+
+  .bubble.flash{
+    border-color:rgba(243,154,18,.85);
+    animation:flashBubble 1s ease-out 1;
+  }
+  @keyframes flashBubble{
+    0%{box-shadow:0 0 0 0 rgba(243,154,18,.45), 0 10px 28px rgba(15,23,42,.13);}
+    100%{box-shadow:0 0 0 20px rgba(243,154,18,0), 0 10px 28px rgba(15,23,42,.13);}
+  }
+
+  .who{
+    display:block;
+    font-size:13px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    font-weight:700;
+    color:var(--amber-dark);
+    margin-bottom:8px;
+  }
+
+  .line{
+    margin:0;
+    font-size:17.5px;
+    line-height:1.62;
+    color:var(--text);
+  }
+
+  .avatar{
+    flex:0 0 auto;
+    align-self:flex-start;
+    height:clamp(140px, 32vh, 320px);
+    aspect-ratio:0.85;
+    width:auto;
+    max-width:40vw;
+    display:block;
+    object-fit:cover;
+    object-position:center 20%;
+    border-radius:0;
+    mix-blend-mode:multiply;
+    -webkit-mask-image:radial-gradient(ellipse 72% 82% at 50% 42%, #000 62%, transparent 100%);
+    mask-image:radial-gradient(ellipse 72% 82% at 50% 42%, #000 62%, transparent 100%);
+  }
+
+  .avatar.plain{
+    mix-blend-mode:normal;
+    -webkit-mask-image:none;
+    mask-image:none;
+    align-self:center;
+    height:auto;
+    width:auto;
+    aspect-ratio:auto;
+    max-width:min(72vw, 720px);
+    max-height:64vh;
+    margin:0 auto;
+    object-fit:contain;
+    object-position:center;
+    border-radius:16px;
+    box-shadow:0 12px 32px rgba(15,23,42,.16);
+  }
+
+  .final-head{margin-bottom:28px;}
+  .final-head .bubble{width:100%;}
+  .final-pic{text-align:center; margin-bottom:8px;}
+
+  /* =====================================================
+     ВИЗУАЛ + КНОПКИ ПОВЕРХ КОРОБОК
+     ===================================================== */
+  .visual-wrap{
+    position:relative;
+    width: 96%;
+    max-width: 960px;
+    margin: 0 auto;
+    border-radius:18px;
+    overflow:hidden;
+    border:1px solid var(--line);
+    background:#ffffff;
+    box-shadow:0 12px 32px rgba(15,23,42,.10);
+    line-height:0;
+  }
+  .visual-wrap .visual img{
+    width:100%;
+    height:auto;
+    display:block;
+  }
+
+  .actions-overlay{
+    position:absolute;
+    left:18px;
+    right:auto;
+    bottom:22%;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+    align-items:stretch;
+    width:min(46%, 300px);
+    z-index:2;
+  }
+  .actions-overlay.right{
+    left:auto;
+    right:18px;
+  }
+
+  .actions-overlay .btn{
+    width:100%;
+    padding:12px 16px;
+    font-size:14px;
+    line-height:1.3;
+    white-space:normal;
+    text-align:center;
+    color:var(--text);
+    background:rgba(255,255,255,.94);
+    border:1px solid rgba(243,154,18,.65);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    box-shadow:0 6px 18px rgba(15,23,42,.25);
+  }
+  .actions-overlay .btn:hover{
+    background:#ffffff;
+    border-color:var(--amber);
+  }
+  .actions-overlay .btn.visited{
+    opacity:.5;
+    border-style:dashed;
+  }
+
+  .start-actions{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:6%;
+    margin:0;
+    padding:0 4%;
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .start-actions .btn{
+    flex:0 1 47%;
+    padding:12px 14px;
+    font-size:14px;
+    line-height:1.3;
+    white-space:normal;
+    text-align:center;
+    color:var(--text);
+    background:rgba(255,255,255,.94);
+    border:1px solid rgba(243,154,18,.65);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    box-shadow:0 6px 18px rgba(15,23,42,.20);
+  }
+  .start-actions .btn:hover{
+    background:#ffffff;
+    border-color:var(--amber);
+  }
+
+  .actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    justify-content:center;
+    margin-top:12px;
+  }
+
+  .btn{
+    font:inherit;
+    font-weight:600;
+    font-size:15.5px;
+    cursor:pointer;
+    padding:14px 24px;
+    border-radius:14px;
+    border:1px solid #cbd5e1;
+    background:#ffffff;
+    color:var(--text);
+    box-shadow:0 2px 6px rgba(15,23,42,.08);
+    transition:transform .16s ease, box-shadow .16s ease, border-color .2s ease, background-color .2s ease, opacity .2s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 24px rgba(15,23,42,.16);
+    border-color:var(--amber);
+  }
+  .btn:active{transform:translateY(0) scale(.985);}
+
+  .btn-primary{
+    background:linear-gradient(180deg,#ffc85c,#f39a12);
+    color:#20160a;
+    border-color:#ffd98a;
+  }
+  .btn.act{
+    background:#ffffff;
+    border-color:#cbd5e1;
+  }
+  .btn.act.visited{
+    opacity:.5;
+    border-style:dashed;
+  }
+
+  .btn-fix{
+    background:#fff8ed;
+    color:#8a4a00;
+    border:2px solid #f39a12;
+    padding:16px 28px;
+    font-size:15.5px;
+    font-weight:700;
+    border-radius:14px;
+    box-shadow:
+      0 6px 18px rgba(243,154,18,.22),
+      0 2px 6px rgba(243,154,18,.14);
+  }
+  .btn-fix:hover{
+    background:#fff0d6;
+    border-color:#d98200;
+    color:#6b3900;
+    box-shadow:
+      0 14px 30px rgba(243,154,18,.30),
+      0 4px 10px rgba(243,154,18,.18);
+  }
+
+  /* =====================================================
+     КНОПКИ ВЕРДИКТА
+     ===================================================== */
+  .btn-verdict{
+    position:relative;
+    flex:1 1 200px;
+    max-width:300px;
+    padding:14px 22px;
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:.01em;
+    color:#ffffff;
+    background:linear-gradient(180deg,#8b5cf6 0%, #6d28d9 100%);
+    border:2px solid #6d28d9;
+    border-radius:14px;
+    box-shadow:
+      0 6px 16px rgba(109,40,217,.28),
+      0 2px 6px rgba(109,40,217,.18),
+      inset 0 1px 0 rgba(255,255,255,.18);
+    transition:
+      transform .18s cubic-bezier(.2,.8,.3,1),
+      box-shadow .22s ease,
+      border-color .22s ease,
+      background .22s ease,
+      opacity .22s ease;
+    overflow:hidden;
+  }
+  .btn-verdict::before{
+    content:'';
+    position:absolute;
+    inset:4px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.28);
+    pointer-events:none;
+    transition:border-color .22s ease;
+  }
+  .btn-verdict::after{
+    content:'';
+    position:absolute;
+    inset:-2px;
+    border-radius:16px;
+    background:radial-gradient(120% 140% at 50% 0%, rgba(255,255,255,.28), transparent 62%);
+    opacity:0;
+    transition:opacity .22s ease;
+    pointer-events:none;
+  }
+
+  .btn-verdict:hover{
+    transform:translateY(-2px);
+    border-color:#5b21b6;
+    background:linear-gradient(180deg,#9d70f8 0%, #7c3aed 100%);
+    box-shadow:
+      0 14px 28px rgba(109,40,217,.38),
+      0 4px 10px rgba(109,40,217,.24),
+      inset 0 1px 0 rgba(255,255,255,.22);
+  }
+  .btn-verdict:hover::before{border-color:rgba(255,255,255,.42);}
+  .btn-verdict:hover::after{opacity:1;}
+
+  .btn-verdict:active{
+    transform:translateY(0) scale(.985);
+    box-shadow:
+      0 4px 12px rgba(109,40,217,.30),
+      inset 0 2px 5px rgba(0,0,0,.18);
+  }
+
+  .btn-verdict:focus-visible{
+    outline:3px solid rgba(124,58,237,.45);
+    outline-offset:3px;
+  }
+
+  .btn-verdict:disabled{
+    cursor:not-allowed;
+    opacity:.38;
+    transform:none;
+    box-shadow:none;
+    filter:grayscale(.25);
+  }
+  .btn-verdict:disabled::before{border-color:rgba(255,255,255,.18);}
+  .btn-verdict:disabled::after{opacity:0;}
+  .btn-verdict:disabled:hover{
+    transform:none;
+    box-shadow:none;
+    background:linear-gradient(180deg,#8b5cf6 0%, #6d28d9 100%);
+    border-color:#6d28d9;
+  }
+  .btn-verdict:disabled:hover::before{border-color:rgba(255,255,255,.18);}
+  .btn-verdict:disabled:hover::after{opacity:0;}
+
+  /* =====================================================
+     СЧЁТЧИК, ВОПРОС, ПОДСКАЗКА — КОМПАКТНО
+     ===================================================== */
+  .counter{
+    text-align:center;
+    font-size:14px;
+    letter-spacing:.05em;
+    color:var(--muted);
+    margin-top:14px;
+  }
+  .counter.full{color:var(--green); font-weight:700;}
+
+  .question{margin-top:0;}
+  .q-text{
+    text-align:center;
+    font-size:18px;
+    font-weight:700;
+    color:var(--amber-dark);
+    margin:10px 0 0;
+  }
+
+  .q-hint{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    text-align:center;
+    font-size:14px;
+    line-height:1.4;
+    color:var(--muted);
+    margin:6px auto 0;
+    max-width:520px;
+  }
+  .q-hint.ready{
+    color:var(--green);
+    font-weight:600;
+  }
+
+  /* ---------- НАВИГАЦИЯ / ФИНАЛ ---------- */
+  .nav{margin-top:16px; text-align:center;}
+  .nav.hidden{display:none;}
+
+  .verdict{
+    text-align:center;
+    font-size:clamp(22px, 4.4vw, 32px);
+    font-weight:800;
+    letter-spacing:.14em;
+    margin:4px 0 22px;
+  }
+  /* Оставлен только победный вариант — поражение в тренажёре недостижимо */
+  .verdict.win{color:var(--green);}
+
+  .hidden{display:none !important;}
+
+  /* ---------- POP-UP ---------- */
+  .overlay{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(15,23,42,.45);
+    -webkit-backdrop-filter:blur(5px);
+    backdrop-filter:blur(5px);
+  }
+  .overlay.show{display:flex; animation:fadeIn .22s ease-out both;}
+  @keyframes fadeIn{from{opacity:0;} to{opacity:1;}}
+
+  .popup{
+    width:100%;
+    max-width:540px;
+    background:#ffffff;
+    border:2px solid #94a3b8;
+    border-radius:22px;
+    padding:28px 28px 24px;
+    box-shadow:0 24px 70px rgba(15,23,42,.25);
+    text-align:center;
+    animation:popIn .32s cubic-bezier(.2,.9,.3,1.35) both;
+  }
+  @keyframes popIn{
+    from{transform:scale(.88); opacity:0;}
+    to{transform:scale(1); opacity:1;}
+  }
+
+  .popup-icon{font-size:46px; line-height:1; margin-bottom:10px;}
+  .popup-title{
+    font-size:13px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    font-weight:700;
+    color:var(--amber-dark);
+    margin-bottom:12px;
+  }
+  .popup-text{
+    font-size:17px;
+    line-height:1.6;
+    color:#334155;
+    margin:0 0 22px;
+  }
+  .popup .btn{width:100%;}
+
+  /* ---------- АДАПТИВ ---------- */
+  @media (max-width:640px){
+    body{padding:16px 12px 50px;}
+
+    .topline{gap:12px;}
+    .avatar{
+      height: clamp(100px, 26vh, 170px);
+      max-width: 36vw;
+    }
+    .avatar.plain{
+      max-width:88vw;
+      max-height:56vh;
+      height:auto;
+    }
+    .bubble{
+      padding:14px 16px 14px 18px;
+      border-radius:18px 18px 18px 6px;
+      border-width:2px;
+    }
+    .bubble::before{
+      right:-15px; top:20px;
+      border-top:11px solid transparent;
+      border-bottom:11px solid transparent;
+      border-left:15px solid #94a3b8;
+    }
+    .bubble::after{
+      right:-11px; top:22px;
+      border-top:9px solid transparent;
+      border-bottom:9px solid transparent;
+      border-left:12px solid #ffffff;
+    }
+
+    .bubble.center-tail{border-radius:18px;}
+    .bubble.center-tail::before{
+      right:auto; left:50%; top:auto; bottom:-15px;
+      transform:translateX(-50%);
+      border-left:11px solid transparent;
+      border-right:11px solid transparent;
+      border-top:15px solid #94a3b8;
+      border-bottom:0;
+    }
+    .bubble.center-tail::after{
+      right:auto; left:50%; top:auto; bottom:-11px;
+      transform:translateX(-50%);
+      border-left:9px solid transparent;
+      border-right:9px solid transparent;
+      border-top:12px solid #ffffff;
+      border-bottom:0;
+    }
+
+    .final-head{margin-bottom:22px;}
+
+    .line{font-size:15.5px; line-height:1.55;}
+    .who{font-size:11.5px;}
+
+    .visual-wrap{width:100%; max-width:none;}
+
+    .start-actions{padding:0 3%; bottom:5%; gap:8px;}
+    .start-actions .btn{flex:1 1 0; padding:9px 8px; font-size:11.5px;}
+
+    .actions-overlay{
+      left:10px;
+      right:auto;
+      bottom:20%;
+      gap:7px;
+      width:min(58%, 230px);
+    }
+    .actions-overlay.right{
+      left:auto;
+      right:10px;
+    }
+    .actions-overlay .btn{padding:9px 10px; font-size:12px;}
+
+    .actions{flex-direction:column; margin-top:10px;}
+    .btn{width:100%; padding:13px 16px; font-size:15px;}
+    .btn-fix{padding:15px 20px; font-size:15px;}
+
+    .btn-verdict{
+      flex:1 1 auto;
+      max-width:none;
+      padding:13px 16px;
+      font-size:14.5px;
+    }
+    .btn-verdict::before{inset:3px; border-radius:9px;}
+
+    .counter{margin-top:12px;}
+    .q-text{font-size:16px; margin-top:8px;}
+    .q-hint{font-size:13px; margin-top:5px;}
+    .popup{padding:22px 18px 20px;}
+    .popup-text{font-size:15.5px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ================= ЭКРАН 1: СТАРТ ================= -->
+  <section class="screen active" id="screen-start">
+    <header class="topline">
+      <div class="bubble">
+        <div class="who">Эдуард Степанов</div>
+        <p class="line">«Курьер только что принёс вам две коробки. Беспечный человек сразу бы их вскрыл, но мы включим режим контроля. С какого объекта начнём осмотр?»</p>
+      </div>
+      <img class="avatar" src="https://www.cultmanager.ru/images/Vibecoding/eduard1.jpeg" alt="Эдуард Степанов">
+    </header>
+
+    <div class="visual-wrap">
+      <div class="visual">
+        <img src="https://www.cultmanager.ru/images/Vibecoding/image---2026-11-06t211829.125.jpeg" alt="Две коробки на столе">
+      </div>
+
+      <div class="start-actions">
+        <button class="btn" onclick="go('left')">📦 Проверить левую коробку</button>
+        <button class="btn" onclick="go('right')">📦 Проверить правую коробку</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ВЕТКА А: ЛЕВАЯ КОРОБКА ================= -->
+  <section class="screen" id="screen-left">
+    <header class="topline">
+      <div class="bubble">
+        <div class="who">Эдуард Степанов</div>
+        <p class="line" id="left-line">«Курьер топчется у стола и протягивает накладную. Не спешите открывать посылку. Какие действия предпримем для проверки? Нажимайте на кнопки, чтобы исследовать объект».</p>
+      </div>
+      <img class="avatar" src="https://www.cultmanager.ru/images/Vibecoding/eduard1.jpeg" alt="Эдуард Степанов">
+    </header>
+
+    <div class="visual-wrap">
+      <div class="visual">
+        <img src="https://www.cultmanager.ru/images/Vibecoding/image---2026-11-06t212044.701.jpeg" alt="Левая коробка">
+      </div>
+
+      <div class="actions actions-overlay" id="left-actions">
+        <button class="btn act" data-key="left-eye">👁️ Осмотреть снаружи</button>
+        <button class="btn act" data-key="left-ear">👂 Прислушаться к коробке</button>
+        <button class="btn act" data-key="left-mouth">👄 Расспросить курьера</button>
+      </div>
+    </div>
+
+    <div class="counter" id="left-counter-wrap">
+      <span id="left-counter">🔍 Изучено признаков: 0 / 3</span>
+    </div>
+
+    <div class="question" id="left-question">
+      <p class="q-text">Какой ваш вердикт по этой коробке?</p>
+      <p class="q-hint" id="left-hint">🔒 Сначала изучите признаки этой коробки</p>
+      <div class="actions">
+        <button class="btn btn-verdict" id="left-btn-suspicious" onclick="answer('left','suspicious')" disabled>Она подозрительна</button>
+        <button class="btn btn-verdict" id="left-btn-safe" onclick="answer('left','safe')" disabled>Безопасна, можно открывать</button>
+      </div>
+    </div>
+
+    <div class="nav hidden" id="left-nav"></div>
+  </section>
+
+  <!-- ================= ВЕТКА Б: ПРАВАЯ КОРОБКА ================= -->
+  <section class="screen" id="screen-right">
+    <header class="topline">
+      <div class="bubble">
+        <div class="who">Эдуард Степанов</div>
+        <p class="line" id="right-line">«Переходим ко второй посылке. Обратите внимание на реакцию курьера — он явно чувствует себя неловко. Проверяем коробку?»</p>
+      </div>
+      <img class="avatar" src="https://www.cultmanager.ru/images/Vibecoding/eduard1.jpeg" alt="Эдуард Степанов">
+    </header>
+
+    <div class="visual-wrap">
+      <div class="visual">
+        <img src="https://www.cultmanager.ru/images/Vibecoding/image---2026-11-06t211939.516.jpeg" alt="Правая коробка">
+      </div>
+
+      <div class="actions actions-overlay right" id="right-actions">
+        <button class="btn act" data-key="right-eye">👁️ Осмотреть снаружи</button>
+        <button class="btn act" data-key="right-ear">👂 Прислушаться к коробке</button>
+        <button class="btn act" data-key="right-mouth">👄 Расспросить курьера</button>
+      </div>
+    </div>
+
+    <div class="counter" id="right-counter-wrap">
+      <span id="right-counter">🔍 Изучено признаков: 0 / 3</span>
+    </div>
+
+    <div class="question" id="right-question">
+      <p class="q-text">Ваш вердикт по этой посылке?</p>
+      <p class="q-hint" id="right-hint">🔒 Сначала изучите признаки этой коробки</p>
+      <div class="actions">
+        <button class="btn btn-verdict" id="right-btn-threat" onclick="answer('right','threat')" disabled>Подозрительная коробка</button>
+        <button class="btn btn-verdict" id="right-btn-safe" onclick="answer('right','safe')" disabled>Обычная безопасная доставка</button>
+      </div>
+    </div>
+
+    <div class="nav hidden" id="right-nav"></div>
+  </section>
+
+  <!-- ================= ЭКРАН 4: ИТОГИ (только победа) ================= -->
+  <section class="screen" id="screen-final">
+    <div class="verdict win" id="finalTitle">🏁 ПОБЕДА</div>
+
+    <div class="final-head">
+      <div class="bubble center-tail">
+        <div class="who">Эдуард Степанов</div>
+        <p class="line" id="finalLine"></p>
+      </div>
+    </div>
+
+    <div class="final-pic">
+      <img id="finalAvatar" class="avatar plain" src="" alt="Победа">
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="restart()">🔄 Пройти квест заново</button>
+    </div>
+  </section>
+
+</div>
+
+<!-- ================= POP-UP ================= -->
+<div class="overlay" id="overlay">
+  <div class="popup" role="dialog" aria-modal="true" aria-labelledby="popupText">
+    <div class="popup-icon" id="popupIcon">👁️</div>
+    <div class="popup-title" id="popupTitle"></div>
+    <p class="popup-text" id="popupText"></p>
+    <button class="btn btn-primary" onclick="closePopup()">Понятно</button>
+  </div>
+</div>
+
+<script>
+/* ======================= ДАННЫЕ ======================= */
+
+const EDU = {
+  base: 'https://www.cultmanager.ru/images/Vibecoding/eduard1.jpeg',
+  good: 'https://www.cultmanager.ru/images/Vibecoding/eduard2.jpeg',
+  bad:  'https://www.cultmanager.ru/images/Vibecoding/eduard3.jpeg'
+};
+
+const FINAL_WIN_IMG = 'https://www.cultmanager.ru/images/Vibecoding/image---2026-11-06t220020.195.jpeg';
+
+const POPUPS = {
+  'left-eye':   { icon:'👁️', title:'Осмотр снаружи',
+                  text:'На коробке видны странные маслянистые пятна, адрес получателя написан неровными печатными буквами от руки, есть крупная пометка «Лично».' },
+  'left-ear':   { icon:'👂', title:'Акустический контроль',
+                  text:'Если наклониться к коробке, слышно, что из неё доносится приглушённый звук. Он похож на тиканье часов.' },
+  'left-mouth': { icon:'👄', title:'Опрос курьера',
+                  text:'Курьер говорит: «Пока нёс её от машины, показалось, что внутри что-то странно смещается и перекатывается».' },
+
+  'right-eye':   { icon:'👁️', title:'Осмотр снаружи',
+                   text:'На коробке красуется угрожающее «Вы ещё пожалеете», а обратный адрес отправителя полностью отсутствует.' },
+  'right-ear':   { icon:'👂', title:'Акустический контроль',
+                   text:'В комнате относительно тихо, и от коробки отчётливо слышно лёгкое шипение.' },
+  'right-mouth': { icon:'👄', title:'Опрос курьера',
+                   text:'Курьер испуганно морщится и говорит: «Когда я нёс эту коробку, от неё пошёл какой-то очень непривычный, резкий химический запах».' }
+};
+
+const INIT_TEXT = {
+  left:  '«Курьер топчется у стола и протягивает накладную. Не спешите открывать посылку. Какие действия предпримем для проверки? Нажимайте на кнопки, чтобы исследовать объект».',
+  right: '«Переходим ко второй посылке. Обратите внимание на реакцию курьера — он явно чувствует себя неловко. Проверяем коробку?»'
+};
+
+/* Текст для случая, когда правую коробку выбрали ПЕРВОЙ */
+const RIGHT_FIRST_TEXT = '«Начнём с правой посылки. Обратите внимание на реакцию курьера — он явно чувствует себя неловко. Проверяем коробку?»';
+
+const FEEDBACK = {
+  left: {
+    suspicious: '«В точку! Масляные пятна — признак разгерметизации химикатов внутри упаковки, а тиканье и смещение веса — маркеры взрывного механизма. Вы подметили всё верно».',
+    safe:       '«Стоп-стоп-стоп! Вы серьёзно хотите её открыть? Вы проигнорировали три явных сигнала подозрительной посылки. Масляные пятна могут означать, что ядовитые вещества уже просачиваются сквозь упаковку, тиканье — работу таймера, а смещение веса — скрытый замыкатель взрывчатки. Зафиксируйте эти маркеры в памяти».'
+  },
+  right: {
+    threat: '«Блестящий ответ! Отсутствие адреса, шипение и резкий запах — серьёзные признаки биологической или химической атаки. Внутри запущена реакция, и вы вовремя заподозрили неладное».',
+    safe:   '«Не торопитесь, здесь легко ошибиться. У этой посылки есть признаки угрозы. Сразу настораживают надпись «Вы ещё пожалеете» и полное отсутствие обратного адреса отправителя. Лёгкое шипение изнутри похоже на утечку газа или химическую реакцию, а резкий химический запах, о котором рассказал курьер, сигнализирует об опасности. Давайте вернёмся назад и повторно исследуем коробку, чтобы зафиксировать в памяти эти маркеры».'
+  }
+};
+
+/* Финальный текст — единственный сценарий, победа */
+const FINAL_TEXT_WIN = '«Поздравляю, экспресс-проверка завершена! Вы только что научились распознавать скрытые химические и биологические угрозы при получении посылок. Отныне вы контролируете безопасность отправлений по трём обязательным критериям: сканируете упаковку взглядом, проверяете на слух и анализируете информацию от курьера. В этом упражнении вы заметили маркеры, которые большинство людей просто игнорируют».';
+
+/* ======================= СОСТОЯНИЕ ======================= */
+
+const state = { left: null, right: null };
+const visited = { left: new Set(), right: new Set() };
+
+const screens = {
+  start: document.getElementById('screen-start'),
+  left:  document.getElementById('screen-left'),
+  right: document.getElementById('screen-right'),
+  final: document.getElementById('screen-final')
+};
+
+const verdictBtns = {
+  left:  [ document.getElementById('left-btn-suspicious'), document.getElementById('left-btn-safe') ],
+  right: [ document.getElementById('right-btn-threat'),     document.getElementById('right-btn-safe') ]
+};
+
+/* ======================= НАВИГАЦИЯ ======================= */
+
+function go(name){
+  Object.keys(screens).forEach(function(k){
+    screens[k].classList.toggle('active', k === name);
+  });
+
+  if (name === 'right' && state.right === null){
+    const line = document.getElementById('right-line');
+    line.textContent = (state.left === null) ? RIGHT_FIRST_TEXT : INIT_TEXT.right;
+  }
+
+  if (name === 'final') renderFinal();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ======================= POP-UP ======================= */
+
+const overlay = document.getElementById('overlay');
+
+function openPopup(key, btn){
+  const p = POPUPS[key];
+  if (!p) return;
+
+  document.getElementById('popupIcon').textContent  = p.icon;
+  document.getElementById('popupTitle').textContent = p.title;
+  document.getElementById('popupText').textContent  = p.text;
+  overlay.classList.add('show');
+
+  const side = key.split('-')[0];
+  if (!visited[side].has(key)){
+    visited[side].add(key);
+    updateCounter(side);
+    if (btn) btn.classList.add('visited');
+  }
+}
+
+function closePopup(){
+  overlay.classList.remove('show');
+}
+
+overlay.addEventListener('click', function(e){
+  if (e.target === overlay) closePopup();
+});
+
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') closePopup();
+});
+
+/* ======================= СЧЁТЧИК И БЛОКИРОВКА ВЕРДИКТА ======================= */
+
+function updateCounter(side){
+  const el = document.getElementById(side + '-counter');
+  const n = visited[side].size;
+  el.textContent = '🔍 Изучено признаков: ' + n + ' / 3';
+  el.classList.toggle('full', n === 3);
+
+  updateVerdictButtons(side);
+}
+
+function updateVerdictButtons(side){
+  const n = visited[side].size;
+  const ready = (n === 3);
+
+  verdictBtns[side].forEach(function(b){
+    b.disabled = !ready;
+  });
+
+  const hint = document.getElementById(side + '-hint');
+  if (!hint) return;
+
+  if (ready){
+    hint.textContent = '✓ Все признаки изучены — можно выносить вердикт';
+    hint.classList.add('ready');
+  } else {
+    hint.textContent = '🔒 Сначала изучите признаки этой коробки';
+    hint.classList.remove('ready');
+  }
+}
+
+document.querySelectorAll('.act').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    openPopup(btn.dataset.key, btn);
+  });
+});
+
+/* ======================= ОТВЕТЫ В ВЕТКАХ ======================= */
+
+function answer(side, value){
+  if (state[side] !== null) return;
+  if (visited[side].size < 3) return;
+
+  state[side] = value;
+
+  const screen = document.getElementById('screen-' + side);
+  const isCorrect = (side === 'left') ? (value === 'suspicious') : (value === 'threat');
+
+  screen.querySelector('.avatar').src = isCorrect ? EDU.good : EDU.bad;
+  document.getElementById(side + '-line').textContent = FEEDBACK[side][value];
+
+  const bubble = screen.querySelector('.bubble');
+  bubble.classList.remove('flash');
+  void bubble.offsetWidth;
+  bubble.classList.add('flash');
+
+  document.getElementById(side + '-actions').classList.add('hidden');
+  document.getElementById(side + '-counter-wrap').classList.add('hidden');
+  document.getElementById(side + '-question').classList.add('hidden');
+
+  if (isCorrect){
+    showNav(side);
+  } else {
+    showFixButton(side);
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showFixButton(side){
+  const nav = document.getElementById(side + '-nav');
+  nav.innerHTML = '';
+
+  const btn = document.createElement('button');
+  btn.className = 'btn btn-fix';
+  btn.textContent = '↺ Исправить ошибку';
+  btn.addEventListener('click', function(){
+    state[side] = null;
+    resetSide(side);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  nav.appendChild(btn);
+  nav.classList.remove('hidden');
+}
+
+function showNav(side){
+  const other = (side === 'left') ? 'right' : 'left';
+  const nav = document.getElementById(side + '-nav');
+  nav.innerHTML = '';
+
+  const btn = document.createElement('button');
+  btn.className = 'btn btn-primary';
+
+  if (state[other] !== null){
+    btn.textContent = '🏁 Узнать итоги проверки';
+    btn.addEventListener('click', function(){ go('final'); });
+  } else {
+    btn.textContent = (other === 'right')
+      ? '📦 Перейти к осмотру правой коробки'
+      : '📦 Перейти к осмотру левой коробки';
+    btn.addEventListener('click', function(){ go(other); });
+  }
+
+  nav.appendChild(btn);
+  nav.classList.remove('hidden');
+}
+
+/* ======================= ФИНАЛ ======================= */
+
+function renderFinal(){
+  document.getElementById('finalTitle').textContent = '🏁 ПОБЕДА';
+
+  const av = document.getElementById('finalAvatar');
+  av.src = FINAL_WIN_IMG;
+  av.alt = 'Победа';
+  av.classList.add('plain');
+
+  document.getElementById('finalLine').textContent = FINAL_TEXT_WIN;
+}
+
+/* ======================= СБРОС ======================= */
+
+function resetSide(side){
+  const screen = document.getElementById('screen-' + side);
+
+  screen.querySelector('.avatar').src = EDU.base;
+
+  if (side === 'left'){
+    document.getElementById('left-line').textContent = INIT_TEXT.left;
+  } else {
+    // Вводная фраза правой коробки зависит от того, пройдена ли левая.
+    document.getElementById('right-line').textContent =
+      (state.left === null) ? RIGHT_FIRST_TEXT : INIT_TEXT.right;
+  }
+
+  const bubble = screen.querySelector('.bubble');
+  bubble.classList.remove('flash');
+
+  document.getElementById(side + '-actions').classList.remove('hidden');
+  document.getElementById(side + '-counter-wrap').classList.remove('hidden');
+  document.getElementById(side + '-question').classList.remove('hidden');
+
+  const nav = document.getElementById(side + '-nav');
+  nav.innerHTML = '';
+  nav.classList.add('hidden');
+
+  visited[side].clear();
+  updateCounter(side);
+
+  document.querySelectorAll('[data-key^="' + side + '-"]').forEach(function(b){
+    b.classList.remove('visited');
+  });
+}
+
+function restart(){
+  state.left = null;
+  state.right = null;
+  resetSide('left');
+  resetSide('right');
+  go('start');
+}
+
+/* ======================= ИНИЦИАЛИЗАЦИЯ ======================= */
+
+updateCounter('left');
+updateCounter('right');
+</script>
+</body>
+</html>
