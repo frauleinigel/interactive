@@ -8,7 +8,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: system-ui, -apple-system, sans-serif;
-      background: #f0f2f5;
+      background: #ffffff;
       color: #1a1a1a;
       min-height: 100vh;
       display: flex;
@@ -18,14 +18,14 @@
     }
     .player {
       width: 100%;
-      max-width: 560px;
+      max-width: 720px;
       background: #ffffff;
       border-radius: 16px;
-      padding: 24px;
+      padding: 28px;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
     }
     .title {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 700;
       color: #000000;
       margin-bottom: 20px;
@@ -34,14 +34,52 @@
     .controls {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
+
+    /* ===== СТИЛЬНАЯ КНОПКА ===== */
+    .play-btn-wrap {
+      position: relative;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .play-btn-wrap::before,
+    .play-btn-wrap::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b, #3b82f6);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 0;
+    }
+    .play-btn-wrap.playing::before {
+      opacity: 0.55;
+      animation: pulseRing 2s ease-out infinite;
+    }
+    .play-btn-wrap.playing::after {
+      opacity: 0.3;
+      animation: pulseRing 2s ease-out infinite 0.6s;
+    }
+    @keyframes pulseRing {
+      0%   { transform: scale(1);   opacity: 0.55; }
+      70%  { transform: scale(1.6); opacity: 0;    }
+      100% { transform: scale(1.6); opacity: 0;    }
+    }
+
     button {
-      background: #2563eb;
+      position: relative;
+      z-index: 1;
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 30%, #ec4899 60%, #f59e0b 90%);
+      background-size: 300% 300%;
+      background-position: 0% 50%;
       border: none;
       color: #fff;
-      width: 52px;
-      height: 52px;
+      width: 58px;
+      height: 58px;
       border-radius: 50%;
       cursor: pointer;
       font-size: 20px;
@@ -49,15 +87,67 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      transition: background 0.15s, transform 0.1s;
+      box-shadow:
+        0 8px 22px rgba(139, 92, 246, 0.35),
+        0 3px 8px rgba(236, 72, 153, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.12);
+      transition: transform 0.15s ease, box-shadow 0.25s ease, background-position 0.6s ease;
+      outline: none;
+      overflow: hidden;
     }
-    button:hover { background: #1d4ed8; }
-    button:active { transform: scale(0.96); }
+    button::before {
+      content: "";
+      position: absolute;
+      top: 0; left: -120%;
+      width: 80%;
+      height: 100%;
+      background: linear-gradient(
+        115deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.5) 50%,
+        transparent 100%
+      );
+      transform: skewX(-20deg);
+      transition: left 0.7s ease;
+      pointer-events: none;
+    }
+    button:hover::before { left: 130%; }
+    button:hover {
+      background-position: 100% 50%;
+      transform: translateY(-2px);
+      box-shadow:
+        0 12px 28px rgba(139, 92, 246, 0.45),
+        0 4px 12px rgba(236, 72, 153, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.12);
+    }
+    button:active {
+      transform: translateY(1px) scale(0.96);
+      box-shadow:
+        0 4px 10px rgba(139, 92, 246, 0.35),
+        0 1px 3px rgba(236, 72, 153, 0.25),
+        inset 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    button:focus-visible {
+      box-shadow:
+        0 0 0 4px rgba(139, 92, 246, 0.3),
+        0 8px 22px rgba(139, 92, 246, 0.35);
+    }
+    button svg {
+      width: 22px;
+      height: 22px;
+      fill: #fff;
+      display: block;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+    }
+
+    /* ===== ДОРОЖКА ПРОГРЕССА ===== */
     .bar {
       flex: 1;
-      height: 8px;
+      height: 10px;
       background: #e5e7eb;
-      border-radius: 4px;
+      border-radius: 5px;
       cursor: pointer;
       position: relative;
       overflow: hidden;
@@ -65,33 +155,121 @@
     .bar-fill {
       height: 100%;
       width: 0%;
-      background: #2563eb;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
       transition: width 0.1s linear;
     }
     .time {
       font-variant-numeric: tabular-nums;
       font-size: 14px;
       color: #6b7280;
-      min-width: 90px;
+      min-width: 95px;
       text-align: right;
     }
-    /* Блок громкости: значок сверху, ползунок снизу */
+
+    /* ===== СТИЛЬНЫЙ ПОЛЗУНОК ГРОМКОСТИ ===== */
     .volume-wrap {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      padding: 4px;
     }
     .volume-icon {
+      width: 22px;
+      height: 22px;
+      color: #d4af37;
+      fill: currentColor;
+      filter: drop-shadow(0 1px 3px rgba(212, 175, 55, 0.5));
+      transition: filter 0.2s ease, transform 0.2s ease;
+    }
+    .volume-wrap:hover .volume-icon {
+      filter: drop-shadow(0 2px 6px rgba(212, 175, 55, 0.8));
+      transform: scale(1.08);
+    }
+
+    /* Общий контейнер ползунка */
+    input[type="range"].styled {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100px;
+      height: 8px;
+      border-radius: 4px;
+      background:
+        linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b) 0/100% 100% no-repeat,
+        #e5e7eb;
+      cursor: pointer;
+      outline: none;
+      box-shadow:
+        inset 0 1px 2px rgba(0, 0, 0, 0.1),
+        0 1px 2px rgba(255, 255, 255, 0.8);
+    }
+
+    /* WebKit (Chrome, Safari, Edge) — бегунок */
+    input[type="range"].styled::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
       width: 20px;
       height: 20px;
-      color: #d4af37; /* золотой */
-      fill: currentColor;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+      border: 2px solid #ffffff;
+      cursor: pointer;
+      box-shadow:
+        0 3px 8px rgba(139, 92, 246, 0.5),
+        0 1px 2px rgba(236, 72, 153, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
     }
-    input[type="range"] {
-      width: 80px;
-      accent-color: #2563eb;
+    input[type="range"].styled::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      box-shadow:
+        0 4px 12px rgba(139, 92, 246, 0.7),
+        0 2px 4px rgba(236, 72, 153, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
     }
+    input[type="range"].styled::-webkit-slider-thumb:active {
+      transform: scale(0.95);
+    }
+
+    /* Firefox */
+    input[type="range"].styled::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+      border: 2px solid #ffffff;
+      cursor: pointer;
+      box-shadow:
+        0 3px 8px rgba(139, 92, 246, 0.5),
+        0 1px 2px rgba(236, 72, 153, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+    input[type="range"].styled::-moz-range-thumb:hover {
+      transform: scale(1.15);
+      box-shadow:
+        0 4px 12px rgba(139, 92, 246, 0.7),
+        0 2px 4px rgba(236, 72, 153, 0.5);
+    }
+
+    /* Firefox — заливка пройденной части */
+    input[type="range"].styled::-moz-range-track {
+      background: #e5e7eb;
+      border-radius: 4px;
+      height: 8px;
+    }
+    input[type="range"].styled::-moz-range-progress {
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);
+      border-radius: 4px;
+      height: 8px;
+    }
+
+    input[type="range"].styled:focus-visible {
+      box-shadow:
+        0 0 0 4px rgba(139, 92, 246, 0.25),
+        inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
     .error-message {
       margin-top: 16px;
       padding: 12px;
@@ -107,7 +285,16 @@
   <div class="player">
     <div class="title">Обращение Эдуарда Степанова</div>
     <div class="controls">
-      <button id="playBtn" aria-label="Play">▶</button>
+      <div class="play-btn-wrap" id="playWrap">
+        <button id="playBtn" aria-label="Play">
+          <svg id="playIcon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+          <svg id="pauseIcon" viewBox="0 0 24 24" aria-hidden="true" style="display:none;">
+            <path d="M6 5h4v14H6zM14 5h4v14h-4z"/>
+          </svg>
+        </button>
+      </div>
       <div class="bar" id="bar">
         <div class="bar-fill" id="barFill"></div>
       </div>
@@ -117,7 +304,7 @@
         <svg class="volume-icon" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 16.5 12zM14 3.23v2.06a7 7 0 0 1 0 13.42v2.06a9 9 0 0 0 0-17.54z"/>
         </svg>
-        <input type="range" id="volume" min="0" max="1" step="0.01" value="1" aria-label="Громкость">
+        <input type="range" id="volume" class="styled" min="0" max="1" step="0.01" value="1" aria-label="Громкость">
       </div>
     </div>
     <div class="error-message" id="errorMsg">
@@ -129,6 +316,9 @@
   <script>
     const audio = document.getElementById('audio');
     const playBtn = document.getElementById('playBtn');
+    const playWrap = document.getElementById('playWrap');
+    const playIcon = document.getElementById('playIcon');
+    const pauseIcon = document.getElementById('pauseIcon');
     const bar = document.getElementById('bar');
     const barFill = document.getElementById('barFill');
     const timeEl = document.getElementById('time');
@@ -146,8 +336,21 @@
       audio.paused ? audio.play() : audio.pause();
     });
 
-    audio.addEventListener('play', () => playBtn.textContent = '❚❚');
-    audio.addEventListener('pause', () => playBtn.textContent = '▶');
+    audio.addEventListener('play', () => {
+      playIcon.style.display = 'none';
+      pauseIcon.style.display = 'block';
+      playWrap.classList.add('playing');
+    });
+    audio.addEventListener('pause', () => {
+      playIcon.style.display = 'block';
+      pauseIcon.style.display = 'none';
+      playWrap.classList.remove('playing');
+    });
+    audio.addEventListener('ended', () => {
+      playIcon.style.display = 'block';
+      pauseIcon.style.display = 'none';
+      playWrap.classList.remove('playing');
+    });
 
     audio.addEventListener('timeupdate', () => {
       const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
@@ -171,7 +374,20 @@
       audio.currentTime = pct * audio.duration;
     });
 
-    volume.addEventListener('input', () => audio.volume = volume.value);
+    // Громкость + визуальное обновление заливки (для WebKit)
+    function updateVolumeFill() {
+      const pct = volume.value * 100;
+      volume.style.background =
+        `linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b) 0/${pct}% 100% no-repeat, #e5e7eb`;
+    }
+    volume.addEventListener('input', () => {
+      audio.volume = volume.value;
+      updateVolumeFill();
+    });
+    updateVolumeFill(); // инициализация при загрузке
+
+    // Пробуем включить звук сразу (некоторые браузеры требуют жест)
+    audio.volume = volume.value;
   </script>
 </body>
 </html>
