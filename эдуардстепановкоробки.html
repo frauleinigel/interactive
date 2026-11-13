@@ -13,6 +13,7 @@
     --amber:#f39a12;
     --amber-dark:#b45309;
     --green:#16a34a;
+    --red:#dc2626;
     --purple:#7c3aed;
     --purple-dark:#5b21b6;
     --purple-deep:#4c1d95;
@@ -164,16 +165,16 @@
     height:auto;
     width:auto;
     aspect-ratio:auto;
-    max-width:min(72vw, 720px);
-    max-height:64vh;
+    max-width:min(48vw, 460px);
+    max-height:42vh;
     margin:0 auto;
     object-fit:contain;
     object-position:center;
-    border-radius:16px;
-    box-shadow:0 12px 32px rgba(15,23,42,.16);
+    border-radius:14px;
+    box-shadow:0 10px 26px rgba(15,23,42,.14);
   }
 
-  .final-head{margin-bottom:28px;}
+  .final-head{margin-bottom:20px;}
   .final-head .bubble{width:100%;}
   .final-pic{text-align:center; margin-bottom:8px;}
 
@@ -192,6 +193,8 @@
     box-shadow:0 12px 32px rgba(15,23,42,.10);
     line-height:0;
   }
+  .visual-wrap.is-hidden{display:none;}
+
   .visual-wrap .visual img{
     width:100%;
     height:auto;
@@ -215,6 +218,12 @@
   .actions-overlay.right{
     left:auto;
     right:18px;
+  }
+  /* Третья коробка: справа, ниже — поверх подарка */
+  #gift-actions{
+    left:auto;
+    right:18px;
+    bottom:6%;
   }
 
   .actions-overlay .btn{
@@ -424,7 +433,7 @@
   .btn-verdict:disabled:hover::after{opacity:0;}
 
   /* =====================================================
-     СЧЁТЧИК, ВОПРОС, ПОДСКАЗКА — КОМПАКТНО
+     СЧЁТЧИК, ВОПРОС, ПОДСКАЗКА
      ===================================================== */
   .counter{
     text-align:center;
@@ -470,10 +479,10 @@
     font-size:clamp(22px, 4.4vw, 32px);
     font-weight:800;
     letter-spacing:.14em;
-    margin:4px 0 22px;
+    margin:4px 0 18px;
   }
-  /* Оставлен только победный вариант — поражение в тренажёре недостижимо */
   .verdict.win{color:var(--green);}
+  .verdict.warn{color:var(--red);}
 
   .hidden{display:none !important;}
 
@@ -536,8 +545,8 @@
       max-width: 36vw;
     }
     .avatar.plain{
-      max-width:88vw;
-      max-height:56vh;
+      max-width:76vw;
+      max-height:46vh;
       height:auto;
     }
     .bubble{
@@ -576,7 +585,7 @@
       border-bottom:0;
     }
 
-    .final-head{margin-bottom:22px;}
+    .final-head{margin-bottom:16px;}
 
     .line{font-size:15.5px; line-height:1.55;}
     .who{font-size:11.5px;}
@@ -596,6 +605,11 @@
     .actions-overlay.right{
       left:auto;
       right:10px;
+    }
+    #gift-actions{
+      left:auto;
+      right:10px;
+      bottom:5%;
     }
     .actions-overlay .btn{padding:9px 10px; font-size:12px;}
 
@@ -650,12 +664,12 @@
     <header class="topline">
       <div class="bubble">
         <div class="who">Эдуард Степанов</div>
-        <p class="line" id="left-line">«Курьер топчется у стола и протягивает накладную. Не спешите открывать посылку. Какие действия предпримем для проверки? Нажимайте на кнопки, чтобы исследовать объект».</p>
+        <p class="line" id="left-line">«Курьер топчется у стола. Не спешите открывать посылку. Какие действия предпримем для проверки? Нажимайте на кнопки, чтобы исследовать объект».</p>
       </div>
       <img class="avatar" src="https://www.cultmanager.ru/images/Vibecoding/eduard1.jpeg" alt="Эдуард Степанов">
     </header>
 
-    <div class="visual-wrap">
+    <div class="visual-wrap" id="left-visual">
       <div class="visual">
         <img src="https://www.cultmanager.ru/images/Vibecoding/image---2026-11-06t212044.701.jpeg" alt="Левая коробка">
       </div>
@@ -693,7 +707,7 @@
       <img class="avatar" src="https://www.cultmanager.ru/images/Vibecoding/eduard1.jpeg" alt="Эдуард Степанов">
     </header>
 
-    <div class="visual-wrap">
+    <div class="visual-wrap" id="right-visual">
       <div class="visual">
         <img src="https://www.cultmanager.ru/images/Vibecoding/image---2026-11-06t211939.516.jpeg" alt="Правая коробка">
       </div>
@@ -721,7 +735,77 @@
     <div class="nav hidden" id="right-nav"></div>
   </section>
 
-  <!-- ================= ЭКРАН 4: ИТОГИ (только победа) ================= -->
+  <!-- ================= ВЕТКА В: ПОДАРОЧНАЯ КОРОБКА ================= -->
+  <section class="screen" id="screen-gift">
+    <header class="topline">
+      <div class="bubble">
+        <div class="who">Эдуард Степанов</div>
+        <p class="line" id="gift-line">«Не расслабляйтесь. Пока вы разбирались с теми двумя, на ресепшене приняли ещё одну доставку. Курьер — женщина. Проверим посылку?»</p>
+      </div>
+      <img class="avatar" src="https://www.cultmanager.ru/images/Vibecoding/eduard1.jpeg" alt="Эдуард Степанов">
+    </header>
+
+    <div class="visual-wrap" id="gift-visual">
+      <div class="visual">
+        <img id="gift-img" src="https://www.cultmanager.ru/images/Vibecoding/image---2026-11-13t213425.796.jpeg" alt="Подарочная коробка">
+      </div>
+
+      <div class="actions actions-overlay" id="gift-actions">
+        <button class="btn act" data-key="gift-eye">👁️ Осмотреть снаружи</button>
+        <button class="btn act" data-key="gift-ear">👂 Прислушаться к коробке</button>
+        <button class="btn act" data-key="gift-mouth">👄 Расспросить курьера</button>
+      </div>
+    </div>
+
+    <div class="counter" id="gift-counter-wrap">
+      <span id="gift-counter">🔍 Изучено признаков: 0 / 3</span>
+    </div>
+
+    <div class="question" id="gift-question">
+      <p class="q-text">Что делаем с подарочной коробкой?</p>
+      <p class="q-hint" id="gift-hint">🔒 Сначала изучите признаки этой коробки</p>
+      <div class="actions">
+        <button class="btn btn-verdict" id="gift-btn-open" onclick="answerGift('open')" disabled>Открываем, приятный подарок</button>
+        <button class="btn btn-verdict" id="gift-btn-suspect" onclick="answerGift('suspect')" disabled>Не открываем, подозрительно</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ЭКРАН ОШИБКИ: ОТКРЫЛИ ПОДАРОК ================= -->
+  <section class="screen" id="screen-gift-error">
+    <div class="verdict warn">⚠️ ОШИБКА</div>
+
+    <header class="topline">
+      <div class="bubble">
+        <div class="who">Эдуард Степанов</div>
+        <p class="line">«Стоп! Вы решили вскрыть коробку, внутри которой ёмкость с токсичным химическим веществом. Оно уже начало просачиваться: тихий прерывистый шорох был звуком вытекающей жидкости. Праздничный бант и надпись «подарок от администрации района» — маскировка. Отсутствие обратного адреса на коробке — ещё один сигнал, который вы пропустили. В реальной ситуации это могло стоить жизни. Вернитесь на шаг назад и проверьте коробку ещё раз».</p>
+      </div>
+      <img class="avatar" src="https://www.cultmanager.ru/images/Vibecoding/eduard3.jpeg" alt="Эдуард Степанов">
+    </header>
+
+    <div class="actions">
+      <button class="btn btn-fix" onclick="retryGift()">↺ Вернуться к осмотру подарка</button>
+    </div>
+  </section>
+
+  <!-- ================= ЭКРАН УСПЕХА: НЕ ОТКРЫЛИ ПОДАРОК ================= -->
+  <section class="screen" id="screen-gift-success">
+    <div class="verdict win">✓ ВЕРНО</div>
+
+    <header class="topline">
+      <div class="bubble">
+        <div class="who">Эдуард Степанов</div>
+        <p class="line">«Именно так и должен действовать профессионал. Атласный бант и надпись про администрацию не ослабили вашу настороженность. Чтобы признать коробку подозрительной, достаточно зафиксировать отсутствие обратного адреса и тихий прерывистый шорох. Злоумышленники специально маскируют под подарок ёмкости с токсичными химическими веществами. Внутри может оказаться жидкость, которая при контакте отравит помещение и людей. Запомните это».</p>
+      </div>
+      <img class="avatar" src="https://www.cultmanager.ru/images/Vibecoding/eduard2.jpeg" alt="Эдуард Степанов">
+    </header>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="go('final')">Перейти к итогам</button>
+    </div>
+  </section>
+
+  <!-- ================= ЭКРАН 8: ИТОГИ ================= -->
   <section class="screen" id="screen-final">
     <div class="verdict win" id="finalTitle">🏁 ПОБЕДА</div>
 
@@ -745,7 +829,7 @@
 
 <!-- ================= POP-UP ================= -->
 <div class="overlay" id="overlay">
-  <div class="popup" role="dialog" aria-modal="true" aria-labelledby="popupText">
+  <div class="popup" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
     <div class="popup-icon" id="popupIcon">👁️</div>
     <div class="popup-title" id="popupTitle"></div>
     <p class="popup-text" id="popupText"></p>
@@ -766,57 +850,67 @@ const FINAL_WIN_IMG = 'https://www.cultmanager.ru/images/Vibecoding/image---2026
 
 const POPUPS = {
   'left-eye':   { icon:'👁️', title:'Осмотр снаружи',
-                  text:'На коробке видны странные маслянистые пятна, адрес получателя написан неровными печатными буквами от руки, есть крупная пометка «Лично».' },
+                  text:'Нижняя часть коробки потемнела, картон покрыт белёсым налётом. Адрес получателя написан неровными печатными буквами от руки. Есть крупная пометка «Лично».' },
   'left-ear':   { icon:'👂', title:'Акустический контроль',
-                  text:'Если наклониться к коробке, слышно, что из неё доносится приглушённый звук. Он похож на тиканье часов.' },
+                  text:'Если наклониться к коробке и прислушаться, не получается понять, что именно внутри.' },
   'left-mouth': { icon:'👄', title:'Опрос курьера',
-                  text:'Курьер говорит: «Пока нёс её от машины, показалось, что внутри что-то странно смещается и перекатывается».' },
+                  text:'Курьер говорит: «Пока нёс посылку от машины, показалось, что внутри что-то перекатывается — как банка или контейнер. Эта коробка тяжелее, чем выглядит».' },
 
   'right-eye':   { icon:'👁️', title:'Осмотр снаружи',
-                   text:'На коробке красуется угрожающее «Вы ещё пожалеете», а обратный адрес отправителя полностью отсутствует.' },
+                   text:'На коробке угрожающая надпись «вы ещё пожалеете». Обратного адреса отправителя нет.' },
   'right-ear':   { icon:'👂', title:'Акустический контроль',
-                   text:'В комнате относительно тихо, и от коробки отчётливо слышно лёгкое шипение.' },
+                   text:'В комнате относительно тихо. От коробки отчётливо слышно лёгкое шипение.' },
   'right-mouth': { icon:'👄', title:'Опрос курьера',
-                   text:'Курьер испуганно морщится и говорит: «Когда я нёс эту коробку, от неё пошёл какой-то очень непривычный, резкий химический запах».' }
+                   text:'Курьер испуганно морщится и говорит: «Когда я нёс эту коробку, от неё пошёл какой-то очень непривычный, резкий химический запах».' },
+
+  'gift-eye':   { icon:'👁️', title:'Подарочная упаковка',
+                  text:'Коробка аккуратно обёрнута, перевязана дорогим атласным бантом. На боку — праздничная наклейка: «Подарок от администрации района». Обратный адрес отправителя на коробке не указан — только номер отправления.' },
+  'gift-ear':   { icon:'👂', title:'Тихий звук',
+                  text:'В коридоре шумно, но если приложить ухо к стороне с бантом, из коробки идёт тихий прерывистый шорох. Он то появляется, то пропадает.' },
+  'gift-mouth': { icon:'👄', title:'Показания курьера',
+                  text:'Курьер спокойно пожимает плечами: «Мне передали коробку. Что внутри — не знаю, не заглядывала. Ленту завязывала не я. Вам расписаться?»' }
 };
 
 const INIT_TEXT = {
-  left:  '«Курьер топчется у стола и протягивает накладную. Не спешите открывать посылку. Какие действия предпримем для проверки? Нажимайте на кнопки, чтобы исследовать объект».',
-  right: '«Переходим ко второй посылке. Обратите внимание на реакцию курьера — он явно чувствует себя неловко. Проверяем коробку?»'
+  left:  '«Курьер топчется у стола. Не спешите открывать посылку. Какие действия предпримем для проверки? Нажимайте на кнопки, чтобы исследовать объект».',
+  right: '«Переходим ко второй посылке. Обратите внимание на реакцию курьера — он явно чувствует себя неловко. Проверяем коробку?»',
+  gift:  '«Не расслабляйтесь. Пока вы разбирались с теми двумя, на ресепшене приняли ещё одну доставку. Курьер — женщина. Проверим посылку?»'
 };
 
-/* Текст для случая, когда правую коробку выбрали ПЕРВОЙ */
 const RIGHT_FIRST_TEXT = '«Начнём с правой посылки. Обратите внимание на реакцию курьера — он явно чувствует себя неловко. Проверяем коробку?»';
 
 const FEEDBACK = {
   left: {
-    suspicious: '«В точку! Масляные пятна — признак разгерметизации химикатов внутри упаковки, а тиканье и смещение веса — маркеры взрывного механизма. Вы подметили всё верно».',
-    safe:       '«Стоп-стоп-стоп! Вы серьёзно хотите её открыть? Вы проигнорировали три явных сигнала подозрительной посылки. Масляные пятна могут означать, что ядовитые вещества уже просачиваются сквозь упаковку, тиканье — работу таймера, а смещение веса — скрытый замыкатель взрывчатки. Зафиксируйте эти маркеры в памяти».'
+    suspicious: '«В точку! Белёсый налёт на картоне — признак повреждённой упаковки: порошок с биологическим агентом уже просыпается наружу. Неровный почерк и пометка «Лично» — признак того, что отправитель скрывает личность. Необычный вес с перекатыванием — признак тяжёлой ёмкости с опасным содержимым. Вы верно прочли все три сигнала».',
+    safe:       '«О, нет! Вы проигнорировали три сигнала. Белёсый налёт на картоне — признак повреждённой упаковки: биологический агент уже просыпается наружу. Неровный почерк и пометка «Лично» — признак того, что отправитель скрывает личность. Необычный вес с перекатыванием — признак тяжёлой ёмкости с опасным содержимым. Вернитесь к осмотру коробки и примите решение снова».'
   },
   right: {
-    threat: '«Блестящий ответ! Отсутствие адреса, шипение и резкий запах — серьёзные признаки биологической или химической атаки. Внутри запущена реакция, и вы вовремя заподозрили неладное».',
-    safe:   '«Не торопитесь, здесь легко ошибиться. У этой посылки есть признаки угрозы. Сразу настораживают надпись «Вы ещё пожалеете» и полное отсутствие обратного адреса отправителя. Лёгкое шипение изнутри похоже на утечку газа или химическую реакцию, а резкий химический запах, о котором рассказал курьер, сигнализирует об опасности. Давайте вернёмся назад и повторно исследуем коробку, чтобы зафиксировать в памяти эти маркеры».'
+    threat: '«Блестящий ответ! Надпись «вы ещё пожалеете» — прямая угроза. Отсутствие обратного адреса — признак того, что отправитель скрывается. Шипение изнутри похоже на утечку газа и химическую реакцию, а резкий запах может говорить о токсичном содержимом. Вы верно прочли все три сигнала».',
+    safe:   '«О, нет! Вы проигнорировали три сигнала. Надпись «вы ещё пожалеете» — прямая угроза. Если обратный адрес не указан, отправитель может скрываться. Шипение изнутри — признак утечки газа или химической реакции, а резкий запах — сигнал о токсичном содержимом. Вернитесь к осмотру коробки и примите решение снова».'
   }
 };
 
-/* Финальный текст — единственный сценарий, победа */
-const FINAL_TEXT_WIN = '«Поздравляю, экспресс-проверка завершена! Вы только что научились распознавать скрытые химические и биологические угрозы при получении посылок. Отныне вы контролируете безопасность отправлений по трём обязательным критериям: сканируете упаковку взглядом, проверяете на слух и анализируете информацию от курьера. В этом упражнении вы заметили маркеры, которые большинство людей просто игнорируют».';
+const FINAL_TEXT_WIN = '«Поздравляю, квест завершён. Вы только что научились распознавать скрытые химические и биологические угрозы при получении посылок. Отработали алгоритм первичной проверки отправлений и проявили бдительность в отношении коробки с подарочной упаковкой. Так держать!»';
 
 /* ======================= СОСТОЯНИЕ ======================= */
 
-const state = { left: null, right: null };
-const visited = { left: new Set(), right: new Set() };
+const state = { left: null, right: null, gift: null };
+const visited = { left: new Set(), right: new Set(), gift: new Set() };
 
 const screens = {
   start: document.getElementById('screen-start'),
   left:  document.getElementById('screen-left'),
   right: document.getElementById('screen-right'),
+  gift:  document.getElementById('screen-gift'),
+  'gift-error':   document.getElementById('screen-gift-error'),
+  'gift-success': document.getElementById('screen-gift-success'),
   final: document.getElementById('screen-final')
 };
 
 const verdictBtns = {
   left:  [ document.getElementById('left-btn-suspicious'), document.getElementById('left-btn-safe') ],
-  right: [ document.getElementById('right-btn-threat'),     document.getElementById('right-btn-safe') ]
+  right: [ document.getElementById('right-btn-threat'),     document.getElementById('right-btn-safe') ],
+  gift:  [ document.getElementById('gift-btn-open'),        document.getElementById('gift-btn-suspect') ]
 };
 
 /* ======================= НАВИГАЦИЯ ======================= */
@@ -905,7 +999,7 @@ document.querySelectorAll('.act').forEach(function(btn){
   });
 });
 
-/* ======================= ОТВЕТЫ В ВЕТКАХ ======================= */
+/* ======================= ОТВЕТЫ В ВЕТКАХ (лев/прав) ======================= */
 
 function answer(side, value){
   if (state[side] !== null) return;
@@ -924,7 +1018,8 @@ function answer(side, value){
   void bubble.offsetWidth;
   bubble.classList.add('flash');
 
-  document.getElementById(side + '-actions').classList.add('hidden');
+  document.getElementById(side + '-visual').classList.add('is-hidden');
+
   document.getElementById(side + '-counter-wrap').classList.add('hidden');
   document.getElementById(side + '-question').classList.add('hidden');
 
@@ -963,8 +1058,8 @@ function showNav(side){
   btn.className = 'btn btn-primary';
 
   if (state[other] !== null){
-    btn.textContent = '🏁 Узнать итоги проверки';
-    btn.addEventListener('click', function(){ go('final'); });
+    btn.textContent = 'Продолжить квест';
+    btn.addEventListener('click', function(){ go('gift'); });
   } else {
     btn.textContent = (other === 'right')
       ? '📦 Перейти к осмотру правой коробки'
@@ -974,6 +1069,45 @@ function showNav(side){
 
   nav.appendChild(btn);
   nav.classList.remove('hidden');
+}
+
+/* ======================= ОТВЕТ НА ПОДАРОЧНУЮ КОРОБКУ ======================= */
+
+function answerGift(value){
+  if (state.gift !== null) return;
+  if (visited.gift.size < 3) return;
+
+  state.gift = value;
+
+  if (value === 'suspect'){
+    go('gift-success');
+  } else {
+    go('gift-error');
+  }
+}
+
+function retryGift(){
+  state.gift = null;
+  resetGift();
+  go('gift');
+}
+
+function resetGift(){
+  const screen = document.getElementById('screen-gift');
+
+  screen.querySelector('.avatar').src = EDU.base;
+  document.getElementById('gift-line').textContent = INIT_TEXT.gift;
+
+  document.getElementById('gift-visual').classList.remove('is-hidden');
+  document.getElementById('gift-counter-wrap').classList.remove('hidden');
+  document.getElementById('gift-question').classList.remove('hidden');
+
+  visited.gift.clear();
+  updateCounter('gift');
+
+  document.querySelectorAll('[data-key^="gift-"]').forEach(function(b){
+    b.classList.remove('visited');
+  });
 }
 
 /* ======================= ФИНАЛ ======================= */
@@ -989,7 +1123,7 @@ function renderFinal(){
   document.getElementById('finalLine').textContent = FINAL_TEXT_WIN;
 }
 
-/* ======================= СБРОС ======================= */
+/* ======================= СБРОС КОРОБОК left/right ======================= */
 
 function resetSide(side){
   const screen = document.getElementById('screen-' + side);
@@ -999,7 +1133,6 @@ function resetSide(side){
   if (side === 'left'){
     document.getElementById('left-line').textContent = INIT_TEXT.left;
   } else {
-    // Вводная фраза правой коробки зависит от того, пройдена ли левая.
     document.getElementById('right-line').textContent =
       (state.left === null) ? RIGHT_FIRST_TEXT : INIT_TEXT.right;
   }
@@ -1007,7 +1140,8 @@ function resetSide(side){
   const bubble = screen.querySelector('.bubble');
   bubble.classList.remove('flash');
 
-  document.getElementById(side + '-actions').classList.remove('hidden');
+  document.getElementById(side + '-visual').classList.remove('is-hidden');
+
   document.getElementById(side + '-counter-wrap').classList.remove('hidden');
   document.getElementById(side + '-question').classList.remove('hidden');
 
@@ -1026,8 +1160,12 @@ function resetSide(side){
 function restart(){
   state.left = null;
   state.right = null;
+  state.gift = null;
+
   resetSide('left');
   resetSide('right');
+  resetGift();
+
   go('start');
 }
 
@@ -1035,6 +1173,7 @@ function restart(){
 
 updateCounter('left');
 updateCounter('right');
+updateCounter('gift');
 </script>
 </body>
 </html>
