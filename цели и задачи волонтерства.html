@@ -1,0 +1,225 @@
+<style>
+.slider-wrapper {
+    font-family: 'Segoe UI', sans-serif;
+    max-width: 900px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #e2e8f0;
+}
+
+.slider-track {
+    display: flex;
+    transition: transform 0.4s ease-in-out;
+    align-items: flex-start; 
+}
+
+.slide {
+    min-width: 100%;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+/* Заголовки шагов внутри слайдов */
+.slide h4 {
+    margin-top: 0;
+    font-size: 20px;
+    color: #2d3748;
+    text-align: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #edf2f7;
+    padding-bottom: 10px;
+}
+
+/* Стили для 1 слайда */
+.idea-box {
+    background: #f7fafc;
+    border-left: 4px solid #a0aec0;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    font-size: 15px;
+}
+
+/* Стили для 2 слайда */
+.goal-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    background: #f8fafc;
+    padding: 10px 15px;
+    border-radius: 8px;
+    gap: 10px;
+}
+.goal-source { flex: 1; font-size: 14px; color: #4a5568; }
+.goal-arrow { font-size: 20px; color: #3182ce; font-weight: bold; }
+.goal-target { flex: 1; font-size: 14px; font-weight: bold; color: #0056b3; }
+
+/* Стили для 3 слайда (Таблица) */
+.table-container { overflow-x: auto; }
+.slide-table { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 1.4; color: #000; }
+.slide-table th { padding: 10px; text-align: left; border-bottom: 2px solid #ddd; background: #f8f9fa; }
+.slide-table th:first-child { color: #0056b3; width: 50%; }
+.slide-table th:last-child { color: #218838; border-left: 1px solid #eee; }
+.slide-table td { padding: 10px; vertical-align: top; border-bottom: 1px solid #eee; }
+.slide-table td:last-child { border-left: 1px solid #eee; }
+.slide-table ul { margin: 0; padding-left: 15px; }
+.slide-table li { margin-bottom: 4px; }
+
+/* Навигация */
+.slider-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-top: 1px solid #e2e8f0;
+    gap: 20px;
+}
+.nav-btn {
+    background: #fff;
+    border: 1px solid #cbd5e0;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #4a5568;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+.nav-btn:hover { background: #e2e8f0; }
+.nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.dots { display: flex; gap: 8px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: #cbd5e0; cursor: pointer; transition: 0.2s; }
+.dot.active { background: #3182ce; transform: scale(1.2); }
+
+/* Адаптив */
+@media (max-width: 600px) {
+    .goal-row { flex-direction: column; text-align: center; gap: 5px; }
+    .goal-arrow { transform: rotate(90deg); }
+}
+</style>
+
+<div class="slider-wrapper">
+    <div class="slider-track" id="sliderTrack">
+        
+        <!-- СЛАЙД 1 -->
+        <div class="slide">
+            <h4>Шаг 1. Направления и идеи</h4>
+            <div class="idea-box">Уборка территории и субботники (нет бюджета на клининг).</div>
+            <div class="idea-box">Помощь на крупных фестивалях и концертах (не хватает персонала).</div>
+            <div class="idea-box">Проведение мастер-классов и игр для посетителей (нужны свободные руки).</div>
+            <div class="idea-box">Оформление залов и подготовка реквизита к праздникам.</div>
+        </div>
+
+        <!-- СЛАЙД 2 -->
+        <div class="slide">
+            <h4>Шаг 2. Превращаем в цели на 2026/27 год</h4>
+            <div class="goal-row">
+                <div class="goal-source">Нет бюджета на уборку</div>
+                <div class="goal-arrow">➔</div>
+                <div class="goal-target">Благоустройство территории до конца 2026 года.</div>
+            </div>
+            <div class="goal-row">
+                <div class="goal-source">Не хватает рук на событиях</div>
+                <div class="goal-arrow">➔</div>
+                <div class="goal-target">Помощь в проведении всех мероприятий сезона.</div>
+            </div>
+            <div class="goal-row">
+                <div class="goal-source">Скучно на выходных</div>
+                <div class="goal-arrow">➔</div>
+                <div class="goal-target">Развитие новых форм работы с посетителями.</div>
+            </div>
+            <div class="goal-row">
+                <div class="goal-source">Не хватает рук для декора</div>
+                <div class="goal-arrow">➔</div>
+                <div class="goal-target">Создание нового творческого контента и оформления.</div>
+            </div>
+        </div>
+
+        <!-- СЛАЙД 3 -->
+        <div class="slide">
+            <h4>Шаг 3. Составляем задачи</h4>
+            <div class="table-container">
+                <table class="slide-table">
+                    <thead>
+                        <tr>
+                            <th>Цели на сезон 2026/27</th>
+                            <th>Задачи для волонтеров</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1. Увеличение количества посетителей.</td>
+                            <td>— Помощь в проведении мероприятий (фестивали, концерты).<br>— Проведение экскурсий.</td>
+                        </tr>
+                        <tr>
+                            <td>2. Помощь в решении задач учреждения.</td>
+                            <td>— Участие в обслуживании территории (уборка, уход за цветами).<br>— Работа с группами на новогодних елках.</td>
+                        </tr>
+                        <tr>
+                            <td>3. Развитие новых форм работы.</td>
+                            <td>— Обучение населения играм и мастер-классам (оригами, лепка).<br>— Участие в патриотических программах.</td>
+                        </tr>
+                        <tr>
+                            <td>4. Новый творческий контент.</td>
+                            <td>— Оформление залов к праздникам.<br>— Помощь в создании декораций и реквизита.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Навигация -->
+    <div class="slider-nav">
+        <button class="nav-btn" id="prevBtn" onclick="moveSlide(-1)">&#10094;</button>
+        <div class="dots" id="dots">
+            <div class="dot active" onclick="goToSlide(0)"></div>
+            <div class="dot" onclick="goToSlide(1)"></div>
+            <div class="dot" onclick="goToSlide(2)"></div>
+        </div>
+        <button class="nav-btn" id="nextBtn" onclick="moveSlide(1)">&#10095;</button>
+    </div>
+</div>
+
+<script>
+let currentSlideIndex = 0;
+const slides = document.querySelectorAll('.slide');
+const track = document.getElementById('sliderTrack');
+const dots = document.querySelectorAll('.dot');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+
+function updateSlider() {
+    track.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentSlideIndex);
+    });
+    prevBtn.disabled = currentSlideIndex === 0;
+    nextBtn.disabled = currentSlideIndex === slides.length - 1;
+}
+
+function moveSlide(direction) {
+    currentSlideIndex += direction;
+    if (currentSlideIndex < 0) currentSlideIndex = 0;
+    if (currentSlideIndex >= slides.length) currentSlideIndex = slides.length - 1;
+    updateSlider();
+}
+
+function goToSlide(index) {
+    currentSlideIndex = index;
+    updateSlider();
+}
+
+updateSlider();
+</script>
