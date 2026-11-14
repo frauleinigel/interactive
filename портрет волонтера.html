@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Конструктор портрета волонтера</title>
+<style>
+    /* --- СТИЛИ ДЛЯ ЭКРАНА --- */
+    .volunteer-builder {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 850px;
+        margin: 20px auto;
+        background: #f9fbfd;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        color: #333;
+    }
+    .volunteer-builder h2 {
+        text-align: center;
+        color: #2b6cb0;
+        margin-top: 0;
+    }
+    .volunteer-builder p.desc {
+        text-align: center;
+        color: #555;
+        margin-bottom: 25px;
+        font-size: 15px;
+    }
+    
+    .input-group {
+        margin-bottom: 20px;
+    }
+    .input-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: #4a5568;
+        font-size: 15px;
+    }
+    .input-group input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #cbd5e0;
+        border-radius: 6px;
+        font-size: 15px;
+        box-sizing: border-box;
+        font-family: inherit;
+    }
+    .input-group input:focus {
+        outline: none;
+        border-color: #3182ce;
+        box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.2);
+    }
+
+    .tags-section {
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 20px;
+    }
+    .tags-section h4 {
+        margin-top: 0;
+        margin-bottom: 12px;
+        color: #2d3748;
+        font-size: 16px;
+    }
+    .tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 15px;
+        min-height: 35px;
+    }
+    .tag {
+        background: #ebf8ff;
+        color: #2b6cb0;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        cursor: pointer;
+        border: 1px solid #bee3f8;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .tag.duty-tag {
+        background: #f0fff4;
+        color: #276749;
+        border-color: #c6f6d5;
+    }
+    .tag:hover {
+        opacity: 0.8;
+    }
+    .tag.selected {
+        background: #3182ce;
+        color: #fff;
+        border-color: #3182ce;
+    }
+    .tag.duty-tag.selected {
+        background: #38a169;
+        color: #fff;
+        border-color: #38a169;
+    }
+    .tag .remove-btn {
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1;
+        opacity: 0.6;
+    }
+    .tag .remove-btn:hover {
+        opacity: 1;
+    }
+
+    /* --- КНОПКИ --- */
+    .add-custom {
+        display: flex;
+        gap: 10px;
+    }
+    .add-custom input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #cbd5e0;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+    .add-custom button {
+        padding: 0 20px;
+        background: #3182ce;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 20px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .add-custom button:hover {
+        background: #2b6cb0;
+    }
+    .add-custom button:active {
+        transform: scale(0.95);
+    }
+
+    .btn-generate {
+        display: block;
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(49, 130, 206, 0.2);
+    }
+    .btn-generate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(49, 130, 206, 0.3);
+    }
+    .btn-generate:active {
+        transform: translateY(0);
+    }
+
+    /* --- МОДАЛЬНОЕ ОКНО (ВСПЛЫВАЮЩЕЕ ОКНО) --- */
+    .modal-overlay {
+        display: none; /* Скрыто по умолчанию */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s ease;
+    }
+    .modal-overlay.show {
+        display: flex;
+    }
+    .modal-content {
+        background: #fff;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 650px;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        animation: slideUp 0.3s ease;
+    }
+    .modal-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 28px;
+        cursor: pointer;
+        color: #a0aec0;
+        line-height: 1;
+        transition: color 0.2s;
+        z-index: 10;
+    }
+    .modal-close:hover {
+        color: #e53e3e;
+    }
+
+    /* Стили для содержимого внутри модалки */
+    .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-right: 30px; /* Отступ для крестика */
+    }
+    .result-header h3 {
+        color: #276749;
+        margin: 0;
+        font-size: 20px;
+    }
+    .result-text p {
+        margin: 10px 0;
+        font-size: 15px;
+        color: #333;
+    }
+    .result-text ul {
+        padding-left: 20px;
+        margin-top: 5px;
+    }
+    .result-text li {
+        margin-bottom: 8px;
+        font-size: 15px;
+        color: #333;
+    }
+
+    .btn-pdf {
+        padding: 10px 20px;
+        background: #e53e3e;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: bold;
+        color: white;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 4px rgba(229, 62, 62, 0.2);
+    }
+    .btn-pdf:hover {
+        background: #c53030;
+        box-shadow: 0 4px 8px rgba(229, 62, 62, 0.3);
+    }
+    .btn-pdf:active {
+        transform: scale(0.98);
+    }
+
+    /* Анимации */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes slideUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* --- СТИЛИ ДЛЯ ПЕЧАТИ / PDF --- */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        /* Показываем только модальное окно и его содержимое */
+        .modal-overlay {
+            display: block !important;
+            position: absolute;
+            top: 0; left: 0;
+            background: transparent;
+        }
+        .modal-content {
+            box-shadow: none;
+            padding: 0;
+            max-height: none;
+            overflow: visible;
+            width: 100%;
+            max-width: 100%;
+        }
+        .modal-close, .btn-pdf {
+            display: none !important;
+        }
+        #result-text, #result-text * {
+            visibility: visible;
+        }
+        .result-header h3 {
+            color: #000;
+            border-bottom: 1px solid #000;
+            padding-bottom: 10px;
+            width: 100%;
+        }
+        .result-text p, .result-text li {
+            color: #000;
+        }
+        @page {
+            margin: 20mm;
+        }
+    }
+</style>
+</head>
+<body>
+
+<div class="volunteer-builder">
+    <h2>🙋‍♂️ Конструктор портрета волонтера</h2>
+    <p class="desc">Соберите портрет идеального волонтера под конкретную задачу вашего учреждения. Отметьте подходящие навыки и обязанности или добавьте свои.</p>
+
+    <div class="input-group">
+        <label for="org-name">Название учреждения и задача (мероприятие):</label>
+        <input type="text" id="org-name" placeholder="Например: Детский центр «Солнышко», новогодний утренник для детей 5-7 лет">
+    </div>
+
+    <div class="tags-section">
+        <h4>🧑‍🎓 Ключевые навыки и компетенции</h4>
+        <div class="tags-container" id="skills-container"></div>
+        <div class="add-custom">
+            <input type="text" id="custom-skill" placeholder="Добавить свой навык...">
+            <button onclick="addCustomSkill()">+</button>
+        </div>
+    </div>
+
+    <div class="tags-section">
+        <h4>🤝 Обязанности волонтера</h4>
+        <div class="tags-container" id="duties-container"></div>
+        <div class="add-custom">
+            <input type="text" id="custom-duty" placeholder="Добавить свою обязанность...">
+            <button onclick="addCustomDuty()">+</button>
+        </div>
+    </div>
+
+    <button class="btn-generate" onclick="generatePortrait()">Сформировать портрет</button>
+</div>
+
+<!-- Модальное окно -->
+<div class="modal-overlay" id="portrait-modal" onclick="closeModalOnOverlay(event)">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal()" title="Закрыть">&times;</button>
+        
+        <div class="result-header">
+            <h3>🙋‍♀️ Портрет волонтера</h3>
+            <button class="btn-pdf" onclick="downloadPDF()">📄 Скачать в PDF</button>
+        </div>
+        <div class="result-text" id="result-text">
+            <!-- Сюда вставляется результат -->
+        </div>
+    </div>
+</div>
+
+<script>
+    let skillsList = [
+        'Знание иностранных языков',
+        'Опыт работы с детьми',
+        'Навыки оказания первой помощи',
+        'Стрессоустойчивость',
+        'Коммуникабельность',
+        'Умение работать в команде',
+        'Водительские права (кат. B)',
+        'Навыки фотографии/видеосъемки'
+    ];
+
+    let dutiesList = [
+        'Встречать и приветствовать гостей',
+        'Проверять билеты и документы',
+        'Провожать гостей по территории',
+        'Помогать в организации мастер-классов',
+        'Следить за порядком в зале',
+        'Раздавать рекламные материалы',
+        'Сопровождать группы детей',
+        'Помогать на фудкорте/буфете'
+    ];
+
+    let selectedSkills = new Set();
+    let selectedDuties = new Set();
+
+    function renderTags() {
+        const skillsContainer = document.getElementById('skills-container');
+        const dutiesContainer = document.getElementById('duties-container');
+        
+        skillsContainer.innerHTML = '';
+        dutiesContainer.innerHTML = '';
+
+        skillsList.forEach((skill) => {
+            const isSelected = selectedSkills.has(skill);
+            const el = document.createElement('div');
+            el.className = `tag ${isSelected ? 'selected' : ''}`;
+            el.onclick = () => toggleSkill(skill);
+            el.innerHTML = `
+                ${skill}
+                ${isSelected ? '<span class="remove-btn" onclick="event.stopPropagation(); removeSkill(\'' + skill + '\')">×</span>' : ''}
+            `;
+            skillsContainer.appendChild(el);
+        });
+
+        dutiesList.forEach((duty) => {
+            const isSelected = selectedDuties.has(duty);
+            const el = document.createElement('div');
+            el.className = `tag duty-tag ${isSelected ? 'selected' : ''}`;
+            el.onclick = () => toggleDuty(duty);
+            el.innerHTML = `
+                ${duty}
+                ${isSelected ? '<span class="remove-btn" onclick="event.stopPropagation(); removeDuty(\'' + duty + '\')">×</span>' : ''}
+            `;
+            dutiesContainer.appendChild(el);
+        });
+    }
+
+    function toggleSkill(skill) {
+        if (selectedSkills.has(skill)) selectedSkills.delete(skill);
+        else selectedSkills.add(skill);
+        renderTags();
+    }
+
+    function toggleDuty(duty) {
+        if (selectedDuties.has(duty)) selectedDuties.delete(duty);
+        else selectedDuties.add(duty);
+        renderTags();
+    }
+
+    function removeSkill(skill) {
+        selectedSkills.delete(skill);
+        renderTags();
+    }
+
+    function removeDuty(duty) {
+        selectedDuties.delete(duty);
+        renderTags();
+    }
+
+    function addCustomSkill() {
+        const input = document.getElementById('custom-skill');
+        const val = input.value.trim();
+        if (val && !skillsList.includes(val)) {
+            skillsList.push(val);
+            selectedSkills.add(val);
+            input.value = '';
+            renderTags();
+        }
+    }
+
+    function addCustomDuty() {
+        const input = document.getElementById('custom-duty');
+        const val = input.value.trim();
+        if (val && !dutiesList.includes(val)) {
+            dutiesList.push(val);
+            selectedDuties.add(val);
+            input.value = '';
+            renderTags();
+        }
+    }
+
+    function generatePortrait() {
+        const orgName = document.getElementById('org-name').value.trim();
+        const resultText = document.getElementById('result-text');
+        const modal = document.getElementById('portrait-modal');
+
+        if (!orgName) {
+            alert('Пожалуйста, укажите название учреждения и задачу.');
+            return;
+        }
+        if (selectedSkills.size === 0 && selectedDuties.size === 0) {
+            alert('Пожалуйста, выберите хотя бы один навык или обязанность.');
+            return;
+        }
+
+        let html = `<p><strong>Учреждение / Задача:</strong> ${orgName}</p>`;
+        
+        if (selectedSkills.size > 0) {
+            html += `<p><strong>Требуемые навыки и компетенции:</strong></p><ul>`;
+            selectedSkills.forEach(skill => {
+                html += `<li>${skill}</li>`;
+            });
+            html += `</ul>`;
+        }
+
+        if (selectedDuties.size > 0) {
+            html += `<p><strong>Обязанности волонтера:</strong></p><ul>`;
+            selectedDuties.forEach(duty => {
+                html += `<li>${duty}</li>`;
+            });
+            html += `</ul>`;
+        }
+
+        const date = new Date().toLocaleDateString('ru-RU');
+        html += `<p style="margin-top: 30px; font-size: 12px; color: #666; text-align: right;">Сформировано: ${date} г.</p>`;
+
+        resultText.innerHTML = html;
+        
+        // Показываем модальное окно
+        modal.classList.add('show');
+    }
+
+    // Закрытие модального окна
+    function closeModal() {
+        document.getElementById('portrait-modal').classList.remove('show');
+    }
+
+    // Закрытие при клике на затемненный фон (вне окна)
+    function closeModalOnOverlay(event) {
+        if (event.target === document.getElementById('portrait-modal')) {
+            closeModal();
+        }
+    }
+
+    function downloadPDF() {
+        window.print();
+    }
+
+    window.onload = () => {
+        renderTags();
+        
+        document.getElementById('custom-skill').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addCustomSkill();
+        });
+        document.getElementById('custom-duty').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addCustomDuty();
+        });
+    };
+</script>
+
+</body>
+</html>
