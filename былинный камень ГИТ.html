@@ -23,6 +23,7 @@
     }
 
     main {
+      width: 100%;
       max-width: 1100px;
       margin: 0 auto;
     }
@@ -59,32 +60,34 @@
       background: #b9ad9a;
     }
 
-    .scene-scroll {
-      width: 100%;
-      overflow-x: auto;
-      padding-bottom: 12px;
-    }
-
+    /* Три колонки сохраняются на любой ширине экрана. */
     .scene {
       display: grid;
-      grid-template-columns: 220px 280px 220px;
-      grid-template-rows: auto 280px;
-      column-gap: 12px;
+      grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1.27fr)
+        minmax(0, 1fr);
+      grid-template-rows: auto auto;
+      column-gap: clamp(4px, 1.5vw, 12px);
       row-gap: 10px;
       align-items: center;
-      width: 744px;
+      width: 100%;
+      max-width: 744px;
       margin: 0 auto;
     }
 
     .choice {
+      display: block;
       width: 100%;
-      padding: 10px 12px;
+      min-width: 0;
+      padding: clamp(4px, 1.2vw, 12px);
       border: 1px solid #77654d;
       border-radius: 8px;
       background: #fff;
       color: inherit;
-      font: 14px/1.35 Arial, sans-serif;
+      font: clamp(9px, 1.8vw, 14px)/1.35 Arial, sans-serif;
       text-align: left;
+      overflow-wrap: anywhere;
       cursor: pointer;
     }
 
@@ -102,20 +105,26 @@
     .choice-left {
       grid-column: 1;
       grid-row: 2;
+      align-self: center;
     }
 
     .choice-right {
       grid-column: 3;
       grid-row: 2;
+      align-self: center;
     }
 
     .stone-image {
       grid-column: 2;
       grid-row: 2;
       display: block;
-      width: 280px;
-      height: 280px;
+      width: 100%;
+      max-width: 280px;
+      height: auto;
+      aspect-ratio: 1;
       object-fit: contain;
+      justify-self: center;
+      align-self: center;
     }
 
     dialog {
@@ -147,6 +156,7 @@
       border-radius: 7px;
       color: #25221e;
       font: 12px/1.25 Arial, sans-serif;
+      overflow-wrap: anywhere;
       cursor: pointer;
     }
 
@@ -263,34 +273,32 @@
 
       <hr>
 
-      <div class="scene-scroll">
-        <div class="scene">
-          <button
-            class="choice choice-top"
-            type="button"
-            data-position="top"
-          ></button>
+      <div class="scene">
+        <button
+          class="choice choice-top"
+          type="button"
+          data-position="top"
+        ></button>
 
-          <button
-            class="choice choice-left"
-            type="button"
-            data-position="left"
-          ></button>
+        <button
+          class="choice choice-left"
+          type="button"
+          data-position="left"
+        ></button>
 
-          <img
-            class="stone-image"
-            id="stone-image"
-            alt=""
-            width="280"
-            height="280"
-          >
+        <img
+          class="stone-image"
+          id="stone-image"
+          alt=""
+          width="280"
+          height="280"
+        >
 
-          <button
-            class="choice choice-right"
-            type="button"
-            data-position="right"
-          ></button>
-        </div>
+        <button
+          class="choice choice-right"
+          type="button"
+          data-position="right"
+        ></button>
       </div>
     </section>
 
