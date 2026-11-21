@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Самоаудит: риск проверки ГИТ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f6f8; padding: 12px; display: flex; justify-content: center; }
+  .widget { max-width: 640px; width: 100%; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden; }
+  .header { background: #1a2b4a; color: #fff; padding: 18px 20px; }
+  .header h2 { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+  .header p { font-size: 13px; opacity: 0.8; line-height: 1.4; }
+  .body { padding: 16px 20px 20px; }
+  .field { margin-bottom: 16px; }
+  .field-label { font-size: 13px; font-weight: 600; color: #1a2b4a; margin-bottom: 8px; display: block; }
+  .field-label .hint { font-weight: 400; color: #7a8290; font-size: 12px; }
+  .options { display: flex; flex-wrap: wrap; gap: 6px; }
+  .options label { flex: 1 1 auto; min-width: 70px; text-align: center; padding: 8px 10px; border: 1.5px solid #d0d5dd; border-radius: 8px; font-size: 12.5px; cursor: pointer; transition: all 0.15s; color: #344054; background: #fff; user-select: none; }
+  .options label:hover { border-color: #1a2b4a; }
+  .options input[type="radio"] { display: none; }
+  .options input[type="radio"]:checked + span { color: #1a2b4a; font-weight: 600; }
+  .options label:has(input:checked) { border-color: #1a2b4a; background: #eef2f8; }
+  .btn { width: 100%; padding: 12px; background: #1a2b4a; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 4px; transition: background 0.15s; }
+  .btn:hover { background: #243d66; }
+  .result { margin-top: 18px; padding: 16px; border-radius: 10px; display: none; }
+  .result.visible { display: block; }
+  .result.low { background: #ecfdf3; border: 1.5px solid #a6f4c5; }
+  .result.medium { background: #fffaeb; border: 1.5px solid #fedf89; }
+  .result.high { background: #fef3f2; border: 1.5px solid #fda29b; }
+  .risk-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
+  .low .risk-badge { background: #d1fadf; color: #05603a; }
+  .medium .risk-badge { background: #fef0c7; color: #93370d; }
+  .high .risk-badge { background: #fee4e2; color: #b42318; }
+  .diagnosis { font-size: 13.5px; line-height: 1.5; color: #344054; margin-bottom: 12px; }
+  .recs-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #667085; margin-bottom: 6px; }
+  .recs { list-style: none; padding: 0; }
+  .recs li { font-size: 13px; line-height: 1.45; color: #344054; padding: 6px 0 6px 20px; position: relative; border-bottom: 1px solid rgba(0,0,0,0.05); }
+  .recs li:last-child { border-bottom: none; }
+  .recs li::before { content: "→"; position: absolute; left: 0; color: #667085; font-weight: 600; }
+  .checklist-toggle { margin-top: 14px; background: none; border: 1.5px solid #d0d5dd; color: #1a2b4a; padding: 8px 14px; border-radius: 8px; font-size: 12.5px; cursor: pointer; width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center; }
+  .checklist-toggle:hover { border-color: #1a2b4a; }
+  .checklist { margin-top: 10px; display: none; }
+  .checklist.open { display: block; }
+  .checklist-item { background: #f9fafb; border-left: 3px solid #1a2b4a; padding: 8px 10px; margin-bottom: 6px; font-size: 12px; line-height: 1.45; color: #344054; border-radius: 0 6px 6px 0; }
+  .checklist-item .norm { display: block; margin-top: 3px; font-size: 11px; color: #667085; }
+  .reset { background: none; border: none; color: #667085; font-size: 12px; cursor: pointer; margin-top: 10px; text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="header">
+    <h2>Самоаудит: риск проверки ГИТ</h2>
+    <p>Три «культурных» индикатора риска. Отметьте параметры вашего учреждения — получите оценку и срочные меры.</p>
+  </div>
+  <div class="body">
+    <form id="auditForm">
+
+      <div class="field">
+        <span class="field-label">Тип учреждения</span>
+        <div class="options">
+          <label><input type="radio" name="type" value="museum" checked><span>Музей</span></label>
+          <label><input type="radio" name="type" value="theatre"><span>Театр</span></label>
+          <label><input type="radio" name="type" value="dshi"><span>ДШИ</span></label>
+          <label><input type="radio" name="type" value="club"><span>Клубная система</span></label>
+          <label><input type="radio" name="type" value="other"><span>Другое</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Текучесть за последний квартал <span class="hint">(увольнения / среднесписочная)</span></span>
+        <div class="options">
+          <label><input type="radio" name="turnover" value="0"><span>&lt; 15%</span></label>
+          <label><input type="radio" name="turnover" value="1"><span>15–30%</span></label>
+          <label><input type="radio" name="turnover" value="3"><span>&gt; 30%</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Доля работников с начислением ниже МРОТ <span class="hint">(пропорционально ставке)</span></span>
+        <div class="options">
+          <label><input type="radio" name="mrot" value="0"><span>&lt; 30%</span></label>
+          <label><input type="radio" name="mrot" value="1"><span>30–50%</span></label>
+          <label><input type="radio" name="mrot" value="3"><span>&gt; 50%</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Уволились и оформили самозанятость за квартал</span>
+        <div class="options">
+          <label><input type="radio" name="sz" value="0" checked><span>0–5 чел.</span></label>
+          <label><input type="radio" name="sz" value="1"><span>6–9 чел.</span></label>
+          <label><input type="radio" name="sz" value="3"><span>10+ чел.</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Из них со среднемесячным доходом ≥ 25 тыс. руб.</span>
+        <div class="options">
+          <label><input type="radio" name="income" value="0" checked><span>0–4 чел.</span></label>
+          <label><input type="radio" name="income" value="1"><span>5–9 чел.</span></label>
+          <label><input type="radio" name="income" value="3"><span>10+ чел.</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Продолжают оказывать услуги учреждению</span>
+        <div class="options">
+          <label><input type="radio" name="active" value="0" checked><span>Нет</span></label>
+          <label><input type="radio" name="active" value="1"><span>Частично</span></label>
+          <label><input type="radio" name="active" value="2"><span>Да</span></label>
+        </div>
+      </div>
+
+      <button type="button" class="btn" onclick="calculate()">Оценить риск</button>
+    </form>
+
+    <div id="result" class="result">
+      <div id="riskBadge" class="risk-badge"></div>
+      <div id="diagnosis" class="diagnosis"></div>
+      <div class="recs-title">Срочные меры</div>
+      <ul id="recs" class="recs"></ul>
+      <button type="button" class="checklist-toggle" onclick="toggleChecklist()">Показать вопросы из чек-листа Роструда <span id="arrow">▼</span></button>
+      <div id="checklist" class="checklist">
+        <div class="checklist-item">Соблюдает ли работодатель запрет на заключение гражданско-правовых договоров, фактически регулирующих трудовые отношения между работником и работодателем? <span class="norm">ч. 2 ст. 15 ТК РФ</span></div>
+        <div class="checklist-item">Оформил ли работодатель трудовой договор, если отношения, возникшие на основании ГПД, признаны трудовыми, — не позднее 3 рабочих дней? <span class="norm">ч. 2 ст. 67 ТК РФ</span></div>
+        <div class="checklist-item">Оплатил ли работодатель фактически отработанное время, если физлицо допущено к работе неуполномоченным лицом и работодатель отказался признать отношения трудовыми? <span class="norm">ч. 1 ст. 67.1 ТК РФ</span></div>
+        <div class="checklist-item">Ознакомлен ли работник под роспись при приёме на работу (до подписания договора) с ПВТР, иными ЛНА, коллективным договором? <span class="norm">ч. 3 ст. 68 ТК РФ</span></div>
+      </div>
+      <button type="button" class="reset" onclick="resetForm()">Пройти заново</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function calculate() {
+  const form = document.getElementById('auditForm');
+  const type = form.querySelector('input[name="type"]:checked').value;
+  const turnover = parseInt(form.querySelector('input[name="turnover"]:checked')?.value || 0);
+  const mrot = parseInt(form.querySelector('input[name="mrot"]:checked')?.value || 0);
+  const sz = parseInt(form.querySelector('input[name="sz"]:checked')?.value || 0);
+  const income = parseInt(form.querySelector('input[name="income"]:checked')?.value || 0);
+  const active = parseInt(form.querySelector('input[name="active"]:checked')?.value || 0);
+
+  const szTriggered = (sz === 3 && income === 3 && active === 2);
+  let szScore = 0;
+  if (szTriggered) { szScore = 5; }
+  else {
+    const hits = [sz === 3, income === 3, active === 2].filter(Boolean).length;
+    szScore = hits >= 2 ? 3 : hits === 1 ? 1 : 0;
+  }
+
+  const total = turnover + mrot + szScore;
+
+  let level, badgeText, badgeClass, diag;
+  const typeNames = { museum: 'музея', theatre: 'театра', dshi: 'ДШИ', club: 'клубной системы', other: 'учреждения' };
+  const tn = typeNames[type];
+
+  if (total <= 4) {
+    level = 'low'; badgeText = 'Низкий риск'; badgeClass = 'low';
+    diag = `По трём ключевым индикаторам ваше учреждение (${tn}) в зоне низкого риска. Однако новый десятый индикатор (10+ самозанятых с доходом ≥25 тыс. руб.) требует регулярного мониторинга — даже при нулевых показателях за прошлый квартал ситуация может измениться после завершения сезона или проекта.`;
+  } else if (total <= 9) {
+    level = 'medium'; badgeText = 'Средний риск'; badgeClass = 'medium';
+    diag = `Есть зоны, требующие внимания. Наиболее уязвимый показатель — ${turnover >= mrot && turnover >= szScore ? 'текучесть кадров' : mrot >= szScore ? 'доля работников с начислением ниже МРОТ' : 'работа с самозанятыми'}. Рекомендуем провести документарную сверку до конца новогодних каникул: инспектор может запросить пояснения, и наличие готовой папки сократит срок проверки.`;
+  } else {
+    level = 'high'; badgeText = 'Высокий риск'; badgeClass = 'high';
+    diag = `Сочетание показателей создаёт реальную угрозу срабатывания индикаторов и внеплановой проверки. ${szTriggered ? 'Выполнены все три условия нового десятого индикатора: массовый переход в самозанятость с доходом ≥25 тыс. руб. при продолжении работы. Это прямая зона риска по ч. 2 ст. 15 ТК РФ.' : 'Необходим срочный аудит: начните с самозанятых и МРОТ, затем зафиксируйте документально объяснения по текучести.'}`;
+  }
+
+  const recs = [];
+  if (szScore >= 3) {
+    recs.push('Проведите реестр всех самозанятых: ФИО, сумма, периодичность, наличие актов с конкретным результатом. Для «пограничных» — либо перевод в штат, либо переформатирование договора в проект с измеримым результатом.');
+    recs.push('Подготовьте письменное пояснение: почему рост числа самозанятых обусловлен проектной/сезонной спецификой, а не подменой трудовых отношений. Приложите акты и договоры.');
+  }
+  if (mrot >= 1) {
+    recs.push('Сверьте расчётные листки за квартал. Выделите совместителей, неполные ставки, сезонных. Подготовьте справку-расшифровку по каждой категории с указанием ставки, отработанного времени и начисленной суммы.');
+  }
+  if (turnover >= 1) {
+    recs.push('Соберите «пояснительную папку» по текучести за 4 квартала: приказы об увольнении с основаниями, акты по срочным договорам, служебные записки о завершении проектов. Каждое увольнение должно быть объяснено документом.');
+  }
+  if (recs.length === 0) {
+    recs.push('Поддерживайте текущий уровень: назначьте ежеквартальную сверку по трём индикаторам (текучесть, МРОТ, самозанятые). Один день в квартал дешевле, чем 10 дней документарной проверки.');
+    recs.push('Проверьте актуальность СОУТ и записей во ФГИС — это отдельный индикатор риска, который часто срабатывает у учреждений культуры.');
+  }
+
+  document.getElementById('riskBadge').textContent = badgeText;
+  document.getElementById('riskBadge').className = 'risk-badge ' + badgeClass;
+  document.getElementById('diagnosis').textContent = diag;
+  const recsList = document.getElementById('recs');
+  recsList.innerHTML = '';
+  recs.slice(0, 3).forEach(r => {
+    const li = document.createElement('li');
+    li.textContent = r;
+    recsList.appendChild(li);
+  });
+
+  const result = document.getElementById('result');
+  result.className = 'result visible ' + level;
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function toggleChecklist() {
+  const cl = document.getElementById('checklist');
+  const arrow = document.getElementById('arrow');
+  cl.classList.toggle('open');
+  arrow.textContent = cl.classList.contains('open') ? '▲' : '▼';
+}
+
+function resetForm() {
+  document.getElementById('result').className = 'result';
+  document.getElementById('checklist').classList.remove('open');
+  document.getElementById('arrow').textContent = '▼';
+  document.getElementById('auditForm').reset();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
