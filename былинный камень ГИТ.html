@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Квест</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scrollbar-gutter: stable;
+    }
+
+    body {
+      margin: 0;
+      padding: 32px 20px;
+      font: 16px/1.5 Arial, sans-serif;
+      color: #25221e;
+      background: #fff;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .intro {
+      font-size: 15px;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    .intro p {
+      margin: 0 0 16px;
+    }
+
+    .stage-label {
+      display: inline-block;
+      padding: 3px 12px;
+      border-radius: 999px;
+      background: #d5edce;
+    }
+
+    .stone-text {
+      color: #800020;
+    }
+
+    hr {
+      height: 1px;
+      margin: 24px 0 32px;
+      border: 0;
+      background: #b9ad9a;
+    }
+
+    .scene-scroll {
+      width: 100%;
+      overflow-x: auto;
+      padding-bottom: 12px;
+    }
+
+    .scene {
+      display: grid;
+      grid-template-columns: 220px 280px 220px;
+      grid-template-rows: auto 280px;
+      column-gap: 12px;
+      row-gap: 10px;
+      align-items: center;
+      width: 744px;
+      margin: 0 auto;
+    }
+
+    .choice {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #77654d;
+      border-radius: 8px;
+      background: #fff;
+      color: inherit;
+      font: 14px/1.35 Arial, sans-serif;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .choice:hover,
+    .choice:focus-visible {
+      background: #f3f3f3;
+    }
+
+    .choice-top {
+      grid-column: 2;
+      grid-row: 1;
+      align-self: end;
+    }
+
+    .choice-left {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .choice-right {
+      grid-column: 3;
+      grid-row: 2;
+    }
+
+    .stone-image {
+      grid-column: 2;
+      grid-row: 2;
+      display: block;
+      width: 280px;
+      height: 280px;
+      object-fit: contain;
+    }
+
+    dialog {
+      width: min(92vw, 600px);
+      padding: clamp(14px, 4vw, 28px);
+      border: 2px solid #77654d;
+      border-radius: 12px;
+      background: #fff;
+      color: inherit;
+      font: inherit;
+    }
+
+    dialog::backdrop {
+      background: rgb(0 0 0 / 65%);
+    }
+
+    .modal-actions {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 6px;
+      margin-top: 20px;
+    }
+
+    .modal-actions button,
+    .certificate-actions button {
+      min-width: 0;
+      padding: 7px 8px;
+      border: 1px solid #77654d;
+      border-radius: 7px;
+      color: #25221e;
+      font: 12px/1.25 Arial, sans-serif;
+      cursor: pointer;
+    }
+
+    .modal-actions button {
+      flex: 1 1 0;
+    }
+
+    .modal-actions button:hover,
+    .modal-actions button:focus-visible,
+    .certificate-actions button:hover,
+    .certificate-actions button:focus-visible {
+      filter: brightness(0.95);
+    }
+
+    .restart-button {
+      background: #ffe59a;
+    }
+
+    .back-button {
+      background: #dfd0f5;
+    }
+
+    .continue-button {
+      background: #cce9bd;
+    }
+
+    .certificate {
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .certificate-image {
+      display: block;
+      width: 100%;
+      max-width: 420px;
+      height: auto;
+      margin: 0 auto;
+    }
+
+    .certificate-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 24px 8px;
+      }
+
+      .modal-actions button {
+        padding: 7px 4px;
+        font-size: 11px;
+      }
+
+      .certificate-actions {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
+
+      html,
+      body {
+        width: auto;
+        margin: 0;
+        padding: 0;
+      }
+
+      main,
+      .certificate {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      #stage-screen,
+      .certificate-actions,
+      dialog {
+        display: none !important;
+      }
+
+      .certificate-image {
+        display: block;
+        width: auto;
+        max-width: 190mm;
+        max-height: 277mm;
+        height: auto;
+        margin: 0 auto;
+        object-fit: contain;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <section id="stage-screen">
+      <div class="intro">
+        <p>
+          <span class="stage-label" id="stage-label"></span>
+          <span id="stage-description"></span>
+        </p>
+
+        <p class="stone-text" id="stone-description"></p>
+      </div>
+
+      <hr>
+
+      <div class="scene-scroll">
+        <div class="scene">
+          <button
+            class="choice choice-top"
+            type="button"
+            data-position="top"
+          ></button>
+
+          <button
+            class="choice choice-left"
+            type="button"
+            data-position="left"
+          ></button>
+
+          <img
+            class="stone-image"
+            id="stone-image"
+            alt=""
+            width="280"
+            height="280"
+          >
+
+          <button
+            class="choice choice-right"
+            type="button"
+            data-position="right"
+          ></button>
+        </div>
+      </div>
+    </section>
+
+    <section id="certificate-screen" class="certificate" hidden>
+      <img
+        class="certificate-image"
+        src="https://www.cultmanager.ru/images/Vibecoding/carskaya-gramota-bezopasnosti.png"
+        alt="Царская грамота безопасности"
+      >
+
+      <div class="certificate-actions">
+        <button
+          class="continue-button"
+          id="save-certificate"
+          type="button"
+        >Сохранить грамоту в PDF</button>
+
+        <button
+          class="restart-button"
+          id="certificate-restart"
+          type="button"
+        >Начать квест заново</button>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="result">
+    <div id="explanation"></div>
+
+    <div class="modal-actions">
+      <button
+        class="restart-button"
+        id="restart"
+        type="button"
+      >Начать квест заново</button>
+
+      <button
+        class="back-button"
+        id="back"
+        type="button"
+      >Вернуться на шаг назад</button>
+
+      <button
+        class="continue-button"
+        id="continue"
+        type="button"
+        hidden
+      >Продолжить путь-дорогу</button>
+    </div>
+  </dialog>
+
+  <script>
+    const stoneDescription = "ПЕРЕД ВАМИ ВЫСИТСЯ БЫЛИННЫЙ КАМЕНЬ";
+
+    const stages = [
+      {
+        description: "В учреждение пришло письменное требование ГИТ: инспекция на основе данных налоговой зафиксировала аномалию и требует кадровые документы.",
+        image: "https://www.cultmanager.ru/images/Vibecoding/kamen1.jpg",
+        correct: "top",
+        choices: {
+          left: {
+            text: "Сесть собирать папки с договорами и писать оправдательные письма.",
+            result: "Тупик. Вы увязли в рутине. Руководитель не должен сам выполнять работу кадровика, пока горит основная деятельность. Время упущено."
+          },
+          top: {
+            text: "Сверить учетный номер надзорного мероприятия в Едином реестре по номеру, указанному в требовании, и выдать кадровику доверенность на ведение дела.",
+            result: "Верно! Без записи в Едином реестре надзорных мероприятий любое требование ГИТ незаконно. А доверенность позволит делегировать сбор документов профессионалу. Путь открыт!"
+          },
+          right: {
+            text: "Запереть архивы и велеть секретарю отвечать, что директора нет на месте.",
+            result: "Тупик. Игнорирование официального требования и недопуск инспектора — автоматический штраф за срыв проверки."
+          }
+        }
+      },
+      {
+        description: "В требовании ГИТ появилась строчка: «Предоставить иные документы за три года».",
+        image: "https://www.cultmanager.ru/images/Vibecoding/kamen2.jpg",
+        correct: "right",
+        choices: {
+          left: {
+            text: "Отправить вообще все архивы и выписки за три года, чтобы не было претензий.",
+            result: "Тупик. Инспектор найдет ошибки в лишних бумагах, не имеющих отношения к делу."
+          },
+          top: {
+            text: "Жестко отказать по телефону, бросить трубку и пригрозить прокуратурой.",
+            result: "Тупик. Агрессивный отказ без ссылок на закон приравняют к сокрытию данных."
+          },
+          right: {
+            text: "Сдать папки строго по предмету проверки, на размытую строчку написать отказ по закону.",
+            result: "Верно! Инспектор не имеет права просить документы вне предмета проверки согласно части 6 статьи 72 Закона № 248-ФЗ."
+          }
+        }
+      },
+      {
+        description: "На представление документов по закону дается 10 рабочих дней со дня получения требования (ч. 4 ст. 72 Закона № 248-ФЗ). Кадровик не успевает сшить 500 листов договоров к завтрашнему утру.",
+        image: "https://www.cultmanager.ru/images/Vibecoding/kamen3.jpg",
+        correct: "left",
+        choices: {
+          left: {
+            text: "Направить в ГИТ официальное письменное ходатайство о продлении срока.",
+            result: "Верный путь! Часть 4 статьи 80 Закона № 248-ФЗ официально разрешает продлить время проверки при уважительных причинах, если направить письменное ходатайство незамедлительно. Инспектор обязан рассмотреть его за 24 часа."
+          },
+          top: {
+            text: "Сдать завтра только половину, а остальное привезти потом без предупреждения.",
+            result: "Тупик. Сдача неполного пакета в установленный срок приравнивается к срыву проверки."
+          },
+          right: {
+            text: "Подделать недостающие акты и подписи за ночь, чтобы папка выглядела полной.",
+            result: "Тупик. Фальсификация — уголовная статья. Робот легко вычислит подделку по базам данных."
+          }
+        }
+      },
+      {
+        description: "Папки готовы к отправке. Нужно обосновать сработавшие индикаторы.",
+        image: "https://www.cultmanager.ru/images/Vibecoding/kamen4.jpg",
+        correct: "right",
+        choices: {
+          left: {
+            text: "Отправить голые папки. Пусть инспектор сам сидит и разбирается.",
+            result: "Тупик. Не увидев ваших аргументов, инспектор выставит максимальный штраф."
+          },
+          top: {
+            text: "Приложить к папкам жалобное письмо про «сложную творческую специфику».",
+            result: "Тупик. Эмоции к делу не пришьешь. Проверка завершилась штрафом."
+          },
+          right: {
+            text: "Приложить к каждой папке короткое письменное пояснение с фактами и актами.",
+            result: "Ура! Четкие пояснения перекрыли риски. Инспектор закрыл дело без нарушений."
+          }
+        }
+      }
+    ];
+
+    const stageScreen = document.getElementById("stage-screen");
+    const certificateScreen = document.getElementById("certificate-screen");
+    const resultDialog = document.getElementById("result");
+    const restartButton = document.getElementById("restart");
+    const continueButton = document.getElementById("continue");
+
+    let currentStage = 0;
+
+    function showStage(index) {
+      currentStage = index;
+      const stage = stages[index];
+
+      if (resultDialog.open) {
+        resultDialog.close();
+      }
+
+      certificateScreen.hidden = true;
+      stageScreen.hidden = false;
+
+      document.getElementById("stage-label").textContent =
+        `Этап ${index + 1}`;
+
+      document.getElementById("stage-description").textContent =
+        stage.description;
+
+      document.getElementById("stone-description").textContent =
+        stoneDescription;
+
+      document.getElementById("stone-image").src = stage.image;
+
+      document.querySelectorAll(".choice").forEach(button => {
+        button.textContent =
+          stage.choices[button.dataset.position].text;
+      });
+
+      window.scrollTo(0, 0);
+    }
+
+    document.querySelectorAll(".choice").forEach(button => {
+      button.addEventListener("click", () => {
+        const position = button.dataset.position;
+        const stage = stages[currentStage];
+        const isCorrect = position === stage.correct;
+
+        document.getElementById("explanation").textContent =
+          stage.choices[position].result;
+
+        restartButton.hidden = currentStage === 0;
+        continueButton.hidden = !isCorrect;
+
+        continueButton.textContent =
+          currentStage === stages.length - 1
+            ? "Смотреть результат квеста"
+            : "Продолжить путь-дорогу";
+
+        resultDialog.showModal();
+      });
+    });
+
+    restartButton.addEventListener("click", () => {
+      showStage(0);
+    });
+
+    document.getElementById("back").addEventListener("click", () => {
+      showStage(currentStage);
+    });
+
+    continueButton.addEventListener("click", () => {
+      resultDialog.close();
+
+      if (currentStage === stages.length - 1) {
+        stageScreen.hidden = true;
+        certificateScreen.hidden = false;
+        window.scrollTo(0, 0);
+      } else {
+        showStage(currentStage + 1);
+      }
+    });
+
+    document.getElementById("certificate-restart")
+      .addEventListener("click", () => {
+        showStage(0);
+      });
+
+    document.getElementById("save-certificate")
+      .addEventListener("click", () => {
+        window.print();
+      });
+
+    showStage(0);
+  </script>
+</body>
+</html>
