@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кадровый аудит в учреждении культуры</title>
+
+<style>
+  :root {
+    --ink: #252b35;
+    --muted: #727985;
+    --line: #e2e5e9;
+    --green: #d5edce;
+    --green-dark: #245b30;
+    --yellow: #ffe59a;
+    --blue: #dce9ff;
+    --purple: #e5d8f6;
+    --red: #a52d35;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scrollbar-gutter: stable;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  body {
+    margin: 0;
+    padding: 24px 16px;
+    background: #f3f5f9;
+    color: var(--ink);
+    font: 15px/1.5 Arial, sans-serif;
+  }
+
+  main {
+    width: 100%;
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  h1, h2, p {
+    margin: 0;
+  }
+
+  h1 {
+    font-size: clamp(23px, 3.8vw, 30px);
+    line-height: 1.22;
+    letter-spacing: -0.025em;
+  }
+
+  button {
+    font: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:focus-visible {
+    outline: 3px solid #9cb7eb;
+    outline-offset: 3px;
+  }
+
+  button:hover:not(:disabled) {
+    filter: brightness(0.96);
+  }
+
+  button:disabled {
+    cursor: default;
+  }
+
+  .label {
+    display: inline-block;
+    padding: 3px 12px;
+    margin-bottom: 12px;
+    border-radius: 999px;
+    background: var(--green);
+    color: var(--green-dark);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .intro {
+    max-width: 760px;
+    margin: 12px auto 0;
+    padding: clamp(22px, 4vw, 34px);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+  }
+
+  .intro .label {
+    padding: 0;
+    margin-bottom: 12px;
+    background: transparent;
+    border-radius: 0;
+    color: #385cde;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+  }
+
+  .intro h1 {
+    margin-bottom: 16px;
+  }
+
+  .intro-text {
+    color: #4b5563;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .task {
+    margin-top: 20px;
+    padding: 16px 18px;
+    background: #f3f5f8;
+    border-radius: 11px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .center-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+  }
+
+  .button {
+    min-height: 40px;
+    padding: 9px 18px;
+    border: 1px solid rgba(0, 0, 0, 0.13);
+    border-radius: 8px;
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 700;
+    transition: filter 0.15s;
+  }
+
+  .button-green {
+    background: var(--green);
+    border-color: #accb9f;
+  }
+
+  .button-restart {
+    background: var(--purple);
+    border-color: #c6b0e3;
+    color: #4e386c;
+  }
+
+  .button-white {
+    background: #fff;
+    border-color: var(--line);
+  }
+
+  .game-title {
+    font-size: clamp(20px, 3.4vw, 26px);
+    margin-bottom: 16px;
+  }
+
+  .dashboard {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1.1fr)
+      minmax(0, 0.8fr)
+      minmax(0, 0.85fr)
+      minmax(0, 1.25fr);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .stat {
+    min-width: 0;
+    padding: 10px 12px;
+    border-right: 1px solid var(--line);
+  }
+
+  .stat:last-child {
+    border-right: 0;
+  }
+
+  .stat-label {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.25;
+    min-height: 28px;
+  }
+
+  .stat-value {
+    margin-top: 3px;
+    font-size: 23px;
+    font-weight: 700;
+    line-height: 1.15;
+  }
+
+  .stat-value small {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 400;
+  }
+
+  .stat-td {
+    background: #f3f9f0;
+  }
+
+  .stat-gph {
+    background: #fff9e9;
+  }
+
+  .stat-npd {
+    background: #f0f5ff;
+  }
+
+  .progress {
+    height: 3px;
+    margin: 12px 0 18px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #e2e6ec;
+  }
+
+  .progress-fill {
+    width: 0;
+    height: 100%;
+    background: #77a669;
+    transition: width 0.2s ease;
+  }
+
+  .candidate {
+    padding: 20px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+  }
+
+  .card-number {
+    margin-bottom: 14px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .identity {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 17px;
+  }
+
+  .avatar {
+    display: grid;
+    place-items: center;
+    flex: 0 0 66px;
+    width: 66px;
+    height: 66px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 50%;
+    background: var(--avatar-bg, #f1f3f7);
+    font-size: 43px;
+    line-height: 1;
+    font-family:
+      "Apple Color Emoji",
+      "Segoe UI Emoji",
+      "Noto Color Emoji",
+      sans-serif;
+  }
+
+  .candidate-name {
+    font-size: 23px;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .candidate-role {
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .dossier {
+    padding: 14px 16px;
+    background: #f5f6f8;
+    border-radius: 9px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .dossier-label {
+    margin-bottom: 5px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .question {
+    margin: 16px 0 10px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .choices {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .choice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 0;
+    min-height: 78px;
+    padding: 10px 7px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: var(--ink);
+    text-align: center;
+    transition: filter 0.15s;
+  }
+
+  .choice strong {
+    font-size: 13px;
+    line-height: 1.25;
+  }
+
+  .choice span {
+    font-size: 10px;
+    line-height: 1.25;
+    opacity: 0.78;
+  }
+
+  .choice-td {
+    background: var(--green);
+    border-color: #accb9f;
+  }
+
+  .choice-gph {
+    background: var(--yellow);
+    border-color: #dfc36f;
+  }
+
+  .choice-npd {
+    background: var(--blue);
+    border-color: #adc5eb;
+  }
+
+  dialog {
+    width: min(92vw, 540px);
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    padding: 22px;
+    border: 1px solid #d9dee4;
+    border-radius: 12px;
+    background: #fff;
+    color: var(--ink);
+    box-shadow: 0 18px 70px rgb(0 0 0 / 18%);
+    font: inherit;
+  }
+
+  dialog::backdrop {
+    background: rgb(0 0 0 / 55%);
+  }
+
+  .dialog-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+
+  .dialog-title {
+    font-size: 23px;
+    line-height: 1.2;
+    color: var(--green-dark);
+  }
+
+  .dialog-title.error {
+    color: var(--red);
+  }
+
+  .close {
+    flex: 0 0 28px;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #f1f3f5;
+    color: #717984;
+    font-size: 21px;
+    line-height: 1;
+  }
+
+  .explanation {
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+  }
+
+  .modal-actions .button {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .finish {
+    padding: clamp(20px, 4vw, 30px);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+  }
+
+  .finish h1 {
+    margin-bottom: 12px;
+  }
+
+  .result-group {
+    padding: 13px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .result-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: baseline;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .result-heading span:last-child {
+    flex-shrink: 0;
+  }
+
+  .result-group p {
+    margin-top: 5px;
+    color: #666f7b;
+    font-size: 13px;
+  }
+
+  .result-td {
+    color: #35623b;
+  }
+
+  .result-gph {
+    color: #89641e;
+  }
+
+  .result-npd {
+    color: #3d62a2;
+  }
+
+  .final-message {
+    margin-top: 20px;
+    padding: 16px 18px;
+    border-radius: 11px;
+    background: #edf6e9;
+    color: #34552f;
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  @media (max-width: 600px) {
+    body {
+      padding: 18px 9px;
+    }
+
+    .intro {
+      margin-top: 0;
+      padding: 20px 16px;
+    }
+
+    .intro-text {
+      font-size: 14px;
+    }
+
+    .task {
+      padding: 13px 14px;
+      font-size: 13px;
+    }
+
+    .stat {
+      padding: 9px 7px;
+    }
+
+    .stat-label {
+      font-size: 9px;
+      min-height: 25px;
+    }
+
+    .stat-value {
+      font-size: 21px;
+    }
+
+    .stat-value small {
+      font-size: 10px;
+    }
+
+    .candidate {
+      padding: 15px 12px;
+    }
+
+    .identity {
+      gap: 11px;
+      margin-bottom: 14px;
+    }
+
+    .avatar {
+      flex-basis: 58px;
+      width: 58px;
+      height: 58px;
+      font-size: 38px;
+    }
+
+    .candidate-name {
+      font-size: 21px;
+    }
+
+    .candidate-role {
+      font-size: 12px;
+    }
+
+    .dossier {
+      padding: 12px;
+      font-size: 13px;
+    }
+
+    .choices {
+      gap: 5px;
+    }
+
+    .choice {
+      min-height: 84px;
+      padding: 8px 4px;
+    }
+
+    .choice strong {
+      font-size: 11px;
+    }
+
+    .choice span {
+      font-size: 9px;
+    }
+
+    dialog {
+      padding: 18px;
+    }
+
+    .finish {
+      padding: 20px 16px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
+  }
+</style>
+</head>
+
+<body>
+<main>
+
+  <section id="intro-screen" class="intro">
+    <div class="label">Тренажер</div>
+
+    <h1>Кадровый аудит в учреждении культуры</h1>
+
+    <p class="intro-text">Представьте, что вы — руководитель ДК. Кадровик предлагает привлечь в команду 15 новых специалистов и всех оформить как самозанятых на НПД с гонорарами от 25 000 руб./мес., чтобы сэкономить на взносах. Кадровик не проверил детали: личные ограничения граждан и характер их работы. А еще вся эта команда дружно уволилась из ДК соседнего поселка — в прошлом квартале они работали там в штате. Если вы подпишете договоры вслепую, сработает новый индикатор риска ГИТ: массовый перевод коллектива на НПД (от 10 человек).</p>
+
+    <div class="task">Задача: пересмотреть предложение кадровика. Проанализируйте анкету каждого из 15 кандидатов до подписания документов. Определите, кого оформить в штат, кого по договору ГПХ как физлицо, а кого по самозанятости.</div>
+
+    <div class="center-actions">
+      <button class="button button-green" id="start" type="button">
+        Начать аудит
+      </button>
+    </div>
+  </section>
+
+  <section id="game-screen" hidden>
+    <h1 class="game-title">Кадровый аудит</h1>
+
+    <div class="dashboard" aria-label="Результаты распределения">
+      <div class="stat">
+        <div class="stat-label">Проверено анкет</div>
+        <div class="stat-value">
+          <span id="checked-count">0</span>
+          <small>из 15</small>
+        </div>
+      </div>
+
+      <div class="stat stat-td">
+        <div class="stat-label">Отправили в штат</div>
+        <div class="stat-value" id="td-count">0</div>
+      </div>
+
+      <div class="stat stat-gph">
+        <div class="stat-label">Взяли по ГПХ</div>
+        <div class="stat-value" id="gph-count">0</div>
+      </div>
+
+      <div class="stat stat-npd">
+        <div class="stat-label">По самозанятости</div>
+        <div class="stat-value">
+          <span id="npd-count">0</span>
+          <small>из 5</small>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="progress"
+      id="progress"
+      role="progressbar"
+      aria-label="Прогресс аудита"
+      aria-valuemin="0"
+      aria-valuemax="15"
+      aria-valuenow="0"
+    >
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <article class="candidate" aria-labelledby="candidate-name">
+      <div class="card-number" id="card-number"></div>
+
+      <div class="identity">
+        <div class="avatar" id="avatar" aria-hidden="true"></div>
+
+        <div>
+          <h2 class="candidate-name" id="candidate-name"></h2>
+          <p class="candidate-role" id="candidate-role"></p>
+        </div>
+      </div>
+
+      <div class="dossier">
+        <div class="dossier-label">Досье кандидата</div>
+        <p id="candidate-description"></p>
+      </div>
+
+      <p class="question">Как оформим сотрудничество?</p>
+
+      <div class="choices">
+        <button
+          class="choice choice-td"
+          type="button"
+          data-answer="td"
+        >
+          <strong>Отправить в штат</strong>
+          <span>Трудовой договор</span>
+        </button>
+
+        <button
+          class="choice choice-gph"
+          type="button"
+          data-answer="gph"
+        >
+          <strong>Взять по ГПХ</strong>
+          <span>Без применения НПД</span>
+        </button>
+
+        <button
+          class="choice choice-npd"
+          type="button"
+          data-answer="npd"
+        >
+          <strong>Сотрудничаем<br>по самозанятости</strong>
+          <span>ГПХ с применением НПД</span>
+        </button>
+      </div>
+    </article>
+
+    <div class="center-actions">
+      <button
+        class="button button-restart"
+        id="restart-game"
+        type="button"
+      >
+        Начать заново
+      </button>
+    </div>
+  </section>
+
+  <section id="finish-screen" class="finish" hidden>
+    <div class="label">Результат кадровой ревизии</div>
+
+    <h1>Ревизия документов успешно завершена</h1>
+
+    <div class="result-group">
+      <div class="result-heading result-td">
+        <span>Штат — трудовой договор</span>
+        <span>4 человека</span>
+      </div>
+      <p>Клавдия, Сергей, Николай, Людмила — оформлены из-за регулярного графика и процесса.</p>
+    </div>
+
+    <div class="result-group">
+      <div class="result-heading result-gph">
+        <span>Обычный ГПХ</span>
+        <span>6 человек</span>
+      </div>
+      <p>Жан-иностранец, Полина-сверх лимита, Руслан-штатник, Марк-иностранец, Вероника-экс-сотрудник, Яна-сверх лимита — оформлены на продукт работы, но без применения льготы НПД из-за жестких ограничений закона.</p>
+    </div>
+
+    <div class="result-group">
+      <div class="result-heading result-npd">
+        <span>Самозанятость — НПД</span>
+        <span>5 человек</span>
+      </div>
+      <p>Игорь, Снежана, Артём, Ксения, Диана — чистые фрилансеры со статусом НПД.</p>
+    </div>
+
+    <div class="final-message">Отличная работа! Вы сохранили баланс: на НПД переведено всего 5 человек. Это в два раза ниже отметки в 10 договоров — нового индикатора риска ГИТ. Угроза внепланового визита инспекторов миновала, а бюджет учреждения сэкономлен без нарушения закона.</div>
+
+    <div class="center-actions">
+      <button
+        class="button button-restart"
+        id="restart-finish"
+        type="button"
+      >
+        Начать заново
+      </button>
+    </div>
+  </section>
+</main>
+
+<dialog
+  id="feedback-dialog"
+  aria-labelledby="feedback-title"
+  aria-describedby="explanation"
+>
+  <div class="dialog-heading">
+    <h2 class="dialog-title" id="feedback-title"></h2>
+
+    <button
+      class="close"
+      id="close-feedback"
+      aria-label="Закрыть окно"
+      type="button"
+    >×</button>
+  </div>
+
+  <p class="explanation" id="explanation"></p>
+
+  <div class="modal-actions">
+    <button
+      class="button button-green"
+      id="feedback-action"
+      type="button"
+    ></button>
+  </div>
+</dialog>
+
+<dialog id="restart-dialog" aria-labelledby="restart-title">
+  <div class="dialog-heading">
+    <h2 id="restart-title" style="font-size:21px">
+      Начать заново?
+    </h2>
+
+    <button
+      class="close"
+      id="close-restart"
+      aria-label="Закрыть окно"
+      type="button"
+    >×</button>
+  </div>
+
+  <p class="explanation">Текущий прогресс будет сброшен.</p>
+
+  <div class="modal-actions">
+    <button
+      class="button button-white"
+      id="cancel-restart"
+      type="button"
+    >
+      Продолжить
+    </button>
+
+    <button
+      class="button button-restart"
+      id="confirm-restart"
+      type="button"
+    >
+      Начать заново
+    </button>
+  </div>
+</dialog>
+
+<script>
+'use strict';
+
+const $ = id => document.getElementById(id);
+
+/*
+  Авторские тексты заказчика сохранены.
+  Юридические утверждения в текстах требуют отдельной проверки
+  перед использованием тренажёра в качестве правового обучения.
+*/
+
+const candidates = [
+  {
+    name: 'Клавдия',
+    role: 'Кассир концертного зала',
+    avatar: '👵🏻',
+    color: '#F1EEF6',
+    correct: 'td',
+    description: 'Будет продавать билеты в кассе ДК строго в часы его работы, полностью подчиняясь правилам внутреннего распорядка.',
+    explanations: {
+      td: 'Линейный персонал с жестким графиком на рабочем месте должен находиться исключительно в штате по трудовому договору.',
+      gph: 'Работа кассира на привязке к кассовому аппарату и расписанию ДК — это регулярный трудовой процесс. Гражданский договор ГПХ здесь будет признан умышленной подменой трудовых отношений (ст. 15 ТК РФ) с последующей принудительной переквалификацией в трудовой договор (ст. 19.1 ТК РФ).',
+      npd: 'Кассир не может быть самозанятым, так как выполняет регулярную функцию на территории заказчика, что является подменой трудовых отношений (ст. 15 ТК РФ) и влечет принудительную переквалификацию договора (ст. 19.1 ТК РФ).'
+    }
+  },
+  {
+    name: 'Жан',
+    role: 'Приглашенный режиссер-постановщик',
+    avatar: '👨🏾‍🦱',
+    color: '#F2EDE6',
+    correct: 'gph',
+    description: 'Гражданин Франции. Приглашается на разовый проект (постановка одной новогодней сказки). Результат работы — готовый спектакль, график свободный.',
+    explanations: {
+      td: 'Необоснованное раздувание штатного расписания. Трудовой договор подразумевает постоянную функцию, подчинение ПВТР и регулярную оплату, что не соответствует разовому характеру постановки одной сказки.',
+      gph: 'Работа носит разовый, проектный характер (создание конкретного результата). Однако статус самозанятого (НПД) недоступен, так как граждане Франции не входят в перечень лиц, имеющих право на НПД (ст. 5 Федерального закона № 422-ФЗ). Налоговый агент (компания) удерживает НДФЛ 30% (так как нерезидент) и платит страховые взносы.',
+      npd: 'Нарушение налогового законодательства. Режим НПД недоступен для граждан Франции. Попытка регистрации приведет к аннулированию чека и доначислению налогов компании как по обычному ГПХ.'
+    }
+  },
+  {
+    name: 'Игорь',
+    role: 'Дизайнер афиш',
+    avatar: '🧔🏼',
+    color: '#EBF0F8',
+    correct: 'npd',
+    description: 'Зарегистрирован как самозанятый. Будет разрабатывать макеты мероприятий из дома. Жесткого расписания нет, важен только готовый файл к дедлайну.',
+    explanations: {
+      td: 'У Игоря нет графика, вам нужен конечный продукт — макет. Зачислять внештатного фрилансера в постоянный штат необоснованно.',
+      gph: 'Нарушение принципа эффективности использования бюджетных средств: двойная нагрузка на бюджет (уплата взносов ~30% при наличии у исполнителя статуса НПД).',
+      npd: 'Разовая задача на результат при наличии у исполнителя статуса НПД. Лимит учреждения свободен.'
+    }
+  },
+  {
+    name: 'Сергей',
+    role: 'Гардеробщик',
+    avatar: '👨🏼‍🦲',
+    color: '#EDF2EC',
+    correct: 'td',
+    description: 'Будет принимать одежду у посетителей на входе строго в часы проведения мероприятий по расписанию ДК.',
+    explanations: {
+      td: 'Линейный персонал с четкой привязкой к объекту и часам работы оформляется исключительно в штат.',
+      gph: 'Гардеробщик привязан к месту и часам работы ДК, выполняя регулярную функцию. Это чистый трудовой процесс, гражданский договор здесь — умышленная подмена отношений (ст. 15 ТК РФ) с последующей переквалификацией (ст. 19.1 ТК РФ).',
+      npd: 'Фиксированный график на территории заказчика — это жесткий признак трудового процесса (ст. 15 ТК РФ). Самозанятость тут недопустима.'
+    }
+  },
+  {
+    name: 'Полина',
+    role: 'Режиссер',
+    avatar: '👧🏽',
+    color: '#F5EDF0',
+    correct: 'gph',
+    description: 'Ее годовой доход в статусе самозанятой на прошлых проектах уже составил 2 450 000 рублей. Привлекается написать один сценарий праздничного мюзикла из дома со свободным графиком.',
+    explanations: {
+      td: 'Задача разовая и проектная. Раздувать постоянный штат учреждения ради одного сценария нельзя.',
+      gph: 'Заключаем стандартный договор ГПХ с удержанием НДФЛ и взносов, так как из-за превышения лимита доходов (порог 2,4 млн руб. в год) самозанятость для нее закрыта.',
+      npd: 'Ловушка по критерию «Лимит дохода». Годовой лимит для применения НПД составляет 2,4 млн рублей. Полина автоматически потеряла право на спецрежим из-за его превышения.'
+    }
+  },
+  {
+    name: 'Снежана',
+    role: 'Иллюстратор',
+    avatar: '👩🏻‍🦰',
+    color: '#F6EEE5',
+    correct: 'npd',
+    description: 'Оформит детскую зону к выставке. Работает удаленно в свободное время по техзаданию, зарегистрирована в приложении «Мой налог».',
+    explanations: {
+      td: 'Это разовая творческая задача. Оформление в постоянный штат финансово необоснованно.',
+      gph: 'Нарушение принципа эффективности использования бюджетных средств. У исполнителя есть статус НПД, графику она не подчиняется — нужно использовать самозанятость.',
+      npd: 'Разовый продукт, удаленная работа со статусом НПД. Безопасная экономия бюджета.'
+    }
+  },
+  {
+    name: 'Николай',
+    role: 'Старший администратор',
+    avatar: '👴🏼',
+    color: '#EEEFF4',
+    correct: 'td',
+    description: 'Привлекается на постоянную, ежедневную работу по координации кружков и ведению внутренней документации на стандартный график пятидневки.',
+    explanations: {
+      td: 'Постоянный трудовой процесс по графику обязывает оформить человека в штат по трудовому договору.',
+      gph: 'Человек включается в ежедневную административную деятельность учреждения на пятидневку. Договор услуг (ГПХ) тут — незаконная подмена отношений по ст. 15 ТК РФ с риском принудительной переквалификации по ст. 19.1 ТК РФ.',
+      npd: 'Постоянный методист-администратор на пятидневке не может быть самозанятым фрилансером. Роструд переквалифицирует такой договор при первой же проверке.'
+    }
+  },
+  {
+    name: 'Руслан',
+    role: 'Настройщик роялей',
+    avatar: '👨🏻‍🦱',
+    color: '#EAF2F0',
+    correct: 'gph',
+    description: 'Приезжает раз в месяц по заявке, постоянного графика нет. Официально статус самозанятого не оформлял. Выяснилось, что Руслан — это ваш штатный сотрудник (работает в ДК сисадмином).',
+    explanations: {
+      td: 'Руслан выполняет разовые задачи на результат, а не регулярный процесс. Зачислять его на вторую ставку в штат нельзя.',
+      gph: 'Нам нужен разовый результат (настроенный рояль) — это поле ГПХ. Оформляем договор подряда с действующим штатным сотрудником с уплатой взносов и НДФЛ.',
+      npd: 'Ловушка по критерию «Ограничения по клиентам». Закон № 422-ФЗ категорически запрещает оказывать услуги по НПД своему действующему работодателю.'
+    }
+  },
+  {
+    name: 'Артём',
+    role: 'Звукорежиссер записи',
+    avatar: '🤓',
+    color: '#ECEEF6',
+    correct: 'npd',
+    description: 'Плательщик НПД. Будет сводить аудиотреки для коллективов у себя в домашней студии. В ДК появляться не обязан, расписание свободное.',
+    explanations: {
+      td: 'Оформлять фрилансера со своим оборудованием под разовые задачи в штат — раздувание кадровых ставок.',
+      gph: 'Нарушение принципа эффективности использования бюджетных средств: двойная нагрузка на бюджет (уплата взносов ~30% при наличии у исполнителя статуса НПД).',
+      npd: 'Оплачиваем конкретный результат через законную самозанятость. Квота учреждения свободна.'
+    }
+  },
+  {
+    name: 'Ксения',
+    role: 'SMM-специалист',
+    avatar: '👩🏽‍🦱',
+    color: '#F4EBEF',
+    correct: 'npd',
+    description: 'Действующий самозанятый. Будет писать посты и выкладывать анонсы в соцсети ДК со своего телефона. Присутствие в офисе не требуется.',
+    explanations: {
+      td: 'Нам нужны только готовые публикации. Оформление СММ-щика в постоянный штат избыточно.',
+      gph: 'Нарушение принципа эффективности использования бюджетных средств: двойная нагрузка на бюджет (уплата взносов ~30% при наличии у исполнителя статуса НПД).',
+      npd: 'Направляем SMM-специалиста в категорию самозанятости. Проектная задача без привязки к офису.'
+    }
+  },
+  {
+    name: 'Людмила',
+    role: 'Смотритель залов музея',
+    avatar: '👩🏼‍🦱',
+    color: '#F1EEE7',
+    correct: 'td',
+    description: 'Будет находиться в выставочных залах и следить за сохранностью экспонатов строго в часы работы музея (с 10:00 до 18:00).',
+    explanations: {
+      td: 'Смотритель музея — это штатная единица, выполняющая функцию личного контроля по жесткому расписанию.',
+      gph: 'Функция смотрителя не имеет конечного материального продукта — это процесс непрерывного контроля по графику музея. Оформление ГПХ — подмена отношений по ст. 15 ТК РФ с последующей переквалификацией по ст. 19.1 ТК РФ.',
+      npd: 'Регулярный график на территории заказчика — это жесткий признак трудовых отношений. Самозанятость тут незаконна.'
+    }
+  },
+  {
+    name: 'Диана',
+    role: 'Декоратор сцены',
+    avatar: '👱🏼‍♀️',
+    color: '#EAF0F6',
+    correct: 'npd',
+    description: 'Плательщик НПД. Изготовит и смонтирует объемные декорации в своей личной мастерской к главному спектаклю сезона.',
+    explanations: {
+      td: 'Диана сдаёт разовый продукт (декорации) к сроку. Штатный регулярный процесс здесь неприменим.',
+      gph: 'Нарушение принципа эффективности использования бюджетных средств (у уполномоченного лица есть статус НПД).',
+      npd: 'Общее количество привлеченных самозанятых удержано на уровне 5 человек, что ниже критической отметки нового индикатора риска (10 человек)'
+    }
+  },
+  {
+    name: 'Марк',
+    role: 'Приглашенный лектор',
+    avatar: '👱🏼‍♂️',
+    color: '#EFECF4',
+    correct: 'gph',
+    description: 'Гражданин Германии (нет российского гражданства или вида на жительство в странах ЕАЭС). Планирует провести курс из 3 лекций по культурологии. График свободный.',
+    explanations: {
+      td: 'Лектор привлекается под разовый курс встреч, он не включается в постоянный трудовой распорядок учреждения. Штат закрыт.',
+      gph: 'Нам нужен разовый продукт (лекции) — это поле ГПХ. Но из-за гражданства дальнего зарубежья самозанятость исключена. Заключаем обычный договор услуг ГПХ.',
+      npd: 'Ловушка по «Гражданству». Гражданин Германии не имеет права применять налоговый режим НПД в РФ по закону № 422-ФЗ.'
+    }
+  },
+  {
+    name: 'Вероника',
+    role: 'Копирайтер',
+    avatar: '👩🏻‍🦱',
+    color: '#EDF2EC',
+    correct: 'gph',
+    description: 'Напишет серию рекламных текстов для сайта ДК удаленно. Выяснилось, что она уволилась из вашего ДК всего 3 месяца назад.',
+    explanations: {
+      td: 'Нам нужны только готовые тексты (результат). Трудовой договор здесь был бы грубой ошибкой и раздуванием ставок. Вероника должна остаться вне штата.',
+      gph: 'Ловушка по критерию «Бывший работодатель». Действует прямой запрет на применение НПД в течение 2 лет после увольнения (п. 8 ч. 2 ст. 6 Закона № 422-ФЗ). Характер работы проектный, поэтому оформляем обычный договор ГПХ физлица.',
+      npd: 'Нарушение п. 8 ч. 2 ст. 6 Закона № 422-ФЗ. С момента увольнения Вероники из вашего ДК прошло менее 2 лет. НПД с экс-работодателем запрещен.'
+    }
+  },
+  {
+    name: 'Яна',
+    role: 'Фотограф',
+    avatar: '👩🏽',
+    color: '#F5EDE6',
+    correct: 'gph',
+    description: 'Проведет репортажную съемку фестиваля ДК. Задача сугубо разовая. В кадровом аудите выяснилось, что ее годовой суммарный доход на НПД (от всех клиентов) на этой неделе уже превысил 2 500 000 рублей.',
+    explanations: {
+      td: 'Фотограф на фестиваль — это краткосрочная работа на результат (снимки), а не штатный регулярный процесс. В кадровый штат принимать нельзя.',
+      gph: 'Вы сохранили гражданско-правовой характер работы (ГПХ), но провели оформление через стандартный договор ГПХ с удержанием НДФЛ и взносов, так как право на льготный НПД у исполнителя аннулировано из-за лимита доходов.',
+      npd: 'Ловушка по критерию «Лимит дохода». Яна перешагнула годовой порог заработка в 2,4 млн рублей. Ее статус самозанятой автоматически слетел в базе ФНС.'
+    }
+  }
+];
+
+const answerButtons = [
+  ...document.querySelectorAll('[data-answer]')
+];
+
+let state = createState();
+
+function createState() {
+  return {
+    index: 0,
+    counts: {
+      td: 0,
+      gph: 0,
+      npd: 0
+    },
+    accepted: false,
+    advanceOnClose: false,
+    lastButton: null
+  };
+}
+
+function updateDashboard() {
+  $('checked-count').textContent = state.index;
+  $('td-count').textContent = state.counts.td;
+  $('gph-count').textContent = state.counts.gph;
+  $('npd-count').textContent = state.counts.npd;
+
+  $('progress').setAttribute('aria-valuenow', state.index);
+  $('progress-fill').style.width =
+    `${state.index / candidates.length * 100}%`;
+}
+
+function focusHeading(element) {
+  element.tabIndex = -1;
+  element.focus({ preventScroll: true });
+}
+
+function showCandidate() {
+  const candidate = candidates[state.index];
+
+  $('card-number').textContent =
+    `Анкета ${state.index + 1} из ${candidates.length}`;
+
+  $('avatar').textContent = candidate.avatar;
+  $('avatar').style.setProperty('--avatar-bg', candidate.color);
+
+  $('candidate-name').textContent = candidate.name;
+  $('candidate-role').textContent = candidate.role;
+  $('candidate-description').textContent = candidate.description;
+
+  state.accepted = false;
+  state.advanceOnClose = false;
+  state.lastButton = null;
+
+  answerButtons.forEach(button => {
+    button.disabled = false;
+  });
+
+  updateDashboard();
+  focusHeading($('candidate-name'));
+}
+
+function startGame() {
+  state = createState();
+
+  $('intro-screen').hidden = true;
+  $('finish-screen').hidden = true;
+  $('game-screen').hidden = false;
+
+  showCandidate();
+  window.scrollTo(0, 0);
+}
+
+function answerQuestion(button) {
+  if (state.accepted || $('feedback-dialog').open) {
+    return;
+  }
+
+  const candidate = candidates[state.index];
+  const answer = button.dataset.answer;
+  const correct = answer === candidate.correct;
+
+  state.lastButton = button;
+
+  if (correct) {
+    state.accepted = true;
+
+    answerButtons.forEach(item => {
+      item.disabled = true;
+    });
+  }
+
+  $('feedback-title').textContent =
+    correct ? 'Верно!' : 'Ошибка!';
+
+  $('feedback-title').classList.toggle('error', !correct);
+
+  $('explanation').textContent =
+    candidate.explanations[answer];
+
+  $('feedback-action').textContent = correct
+    ? (
+        state.index === candidates.length - 1
+          ? 'Посмотреть результат'
+          : 'Следующая анкета'
+      )
+    : 'Исправить ответ';
+
+  $('feedback-dialog').showModal();
+  $('feedback-dialog').scrollTop = 0;
+  $('feedback-action').focus();
+}
+
+function closeFeedback() {
+  if (!$('feedback-dialog').open) return;
+
+  state.advanceOnClose = state.accepted;
+  $('feedback-dialog').close();
+}
+
+function advance() {
+  const candidate = candidates[state.index];
+
+  state.counts[candidate.correct]++;
+  state.index++;
+
+  updateDashboard();
+
+  if (state.index === candidates.length) {
+    showFinish();
+  } else {
+    showCandidate();
+  }
+}
+
+function showFinish() {
+  $('game-screen').hidden = true;
+  $('finish-screen').hidden = false;
+
+  focusHeading($('finish-screen').querySelector('h1'));
+  window.scrollTo(0, 0);
+}
+
+answerButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    answerQuestion(button);
+  });
+});
+
+$('feedback-action').addEventListener('click', closeFeedback);
+$('close-feedback').addEventListener('click', closeFeedback);
+
+$('feedback-dialog').addEventListener('cancel', event => {
+  event.preventDefault();
+  closeFeedback();
+});
+
+$('feedback-dialog').addEventListener('close', () => {
+  if (state.advanceOnClose) {
+    state.advanceOnClose = false;
+    advance();
+  } else {
+    state.lastButton?.focus();
+  }
+});
+
+$('start').addEventListener('click', startGame);
+$('restart-finish').addEventListener('click', startGame);
+
+$('restart-game').addEventListener('click', () => {
+  $('restart-dialog').showModal();
+  $('cancel-restart').focus();
+});
+
+$('close-restart').addEventListener('click', () => {
+  $('restart-dialog').close();
+});
+
+$('cancel-restart').addEventListener('click', () => {
+  $('restart-dialog').close();
+});
+
+$('confirm-restart').addEventListener('click', () => {
+  $('restart-dialog').close();
+  startGame();
+});
+</script>
+</body>
+</html>
