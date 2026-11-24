@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Выберите 5 подозрительных предметов</title>
+<style>
+  *{box-sizing:border-box}
+  body{
+    font-family:'Segoe UI',Arial,sans-serif;
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:linear-gradient(135deg,#0b1e3f 0%,#1a3a6b 50%,#7a0f1e 100%);
+    color:#fff;
+  }
+  .card{
+    max-width:960px;
+    width:100%;
+    background:#f0f2f5;
+    backdrop-filter:blur(2px);
+    border-radius:24px;
+    padding:20px 20px 25px;
+    box-shadow:0 30px 60px rgba(0,0,0,.6);
+    border:1px solid rgba(255,255,255,.06);
+  }
+  .title{
+    text-align:center;
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:.2px;
+    margin:0 0 12px;
+    color:#0b1e3f;
+    text-shadow:none;
+  }
+  .poster-wrap{
+    width:100%;
+    position:relative;
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 8px 30px rgba(0,0,0,.5);
+    border:2px solid rgba(255,255,255,.1);
+    line-height:0;
+    background:#1e2a3a;
+    user-select: none; 
+  }
+  .poster-wrap img{
+    display:block;
+    width:100%;
+    height:auto;
+    pointer-events:none;
+  }
+  .marker{
+    position:absolute;
+    transform:translate(-50%,-50%);
+    width:24px;
+    height:24px;
+    border-radius:50%;
+    border:2px solid #fff;
+    background:rgba(26,58,107,.85);
+    color:#fff;
+    font-size:10px;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 3px 12px rgba(0,0,0,.6), 0 0 0 4px rgba(46,111,212,.2);
+    transition:transform .18s ease, background .25s ease, box-shadow .25s;
+    animation:pulse 2.6s ease-in-out infinite;
+    z-index:10;
+    line-height:1;
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:0 3px 12px rgba(0,0,0,.6), 0 0 0 4px rgba(46,111,212,.2)}
+    50%{box-shadow:0 3px 12px rgba(0,0,0,.6), 0 0 0 10px rgba(46,111,212,.08)}
+  }
+  .marker:hover:not(.done){
+    transform:translate(-50%,-50%) scale(1.25);
+    background:rgba(192,24,47,.9);
+    animation:none;
+  }
+
+  .marker.done{
+    cursor:default;
+    animation:none;
+  }
+  .marker.correct-done{
+    background:rgba(26,58,107,.9);
+    box-shadow:0 3px 12px rgba(46,111,212,.6), 0 0 0 2px rgba(46,111,212,.5);
+  }
+  .marker.correct-done::after{
+    content:"✓";
+    position:absolute;
+    bottom:-2px;
+    right:-2px;
+    width:12px;
+    height:12px;
+    background:#2e6fd4;
+    color:#fff;
+    border-radius:50%;
+    border:2px solid #fff;
+    font-size:7px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .marker.wrong-done{
+    background:rgba(192,24,47,.9);
+    box-shadow:0 3px 12px rgba(192,24,47,.6), 0 0 0 2px rgba(192,24,47,.5);
+  }
+  .marker.wrong-done::after{
+    content:"✕";
+    position:absolute;
+    bottom:-2px;
+    right:-2px;
+    width:12px;
+    height:12px;
+    background:#c0182f;
+    color:#fff;
+    border-radius:50%;
+    border:2px solid #fff;
+    font-size:6px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .info-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:12px;
+    padding:0 4px;
+    gap: 10px;
+  }
+  .counter{
+    font-size:15px;
+    font-weight:600;
+    color:#0b1e3f;
+    background:rgba(0,0,0,.08);
+    padding:4px 16px;
+    border-radius:40px;
+  }
+  .btn{
+    padding:10px 24px;
+    font-size:14px;
+    font-weight:700;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(135deg,#ffd166,#f4a300);
+    color:#0b1e3f;
+    cursor:pointer;
+    transition:all .22s ease;
+    font-family:inherit;
+    box-shadow:0 6px 18px rgba(0,0,0,.4);
+  }
+  .btn:hover{
+    background:linear-gradient(135deg,#ffe08a,#ffb700);
+    transform:translateY(-1px);
+    box-shadow:0 10px 22px rgba(244,163,0,.55);
+  }
+
+  .overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(11,30,63,.78);
+    backdrop-filter:blur(5px);
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    z-index:100;
+  }
+  .overlay.active{display:flex;animation:fadeIn .2s ease}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .modal{
+    background:#fff;
+    max-width:520px;
+    width:100%;
+    padding:30px 32px 28px;
+    border-radius:18px;
+    position:relative;
+    line-height:1.6;
+    box-shadow:0 25px 50px rgba(0,0,0,.6);
+    animation:slideUp .3s ease;
+    color:#0b1e3f;
+  }
+  @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  .modal::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:5px;
+    background:linear-gradient(90deg,#1a3a6b 0%,#1a3a6b 50%,#c0182f 50%,#c0182f 100%);
+    border-radius:18px 18px 0 0;
+  }
+  #modalText{
+    font-size:17px;
+    font-weight:500;
+    line-height:1.65;
+  }
+  #modalText b{font-weight:800}
+  .close{
+    position:absolute;
+    top:8px;
+    right:12px;
+    font-size:28px;
+    line-height:1;
+    background:none;
+    border:none;
+    cursor:pointer;
+    color:#1a3a6b;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    transition:all .2s ease;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:inherit;
+  }
+  .close:hover{background:#c0182f;color:#fff;transform:rotate(90deg)}
+  .final-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(11,30,63,.87);
+    backdrop-filter:blur(6px);
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    z-index:200;
+  }
+  .final-overlay.active{display:flex;animation:fadeIn .3s ease}
+  .final-box{
+    background:linear-gradient(135deg,#1a3a6b 0%,#0b1e3f 100%);
+    color:#fff;
+    padding:48px 40px;
+    border-radius:22px;
+    text-align:center;
+    box-shadow:0 30px 70px rgba(0,0,0,.7), 0 0 0 3px rgba(255,209,102,.25);
+    animation:zoomIn .4s cubic-bezier(.2,1.2,.4,1);
+    border:2px solid #ffd166;
+    max-width:460px;
+    width:100%;
+  }
+  @keyframes zoomIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+  .final-icon{
+    font-size:56px;
+    margin-bottom:6px;
+    line-height:1;
+  }
+  .final-box h2{
+    font-size:26px;
+    margin:6px 0 14px;
+    font-weight:800;
+    letter-spacing:.3px;
+    color:#ffd166;
+    text-shadow:0 3px 12px rgba(255,209,102,.35);
+  }
+  .final-box p{
+    font-size:15px;
+    margin:0 0 24px;
+    line-height:1.5;
+    color:rgba(255,255,255,.9);
+  }
+  .final-btn{
+    padding:12px 30px;
+    font-size:15px;
+    font-weight:700;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(135deg,#ffd166,#f4a300);
+    color:#0b1e3f;
+    cursor:pointer;
+    transition:all .22s ease;
+    font-family:inherit;
+    box-shadow:0 6px 18px rgba(0,0,0,.4);
+  }
+  .final-btn:hover{
+    background:linear-gradient(135deg,#ffe08a,#ffb700);
+    transform:translateY(-1px);
+    box-shadow:0 10px 22px rgba(244,163,0,.55);
+  }
+  @media (max-width:600px){
+    .card{padding:12px 10px 16px}
+    .title{font-size:18px}
+    .marker{width:22px;height:22px;font-size:9px}
+    .modal{padding:24px 20px}
+    #modalText{font-size:16px}
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="title">🕵️‍♂️ Кликните мышкой на 5 подозрительных предметов</div>
+
+  <div class="poster-wrap" id="posterWrap">
+    <img src="https://www.cultmanager.ru/images/Vibecoding/beshoznye-predmety.jpg" alt="Кабинет учреждения культуры">
+
+    <!-- Кружки с вашими координатами -->
+    <button class="marker" data-id="1" style="left: 30.5593%; top: 27.9657%;" title="Тарелка с печеньем">1</button>
+    <button class="marker" data-id="2" style="left: 64.3247%; top: 18.6248%;" title="Баллончик с ржавчиной">2</button>
+    <button class="marker" data-id="3" style="left: 54.3486%; top: 55.5327%;" title="Конверт грязный">3</button>
+    <button class="marker" data-id="4" style="left: 46.9816%; top: 35.0283%;" title="Пустая кружка">4</button>
+    <button class="marker" data-id="5" style="left: 37.0055%; top: 42.3188%;" title="Мобильный телефон">5</button>
+    <button class="marker" data-id="6" style="left: 18.4345%; top: 30.6996%;" title="Бутылка без этикетки">6</button>
+    <button class="marker" data-id="7" style="left:10%; top:47%;" title="Настольная лампа">7</button>
+    <button class="marker" data-id="8" style="left: 82.2817%; top: 61.0005%;" title="Рюкзак с пятном">8</button>
+    <button class="marker" data-id="9" style="left: 44.8329%; top: 76.9484%;" title="Стул на колесиках">9</button>
+    <button class="marker" data-id="10" style="left: 18.895%; top: 76.2649%;" title="Разбитая колба">10</button>
+  </div>
+
+  <div class="info-row">
+    <span class="counter" id="foundCount">0 / 5 найдено</span>
+    <div style="display:flex; gap:10px;">
+        <button class="btn" id="restart">🔄 Заново</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <button class="close" id="close">×</button>
+    <div id="modalText"></div>
+  </div>
+</div>
+
+<div class="final-overlay" id="finalOverlay">
+  <div class="final-box">
+    <div class="final-icon">🏆</div>
+    <h2>Задание выполнено</h2>
+    <p>Вы нашли все 5 подозрительных предметов.</p>
+    <button class="final-btn" id="finalRestart">Начать заново</button>
+  </div>
+</div>
+
+<script>
+  const data = {
+    "1": { status: "safe", text: "<b>Ошибка!</b> Тарелка с печеньем — стоит на подоконнике. Без признаков постороннего запаха, порошка, налёта или жидкости опасности нет." },
+    "2": { status: "danger", text: "<b>Верно!</b> Баллончик с ржавчиной — коррозия разрушает стенки. Есть риск утечки токсичного газа или химиката." },
+    "3": { status: "danger", text: "<b>Верно!</b> Конверт грязный — на нём маслянистые разводы и потёки. Именно так чаще всего доставляют токсичные порошки и споры возбудителей." },
+    "4": { status: "safe", text: "<b>Ошибка!</b> Пустая кружка — обычный предмет. Без следов налёта, пятен, запаха или остатков неизвестного вещества она не представляет угрозы." },
+    "5": { status: "safe", text: "<b>Ошибка!</b> Мобильный телефон — личное устройство сотрудника. Оставленный на столе — часть привычной обстановки, а не подозрительный предмет." },
+    "6": { status: "danger", text: "<b>Верно!</b> Бутылка с мутным содержимым, этикетка отсутствует. Состав жидкости неизвестен — внешний вид не позволяет исключить, что внутри токсичный химикат." },
+    "7": { status: "safe", text: "<b>Ошибка!</b> Лампа — стационарный предмет мебели. У неё нет признаков утечки, повреждений или нестандартного содержимого." },
+    "8": { status: "danger", text: "<b>Верно!</b> Рюкзак с влажным пятном — возможный след утечки агрессивной жидкости. Такие предметы часто оставляют для скрытой угрозы." },
+    "9": { status: "safe", text: "<b>Ошибка!</b> Кресло на колёсах — стандартная офисная мебель. Целое, без следов посторонних веществ." },
+    "10": { status: "danger", text: "<b>Верно!</b> Разбитая колба — осколки лабораторной посуды. Внутри мог находиться патогенный биологический агент или отравляющее вещество." }
+  };
+
+  const markers = document.querySelectorAll('.marker');
+  const overlay = document.getElementById('overlay');
+  const modalText = document.getElementById('modalText');
+  const closeBtn = document.getElementById('close');
+  const restartBtn = document.getElementById('restart');
+  const finalOverlay = document.getElementById('finalOverlay');
+  const finalRestart = document.getElementById('finalRestart');
+  const foundCountSpan = document.getElementById('foundCount');
+
+  let correctFound = 0;
+  let isFinalShown = false;
+
+  function updateCounter(){
+    foundCountSpan.textContent = correctFound + ' / 5 найдено';
+  }
+
+  markers.forEach(marker => {
+    marker.addEventListener('click', () => {
+      if (marker.classList.contains('done')) return;
+      if (isFinalShown) return;
+
+      const id = marker.dataset.id;
+      const item = data[id];
+      if (!item) return;
+
+      marker.classList.add('done');
+      const isDanger = item.status === 'danger';
+      marker.classList.add(isDanger ? 'correct-done' : 'wrong-done');
+
+      if (isDanger) correctFound++;
+      updateCounter();
+
+      modalText.innerHTML = item.text;
+      overlay.classList.add('active');
+    });
+  });
+
+  function closeModal(){
+    overlay.classList.remove('active');
+    if (correctFound === 5 && !isFinalShown){
+      isFinalShown = true;
+      setTimeout(() => finalOverlay.classList.add('active'), 280);
+    }
+  }
+
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+
+  function resetAll(){
+    markers.forEach(m => m.classList.remove('done', 'correct-done', 'wrong-done'));
+    overlay.classList.remove('active');
+    finalOverlay.classList.remove('active');
+    correctFound = 0;
+    isFinalShown = false;
+    updateCounter();
+  }
+
+  restartBtn.addEventListener('click', resetAll);
+  finalRestart.addEventListener('click', resetAll);
+  updateCounter();
+</script>
+</body>
+</html>
