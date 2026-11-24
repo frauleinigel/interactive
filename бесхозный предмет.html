@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: sans-serif; color: #002b5b; max-width: 600px; margin: 30px auto; padding: 20px; font-size: 14px; }
+        .step-title { background: #ffc107; padding: 5px 15px; border-radius: 20px; display: inline-block; font-weight: bold; margin-bottom: 15px; }
+        .center-img { display: block; margin: 15px auto; width: 60px; height: 60px; }
+        .question { font-weight: bold; margin: 15px 0; display: block; text-align: center; }
+        .btn { display: block; width: 100%; padding: 12px 15px; margin: 8px 0; border: none; border-radius: 6px; color: #fff; cursor: pointer; text-align: left; font-size: 14px; transition: 0.2s; background: linear-gradient(135deg, #002b5b 0%, #0056b3 100%); }
+        .btn:hover { background: linear-gradient(135deg, #001a38 0%, #003d7a 100%); }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 6px; border: 1px solid #ddd; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 1000; width: 320px; text-align: center; }
+        .next-btn { background: #ffc107; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; }
+        .error { display: none; margin-top: 20px; padding: 12px; border-radius: 4px; border: 1px solid #d9534f; color: #d9534f; background: #fff5f5; font-size: 13px; }
+        .back-btn { background: #6f42c1; color: white; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-size: 13px; }
+        .restart-btn { background: #ff9800; color: #000; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; margin-left: 8px; font-size: 13px; font-weight: bold; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="step1">
+    <div class="step-title">ШАГ 1</div>
+    <p>Вы идете по фойе учреждения культуры возле зрительного зала и замечаете на банкетке плотно закрытый бесхозный рюкзак. Посетителей рядом нет. Из рюкзака доносятся едва слышные щелчки, а снизу проступает мокрое маслянистое пятно со странным химическим запахом.</p>
+    <img src="https://www.cultmanager.ru/images/Vibecoding/school-satchel_1f392.png" class="center-img" alt="рюкзак">
+    <strong class="question">Ваша первая реакция?</strong>
+    <button class="btn" onclick="showError('step1', 'Расстегивание рюкзака опасно: это может привести к детонации или прямому контакту с отравляющим веществом.', false)">Расстегну молнию рюкзака, чтобы заглянуть внутрь и проверить, нет ли там документов владельца или телефона.</button>
+    <button class="btn" onclick="showError('step1', 'Перемещение предмета — риск активации взрывателя или распространения химического агента.', false)">Аккуратно перенесу рюкзак на пост охраны, чтобы он не пугал посетителей учреждения.</button>
+    <button class="btn" onclick="showModal('step2', '✅ <strong>ВЕРНО!</strong><br>Главное правило — абсолютная неприкосновенность. Исключаем физическое воздействие.')">Оставлю рюкзак в покое: не буду прикасаться и передвигать. Не буду пытаться проверять, что внутри.</button>
+</div>
+
+<div id="step2" class="hidden">
+    <div class="step-title">ШАГ 2</div>
+    <p>Вы зафиксировали взгляд на рюкзаке и поняли, что он опасен.</p>
+    <img src="https://www.cultmanager.ru/images/Vibecoding/school-satchel_1f392.png" class="center-img" alt="рюкзак">
+    <strong class="question">Как поступите дальше?</strong>
+    <button class="btn" onclick="showError('step2', 'Мобильный телефон создает радиосигнал, который может спровоцировать срабатывание взрывного устройства.', true)">Достану мобильный телефон, подойду поближе к рюкзаку, чтобы сделать четкое фото для полиции, и сразу начну звонить по номеру 112.</button>
+    <button class="btn" onclick="showModal('step3', '✅ <strong>ВЕРНО!</strong><br>Фиксация точного времени обнаружения рюкзака критически важна для экстренных служб — это поможет оперативно отследить злоумышленников по камерам видеонаблюдения. А удаление на безопасное расстояние защитит вас от поражения и исключит риск того, что радиосигнал вашего мобильного телефона случайно спровоцирует взрыватель в рюкзаке.')">Запомню точное время обнаружения рюкзака, немедленно отойду на безопасное расстояние и оттуда вызову экстренные службы.</button>
+    <button class="btn" onclick="showError('step2', 'Паника в фойе провоцирует давку и может привести к непредсказуемой реакции злоумышленников.', true)">Громко закричу на все фойе: «Внимание, здесь бомба и химикаты! Всем срочно бежать на улицу!».</button>
+</div>
+
+<div id="step3" class="hidden">
+    <div class="step-title">ШАГ 3</div>
+    <p>Вы отошли в безопасную зону, зафиксировали время находки и вызвали службу 112. До приезда оперативных служб остаются считанные минуты.</p>
+    <img src="https://www.cultmanager.ru/images/Vibecoding/school-satchel_1f392.png" class="center-img" alt="рюкзак">
+    <strong class="question">Ваши дальнейшие действия?</strong>
+    <button class="btn" onclick="showModal('final', '✅ <strong>ВЕРНО!</strong><br>Пока едут спецслужбы, судьба людей зависит от вас. Охрана заблокирует опасную зону, сотрудники выведут посетителей без паники, а вы встретите саперов на входе, чтобы они не теряли минуты на поиски нужного зала.')">Предупрежу коллег и охрану, ограничу доступ людей в зону, организую эвакуацию и дождусь специалистов у входа в здание, чтобы указать им дорогу.</button>
+    <button class="btn" onclick="showError('step3', 'Самостоятельное нахождение рядом подвергает вас риску в случае детонации или выброса токсичных веществ.', true)">Самостоятельно вернусь к банкетке с рюкзаком и встану рядом с ней, чтобы лично контролировать, подходят ли к нему люди.</button>
+    <button class="btn" onclick="showError('step3', 'Накрывать предмет нельзя: любое касание может надавить на скрытые элементы взрывателя.', true)">Вернусь к рюкзаку и накрою его плотной курткой или тряпкой, чтобы локализовать химический запах.</button>
+</div>
+
+<div id="final" class="hidden">
+    <h3>🎉 Ситуация разрешена!</h3>
+    <p>Специалисты РХБЗ и взрывотехники оперативно изолировали рюкзак. Внутри была замаскированная емкость с токсичным химикатом и радиовзрывателем.<br><br>Благодаря вашей бдительности устройство не сработало, ядовитые испарения не попали в вентиляцию здания. Вы предотвратили трагедию, спасли жизни десятков коллег и посетителей. Вы — молодец!</p>
+    <button class="restart-btn" onclick="location.reload()">Начать заново</button>
+</div>
+
+<div id="errorBox" class="error">
+    <p id="errorText"></p>
+    <button class="back-btn" onclick="hideError()">Вернуться на шаг назад</button>
+    <button id="restartInError" class="restart-btn hidden" onclick="location.reload()">Начать заново</button>
+</div>
+
+<div id="successModal" class="modal">
+    <p id="successText"></p>
+    <button class="next-btn" id="nextButton" onclick="nextStep()">Перейти к следующему шагу</button>
+</div>
+
+<script>
+    let currentStep = 'step1';
+    let nextStepId = '';
+    function showModal(id, msg) {
+        nextStepId = id;
+        document.getElementById('successText').innerHTML = msg;
+        document.getElementById('successModal').style.display = 'block';
+        // Меняем текст кнопки в зависимости от того, финальный ли это шаг
+        var btn = document.getElementById('nextButton');
+        if (id === 'final') {
+            btn.innerText = 'Перейти к результату';
+        } else {
+            btn.innerText = 'Перейти к следующему шагу';
+        }
+    }
+    function nextStep() {
+        document.getElementById('successModal').style.display = 'none';
+        document.getElementById(currentStep).classList.add('hidden');
+        currentStep = nextStepId;
+        document.getElementById(currentStep).classList.remove('hidden');
+    }
+    function showError(stepId, msg, showRestart) {
+        document.getElementById(stepId).classList.add('hidden');
+        document.getElementById('errorText').innerText = msg;
+        document.getElementById('restartInError').className = showRestart ? 'restart-btn' : 'restart-btn hidden';
+        document.getElementById('errorBox').style.display = 'block';
+    }
+    function hideError() {
+        document.getElementById('errorBox').style.display = 'none';
+        document.getElementById(currentStep).classList.remove('hidden');
+    }
+</script>
+</body>
+</html>
