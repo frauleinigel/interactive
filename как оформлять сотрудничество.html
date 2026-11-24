@@ -625,7 +625,6 @@
         <div class="stat-label">По самозанятости</div>
         <div class="stat-value">
           <span id="npd-count">0</span>
-          <small>из 5</small>
         </div>
       </div>
     </div>
@@ -1088,6 +1087,28 @@ function startGame() {
   window.scrollTo(0, 0);
 }
 
+/* Сброс возвращает на вводный экран, а не к первой анкете. */
+function resetToIntro() {
+  state = createState();
+
+  if ($('restart-dialog').open) {
+    $('restart-dialog').close();
+  }
+
+  $('game-screen').hidden = true;
+  $('finish-screen').hidden = true;
+  $('intro-screen').hidden = false;
+
+  answerButtons.forEach(button => {
+    button.disabled = false;
+  });
+
+  updateDashboard();
+
+  focusHeading($('intro-screen').querySelector('h1'));
+  window.scrollTo(0, 0);
+}
+
 function answerQuestion(button) {
   if (state.accepted || $('feedback-dialog').open) {
     return;
@@ -1182,7 +1203,8 @@ $('feedback-dialog').addEventListener('close', () => {
 });
 
 $('start').addEventListener('click', startGame);
-$('restart-finish').addEventListener('click', startGame);
+
+$('restart-finish').addEventListener('click', resetToIntro);
 
 $('restart-game').addEventListener('click', () => {
   $('restart-dialog').showModal();
@@ -1197,10 +1219,7 @@ $('cancel-restart').addEventListener('click', () => {
   $('restart-dialog').close();
 });
 
-$('confirm-restart').addEventListener('click', () => {
-  $('restart-dialog').close();
-  startGame();
-});
+$('confirm-restart').addEventListener('click', resetToIntro);
 </script>
 </body>
 </html>
