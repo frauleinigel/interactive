@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Разложите документы по видам</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #ffffff;
+    color: #1a1a1a;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px 10px;
+    line-height: 1.5;
+}
+
+.widget {
+    max-width: 1100px;
+    width: 100%;
+    background: #ffffff;
+    padding: 4px 0 0;
+}
+
+/* ── заголовок ── */
+.widget-title {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #cc0000;
+    line-height: 1.2;
+    margin-bottom: 4px;
+    text-align: center;
+}
+
+.widget-desc {
+    font-size: 1.1rem;
+    color: #333;
+    line-height: 1.4;
+    margin-bottom: 18px;
+    text-align: center;
+}
+
+/* ── стопка ── */
+.stack-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 8px 0;
+    user-select: none;
+}
+.stack-arrow {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: #1a1a1a;
+    font-size: 1.7rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-weight: 300;
+    transition: background 0.15s;
+}
+.stack-arrow:hover:not(:disabled) { background: #f0f0f0; }
+.stack-arrow:disabled { opacity: 0.2; cursor: default; }
+
+.stack {
+    position: relative;
+    flex: 1;
+    max-width: 520px;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.stack-card {
+    background: #ffffff;
+    border: 2px solid #000;
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.45;
+    color: #1a1a1a;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.10);
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: opacity 0.2s;
+    user-select: none;
+}
+.stack-card.behind-1 {
+    transform: translateY(-50%) scale(0.96);
+    top: calc(50% + 6px);
+    z-index: 1;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.stack-card.behind-2 {
+    transform: translateY(-50%) scale(0.92);
+    top: calc(50% + 12px);
+    z-index: 0;
+    box-shadow: none;
+}
+.stack-card.current {
+    z-index: 10;
+    cursor: grab;
+}
+.stack-card.current:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.16); }
+.stack-card.current.dragging { opacity: 0.25; }
+.stack-empty {
+    text-align: center;
+    color: #666;
+    font-size: 0.95rem;
+    padding: 20px;
+}
+
+/* ── гость ── */
+.drag-ghost {
+    position: fixed;
+    z-index: 1000;
+    pointer-events: none;
+    padding: 16px 20px;
+    background: #fff;
+    border: 2px solid #000;
+    border-radius: 12px;
+    color: #1a1a1a;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.45;
+    text-align: center;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+    max-width: 420px;
+    word-break: break-word;
+}
+
+/* ── четыре колонки всегда ── */
+.columns {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+}
+.column {
+    background: #ffffff;
+    border: 2px solid #000;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: border 0.2s;
+}
+.column.hover {
+    border-color: #2196f3;
+    box-shadow: 0 0 0 3px rgba(33,150,243,0.25);
+}
+
+.column-header {
+    padding: 10px 8px 8px;
+    text-align: center;
+    border-bottom: 2px solid #000;
+    pointer-events: none;
+    flex-shrink: 0;
+}
+.column-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1.2;
+}
+.column-sub {
+    font-size: 0.65rem;
+    color: #555;
+    margin-top: 2px;
+    font-weight: 400;
+}
+
+.column-body {
+    min-height: 160px;
+    padding: 6px;
+    background: #fafafa;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    transition: background 0.2s;
+}
+.column.hover .column-body { background: #e8f4fd; }
+
+.placed-card {
+    background: #fff;
+    border: 2px solid #000;
+    border-radius: 8px;
+    padding: 10px 24px 10px 12px;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: #1a1a1a;
+    text-align: left;
+    animation: fadeIn 0.3s ease;
+    position: relative;
+    font-weight: 500;
+}
+.placed-card.correct { border-color: #2ea44f; }
+.placed-card.wrong { border-color: #dc2626; }
+
+.placed-card .remove-btn {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: #bbb;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background 0.15s;
+}
+.placed-card .remove-btn:hover { background: #fee2e2; color: #dc2626; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── кнопка ── */
+.main-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    background: #f2f2f2;
+    color: #a0a0a0;
+    transition: all 0.15s;
+}
+.main-btn.active {
+    background: #2196f3;
+    color: #fff;
+    cursor: pointer;
+}
+.main-btn.active:hover { background: #1976d2; }
+.main-btn.reset-mode {
+    background: #f5f5f5;
+    color: #1a1a1a;
+    border: 2px solid #000;
+    cursor: pointer;
+}
+.main-btn.reset-mode:hover { background: #e5e5e5; }
+
+/* ── адаптив только для шрифтов, колонки не ломать ── */
+@media (max-width: 700px) {
+    .widget-title { font-size: 1.4rem; }
+    .widget-desc { font-size: 1rem; }
+    .stack-card { font-size: 0.85rem; padding: 14px 16px; }
+    .drag-ghost { font-size: 0.85rem; padding: 14px 16px; max-width: 300px; }
+    .column-title { font-size: 0.7rem; }
+    .placed-card { font-size: 0.72rem; padding: 8px 20px 8px 10px; }
+    .main-btn { font-size: 0.9rem; padding: 12px; }
+}
+@media (max-width: 440px) {
+    body { padding: 14px 6px; }
+    .widget-title { font-size: 1.2rem; }
+    .stack { min-height: 90px; }
+    .stack-card { font-size: 0.78rem; padding: 12px 12px; }
+    .column-header { padding: 6px 4px; }
+    .column-body { padding: 4px; min-height: 100px; }
+    .placed-card { font-size: 0.68rem; padding: 6px 16px 6px 8px; }
+}
+</style>
+</head>
+<body>
+
+<div class="widget" role="main">
+
+    <div class="widget-title">📋 Разложите документы по видам</div>
+    <div class="widget-desc">Распределите документы по четырём группам</div>
+
+    <div class="stack-area">
+        <button class="stack-arrow" id="prevBtn" aria-label="Предыдущая">‹</button>
+        <div class="stack" id="stack"></div>
+        <button class="stack-arrow" id="nextBtn" aria-label="Следующая">›</button>
+    </div>
+
+    <div class="columns">
+        <div class="column" data-target="npa">
+            <div class="column-header">
+                <div class="column-title">📜 Внешние НПА</div>
+                <div class="column-sub">гос. акты</div>
+            </div>
+            <div class="column-body" id="colNpa"></div>
+        </div>
+        <div class="column" data-target="lna">
+            <div class="column-header">
+                <div class="column-title">🏛️ Внутренние ЛНА</div>
+                <div class="column-sub">акты работодателя</div>
+            </div>
+            <div class="column-body" id="colLna"></div>
+        </div>
+        <div class="column" data-target="extControl">
+            <div class="column-header">
+                <div class="column-title">📎 Внешние контр‑учёт</div>
+                <div class="column-sub">от госорганов</div>
+            </div>
+            <div class="column-body" id="colExt"></div>
+        </div>
+        <div class="column" data-target="intControl">
+            <div class="column-header">
+                <div class="column-title">📋 Внутренние контр‑учёт</div>
+                <div class="column-sub">внутри учреждения</div>
+            </div>
+            <div class="column-body" id="colInt"></div>
+        </div>
+    </div>
+
+    <button class="main-btn" id="mainBtn" disabled>Проверить результат</button>
+
+</div>
+
+<script>
+(function () {
+    'use strict';
+    const CARDS = [
+        { id: '1', target: 'npa', text: 'Трудовой кодекс РФ' },
+        { id: '2', target: 'npa', text: 'приказ Минтруда № 776н об утверждении Примерного положения о СУОТ' },
+        { id: '3', target: 'lna', text: 'положение о системе управления охраной труда учреждения' },
+        { id: '4', target: 'lna', text: 'инструкция по охране труда при работе за компьютером' },
+        { id: '5', target: 'lna', text: 'приказ руководителя о назначении ответственного за охрану труда' },
+        { id: '6', target: 'intControl', text: 'журнал регистрации вводного инструктажа' },
+        { id: '7', target: 'intControl', text: 'акт внутренней проверки соблюдения требований ОТ' },
+        { id: '8', target: 'extControl', text: 'предписание трудовой инспекции' },
+        { id: '9', target: 'extControl', text: 'протокол замеров шума сторонней лаборатории' },
+        { id: '10', target: 'intControl', text: 'наряд-допуск на работы повышенной опасности' }
+    ];
+
+    const stackEl = document.getElementById('stack');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const colNpa = document.getElementById('colNpa');
+    const colLna = document.getElementById('colLna');
+    const colExt = document.getElementById('colExt');
+    const colInt = document.getElementById('colInt');
+    const columns = document.querySelectorAll('.column');
+    const mainBtn = document.getElementById('mainBtn');
+
+    let pool = [];
+    let currentIndex = 0;
+    let placed = [];
+    let checked = false;
+    let drag = null;
+
+    function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    function init() {
+        pool = shuffle(CARDS);
+        currentIndex = 0;
+        placed = [];
+        checked = false;
+        colNpa.innerHTML = '';
+        colLna.innerHTML = '';
+        colExt.innerHTML = '';
+        colInt.innerHTML = '';
+        mainBtn.className = 'main-btn';
+        mainBtn.disabled = true;
+        mainBtn.textContent = 'Проверить результат';
+        renderStack();
+        updateButton();
+    }
+
+    function renderStack() {
+        stackEl.innerHTML = '';
+        if (pool.length === 0) {
+            stackEl.innerHTML = '<div class="stack-empty">Все карточки разложены</div>';
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+            return;
+        }
+        if (currentIndex >= pool.length) currentIndex = pool.length - 1;
+        if (currentIndex < 0) currentIndex = 0;
+        for (let i = 2; i >= 0; i--) {
+            const card = pool[currentIndex + i];
+            if (!card) continue;
+            const el = document.createElement('div');
+            el.className = 'stack-card';
+            if (i === 1) el.classList.add('behind-1');
+            if (i === 2) el.classList.add('behind-2');
+            if (i === 0) el.classList.add('current');
+            el.textContent = card.text;
+            el.dataset.id = card.id;
+            stackEl.appendChild(el);
+        }
+        prevBtn.disabled = currentIndex === 0;
+        nextBtn.disabled = currentIndex >= pool.length - 1;
+    }
+
+    function getColumn(target) {
+        if (target === 'npa') return colNpa;
+        if (target === 'lna') return colLna;
+        if (target === 'extControl') return colExt;
+        return colInt;
+    }
+
+    function placeCard(cardId, target) {
+        if (checked) return;
+        const idx = pool.findIndex(c => c.id === cardId);
+        if (idx === -1) return;
+        const card = pool[idx];
+        const el = document.createElement('div');
+        el.className = 'placed-card';
+        el.dataset.id = card.id;
+        el.innerHTML = `<button class="remove-btn" aria-label="Вернуть">✕</button>${card.text}`;
+        el.querySelector('.remove-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (checked) return;
+            returnCard(card.id);
+        });
+        const wrap = getColumn(target);
+        wrap.appendChild(el);
+        placed.push({ id: card.id, target: card.target, placedTo: target });
+        pool.splice(idx, 1);
+        if (currentIndex >= pool.length && currentIndex > 0) currentIndex = pool.length - 1;
+        renderStack();
+        updateButton();
+    }
+
+    function returnCard(id) {
+        const idx = placed.findIndex(p => p.id === id);
+        if (idx === -1) return;
+        const card = CARDS.find(c => c.id === id);
+        placed.splice(idx, 1);
+        pool.push(card);
+        const el = document.querySelector(`.placed-card[data-id="${id}"]`);
+        if (el) el.remove();
+        renderStack();
+        updateButton();
+    }
+
+    function updateButton() {
+        if (checked) return;
+        if (placed.length === CARDS.length) {
+            mainBtn.disabled = false;
+            mainBtn.classList.add('active');
+        } else {
+            mainBtn.disabled = true;
+            mainBtn.classList.remove('active');
+        }
+    }
+
+    function checkResult() {
+        checked = true;
+        mainBtn.disabled = false;
+        mainBtn.classList.remove('active');
+        mainBtn.classList.add('reset-mode');
+        mainBtn.textContent = '↻ Попробовать еще раз';
+        placed.forEach(p => {
+            const el = document.querySelector(`.placed-card[data-id="${p.id}"]`);
+            if (!el) return;
+            const correct = p.target === p.placedTo;
+            el.classList.add(correct ? 'correct' : 'wrong');
+        });
+    }
+
+    function onPointerDown(e) {
+        if (checked) return;
+        const card = e.target.closest('.stack-card.current');
+        if (!card) return;
+        e.preventDefault();
+        const rect = card.getBoundingClientRect();
+        const ghost = document.createElement('div');
+        ghost.className = 'drag-ghost';
+        ghost.textContent = card.textContent;
+        ghost.style.left = rect.left + 'px';
+        ghost.style.top = rect.top + 'px';
+        ghost.style.width = rect.width + 'px';
+        document.body.appendChild(ghost);
+        drag = { cardId: card.dataset.id, ghost, offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top };
+        card.classList.add('dragging');
+        document.addEventListener('pointermove', onPointerMove);
+        document.addEventListener('pointerup', onPointerUp);
+    }
+
+    function onPointerMove(e) {
+        if (!drag) return;
+        drag.ghost.style.left = (e.clientX - drag.offsetX) + 'px';
+        drag.ghost.style.top = (e.clientY - drag.offsetY) + 'px';
+        columns.forEach(c => c.classList.remove('hover'));
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        const col = el ? el.closest('.column') : null;
+        if (col) col.classList.add('hover');
+    }
+
+    function onPointerUp(e) {
+        if (!drag) return;
+        document.removeEventListener('pointermove', onPointerMove);
+        document.removeEventListener('pointerup', onPointerUp);
+        drag.ghost.remove();
+        columns.forEach(c => c.classList.remove('hover'));
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        const col = el ? el.closest('.column') : null;
+        const dragEl = document.querySelector('.stack-card.current.dragging');
+        if (dragEl) dragEl.classList.remove('dragging');
+        const cardId = drag.cardId;
+        drag = null;
+        if (col) placeCard(cardId, col.dataset.target);
+        else renderStack();
+    }
+
+    document.addEventListener('pointerdown', onPointerDown);
+    prevBtn.addEventListener('click', () => { if (currentIndex > 0) { currentIndex--; renderStack(); } });
+    nextBtn.addEventListener('click', () => { if (currentIndex < pool.length - 1) { currentIndex++; renderStack(); } });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft' && currentIndex > 0) { currentIndex--; renderStack(); }
+        else if (e.key === 'ArrowRight' && currentIndex < pool.length - 1) { currentIndex++; renderStack(); }
+    });
+    mainBtn.addEventListener('click', () => {
+        if (mainBtn.classList.contains('reset-mode')) init();
+        else if (!mainBtn.disabled) checkResult();
+    });
+
+    init();
+})();
+</script>
+</body>
+</html>
