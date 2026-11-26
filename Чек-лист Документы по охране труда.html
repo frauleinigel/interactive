@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Чек-лист · Документы по охране труда</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: #fff;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    padding: 20px 18px;
+    display: flex;
+    justify-content: center;
+    line-height: 1.3;
+}
+
+.container {
+    max-width: 880px;
+    width: 100%;
+    background: #fff;
+    padding: 22px 32px 26px;
+    border: 1px solid #eaeaea;
+}
+
+h1 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #cc0000;
+    text-align: center;
+    margin: 0 0 13px;
+    line-height: 1.22;
+    padding-bottom: 9px;
+    border-bottom: 1px solid #eee;
+}
+
+.memo-label {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    color: #0b2b4a;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+}
+
+.group {
+    margin-bottom: 10px;
+}
+
+.group-title {
+    font-weight: 700;
+    color: #0b2b4a;
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1px;
+}
+
+.group-title::before {
+    content: '';
+    display: inline-block;
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    background-color: #2e7d32;
+    border-radius: 50%;
+    margin-top: 4px;
+    margin-right: 7px;
+}
+
+.items {
+    list-style: none;
+    padding-left: 13px;
+}
+
+.check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 1px 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.12s ease;
+}
+
+.check-item:hover { background: #f4f7f4; }
+
+.check-item input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.box {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #b9c2cb;
+    border-radius: 3px;
+    margin-top: 1px;
+    position: relative;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.box::after {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: -1px;
+    width: 4px;
+    height: 7px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0);
+    transform-origin: center;
+    transition: transform 0.15s ease;
+}
+
+.check-item input:checked + .box {
+    background: #2e7d32;
+    border-color: #2e7d32;
+}
+
+.check-item input:checked + .box::after {
+    transform: rotate(45deg) scale(1);
+}
+
+.check-item input:focus-visible + .box {
+    outline: 2px solid #2e7d32;
+    outline-offset: 2px;
+}
+
+.text {
+    font-size: 12.5px;
+    line-height: 1.3;
+    color: #000;
+    transition: color 0.15s ease;
+}
+
+.check-item input:checked ~ .text {
+    color: #9aa1a8;
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+}
+
+.note {
+    font-size: 12px;
+    color: #6b7178;
+    font-style: italic;
+    padding: 7px 10px;
+    border-left: 3px solid #2e7d32;
+    background: #f6f8f6;
+    border-radius: 0 4px 4px 0;
+    margin-top: 11px;
+    line-height: 1.3;
+}
+
+.pdf-btn-wrap {
+    margin-top: 16px;
+    text-align: right;
+    border-top: 1px solid #ddd;
+    padding-top: 13px;
+}
+
+.pdf-btn {
+    background: #2e7d32;
+    color: #fff;
+    border: none;
+    padding: 8px 24px;
+    font-size: 13.5px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    letter-spacing: 0.3px;
+    font-family: inherit;
+}
+
+.pdf-btn:hover { background: #1b5e20; }
+.pdf-btn:focus { outline: 2px solid #2e7d32; outline-offset: 2px; }
+
+@media print {
+    body { padding: 0; margin: 0; }
+    .container { border: none; padding: 16px 20px; max-width: 100%; }
+    .pdf-btn-wrap { display: none; }
+    h1 { color: #cc0000 !important; }
+    .memo-label, .group-title { color: #0b2b4a !important; }
+    .group-title::before, .box, .note {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .check-item:hover { background: none; }
+}
+
+@media (max-width: 600px) {
+    .container { padding: 16px 12px; }
+    h1 { font-size: 14px; }
+    .memo-label { font-size: 16px; letter-spacing: 2px; }
+    .text { font-size: 12px; }
+    .pdf-btn { width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>
+    <span class="memo-label">Чек-лист</span>
+    ДОКУМЕНТЫ ПО ОХРАНЕ ТРУДА, КОТОРЫЕ ДОЛЖНЫ БЫТЬ В КАЖДОЙ ОРГАНИЗАЦИИ
+</h1>
+
+<div class="group">
+    <div class="group-title">Организация работы по охране труда</div>
+    <ul class="items">
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Положение о СУОТ</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Политика в области охраны труда</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Положение о службе ОТ или приказ о назначении специалиста по охране труда</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Программа производственного контроля</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Перечень НПА с требованиями ОТ по специфике деятельности организации</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Комплект актуальных НПА или договор с компанией, которая предоставляет доступ к электронной базе нормативных документов</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Документы, подтверждающие распределение обязанностей в сфере ОТ между должностными лицами на каждом уровне управления, в том числе приказы о назначении ответственных</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Планы проведения контрольных мероприятий по охране труда</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Акты, протоколы и предписания по результатам контрольных мероприятий по охране труда</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">План мероприятий по улучшению условий и охраны труда</span></label></li>
+    </ul>
+</div>
+
+<div class="group">
+    <div class="group-title">Специальная оценка условий труда</div>
+    <ul class="items">
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Отчёт о проведении СОУТ, подписанный членами комиссии и утверждённый её председателем</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Приказ, утверждающий состав и порядок деятельности комиссии по проведению СОУТ</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">График, по которому проводили спецоценку</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Утверждённый перечень рабочих мест, на которых проводилась СОУТ</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Результаты идентификации вредных и опасных производственных факторов, утверждённые комиссией</span></label></li>
+    </ul>
+</div>
+
+<div class="group">
+    <div class="group-title">Управление профрисками</div>
+    <ul class="items">
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Приказ об управлении профрисками в организации</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Перечень или реестр опасностей</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Документ с описанием методов выявления опасностей и оценки уровня риска либо такое описание в разделе положения о СУОТ</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Документ, подтверждающий проведение оценки уровней рисков, с указанием установленного уровня по каждому риску</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Документ с перечнем мер по исключению, снижению или контролю уровней рисков</span></label></li>
+    </ul>
+</div>
+
+<div class="group">
+    <div class="group-title">Обучение работников</div>
+    <ul class="items">
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Документ, устанавливающий порядок обучения по охране труда</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Результаты планирования обучения по охране труда, утверждённые работодателем</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Программа вводного инструктажа по охране труда</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Локальные акты для регистрации инструктажей по охране труда</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Программы обучения по охране труда и экзаменационные билеты</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Приказы о назначении ответственных за инструктажи, обучение и проверку знаний</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Протоколы проверки знаний</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Инструкции по охране труда в соответствии со спецификой деятельности организации</span></label></li>
+    </ul>
+</div>
+
+<div class="group">
+    <div class="group-title">Информирование работников</div>
+    <ul class="items">
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Трудовые договоры с работниками, в которые включили данные об условиях труда на их рабочих местах</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Документы, подтверждающие ознакомление работников с результатами СОУТ под подпись</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="box"></span><span class="text">Документ, подтверждающий ознакомление работников с результатами оценки профрисков под подпись</span></label></li>
+    </ul>
+</div>
+
+<p class="note">Все локальные документы должны быть утверждены работодателем или его уполномоченным представителем.</p>
+
+<div class="pdf-btn-wrap">
+    <button class="pdf-btn" type="button" onclick="window.print()">Сохранить в PDF</button>
+</div>
+
+</div>
+
+<script>
+(function () {
+    var boxes = document.querySelectorAll('.check-item input');
+    var KEY = 'ot-checklist-v1';
+
+    try {
+        var saved = JSON.parse(localStorage.getItem(KEY) || '[]');
+        boxes.forEach(function (b, i) { b.checked = !!saved[i]; });
+    } catch (e) {}
+
+    boxes.forEach(function (b) {
+        b.addEventListener('change', function () {
+            var state = [];
+            boxes.forEach(function (x) { state.push(x.checked ? 1 : 0); });
+            try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+        });
+    });
+})();
+</script>
+</body>
+</html>
